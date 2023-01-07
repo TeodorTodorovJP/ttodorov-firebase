@@ -1,0 +1,44 @@
+
+/* All classes here should be responsible for the card styling.
+  Any css, background or content, should be done from the component.
+*/
+
+
+
+.card {
+  height: fit-content;
+  width: fit-content;
+  margin: 0;
+
+  box-shadow: -1.5rem 1rem 1.5rem black;
+  border-radius: 1.4rem;
+  border: none;
+  
+  /* Default background */
+  /* background-image: linear-gradient(90deg, rgba(251,129,57,1) 0%, rgba(9,100,121,1) 61%); */
+  transition: transform 1s, box-shadow 1s;
+}
+
+/* .card:hover {
+  transform: translateY(-5px) scale(1.048) translateX(-5px);
+  box-shadow: -20px 10px 20px black;
+} */
+
+.card.app {
+  margin: 1vh;
+}
+
+/* Mobile view */
+@media (max-width: 430px) {
+  .card.app {
+    box-shadow: none;
+    border-radius: 0px;
+    margin: 0;
+  }
+}
+
+
+.card.meals-list {
+  margin: 1vh;
+  border: rebeccapurple solid 3px;
+}
