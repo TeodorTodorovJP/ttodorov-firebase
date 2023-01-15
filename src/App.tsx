@@ -3,6 +3,7 @@ import classes from "./App.module.css";
 import Card from "./components/UI/Card";
 import Navigation from "./components/Navigation/Navigation";
 import MealsList from "./components/MealsList/MealsList";
+import { Outlet } from "react-router-dom";
 
 const App = () => {
   useEffect(() => {
@@ -36,6 +37,7 @@ const App = () => {
       <div className={`${classes.app} ${classes[theme]}`}>
         <Navigation />
         <MealsList />
+        <Outlet />
       </div>
     </Card>
   );

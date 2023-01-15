@@ -1,16 +1,23 @@
 import classes from "./NavElement.module.css";
+import { NavLink } from "react-router-dom";
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
 const NavElement = (props) => {
-  const additionalClass = props.additionalClass
-    ? ` ${classes[props.additionalClass]}`
-    : "";
-
   return (
-    <a href="*" alt="nav" className={`${classes.nav} ${additionalClass}`}>
+    <NavLink
+      to={props.path}
+      alt="nav"
+      className={({ isActive, isPending }) =>
+        isActive
+          ? `${classes.nav} ${classes.active}`
+          : isPending
+          ? `${classes.nav} ${classes.pending}`
+          : ""
+      }
+    >
       {props.children}
-    </a>
+    </NavLink>
   );
 };
 

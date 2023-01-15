@@ -2,14 +2,30 @@ import { useState } from "react";
 import NavElement from "../UI/NavElement";
 import classes from "./Navigation.module.css";
 import { ReactComponent as HamburgerMenu } from "../UI/SVG/hamburger-menu.svg";
+import { NavLink } from "react-router-dom";
+import AuthContext from "../../app/auth-context";
+import { useContext } from "react";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
 const Navigation = (props) => {
-  const navItems = ["home", "meals", "order", "drinks"].map((n, i) => (
-    <NavElement key={i}>{n}</NavElement>
+  const navItems = [
+    { path: "/auth", text: "Authenticate" },
+    { path: "/counter", text: "Your Counter" },
+  ].map((link) => (
+    <NavElement key={link.path} path={link.path}>
+      {link.text}
+    </NavElement>
   ));
+
+  const authCtx = useContext(AuthContext);
+  const isLoggedIn = authCtx.isLoggedIn;
+
+  const logoutHandler = () => {
+    authCtx.logout();
+    // optional: redirect the user
+  };
 
   const [navVisible, setNavVisible] = useState(false);
 
@@ -19,12 +35,19 @@ const Navigation = (props) => {
   };
 
   return (
-    <nav className={classes.navigation}>
-      <button type="button" onClick={navClickHandle}>
-        <HamburgerMenu />
-      </button>
-      <div className={`${classes.navItems} ${navClass}`}>{navItems}</div>
-    </nav>
+    <>
+      <header className={`${classes.navigation}`}>
+        <button type="button" onClick={navClickHandle}>
+          <HamburgerMenu />
+        </button>
+
+        <nav className={`${classes.navItems} ${navClass}`}>
+          {navItems}
+
+          {isLoggedIn && <button onClick={logoutHandler}>Logout</button>}
+        </nav>
+      </header>
+    </>
   );
 };
 
