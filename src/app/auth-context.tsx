@@ -1,15 +1,29 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
 
-let logoutTimer;
+let logoutTimer: ReturnType<typeof setTimeout> = setTimeout(() => "", 1000);
 
-const AuthContext = React.createContext({
+type AuthContent = {
+  token: string | null | undefined;
+  isLoggedIn: boolean;
+  login: (token: string, expirationTime: string) => void;
+  logout: () => void;
+};
+
+const AuthContext = createContext<AuthContent>({
   token: "",
   isLoggedIn: false,
   login: (token) => {},
   logout: () => {},
 });
 
-const calculateRemainingTime = (expirationTime) => {
+const calculateRemainingTime = (expirationTime: string | number | Date) => {
   const currentTime = new Date().getTime();
   const adjExpirationTime = new Date(expirationTime).getTime();
 
@@ -20,7 +34,7 @@ const calculateRemainingTime = (expirationTime) => {
 
 const retrieveStoredToken = () => {
   const storedToken = localStorage.getItem("token");
-  const storedExpirationDate = localStorage.getItem("expirationTime");
+  const storedExpirationDate = localStorage.getItem("expirationTime") || 0;
 
   const remainingTime = calculateRemainingTime(storedExpirationDate);
 
@@ -36,7 +50,7 @@ const retrieveStoredToken = () => {
   };
 };
 
-export const AuthContextProvider = (props) => {
+export const AuthContextProvider = (props: { children: ReactNode }) => {
   const tokenData = retrieveStoredToken();
 
   let initialToken;
@@ -58,7 +72,7 @@ export const AuthContextProvider = (props) => {
     }
   }, []);
 
-  const loginHandler = (token, expirationTime) => {
+  const loginHandler = (token: string, expirationTime: string) => {
     setToken(token);
     localStorage.setItem("token", token);
     localStorage.setItem("expirationTime", expirationTime);
@@ -70,7 +84,7 @@ export const AuthContextProvider = (props) => {
 
   useEffect(() => {
     if (tokenData) {
-      console.log(tokenData.duration);
+      console.log("Token Duration", tokenData.duration);
       logoutTimer = setTimeout(logoutHandler, tokenData.duration);
     }
   }, [tokenData, logoutHandler]);
@@ -89,4 +103,6 @@ export const AuthContextProvider = (props) => {
   );
 };
 
-export default AuthContext;
+const useAuthContext = () => useContext(AuthContext);
+
+export default useAuthContext;

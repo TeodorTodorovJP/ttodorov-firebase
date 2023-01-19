@@ -1,5 +1,6 @@
 import classes from "./MealsList.module.css";
 import Card from "../UI/Card";
+import { Outlet } from "react-router-dom";
 
 const MealsList = (props) => {
   const DUMMY_MEALS = [
@@ -38,7 +39,12 @@ const MealsList = (props) => {
     </Card>
   ));
 
-  return <div>{meals}</div>;
+  return (
+    <>
+      <div>{meals}</div>
+      <Outlet />
+    </>
+  );
 };
 
 export default MealsList;

@@ -4,3 +4,12 @@
     /* font-size: 1.4rem; */
 }
   
+
+
+.active {
+    color: red;
+}
+
+.pending {
+    color: aqua;
+}

@@ -1,14 +1,14 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef } from "react";
 import { redirect } from "react-router-dom";
 
-import AuthContext from "../../app/auth-context";
+import useAuthContext from "../../app/auth-context";
 // import classes from "./AuthForm.module.css";
 let classes = {};
 const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
-  const authCtx = useContext(AuthContext);
+  const authCtx = useAuthContext();
 
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

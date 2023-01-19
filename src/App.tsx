@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import classes from "./App.module.css";
 import Card from "./components/UI/Card";
 import Navigation from "./components/Navigation/Navigation";
-import MealsList from "./components/MealsList/MealsList";
 import { Outlet } from "react-router-dom";
 
+// import useAuthContext from "./app/auth-context";
+
 const App = () => {
+  // const authCtx = useAuthContext();
   useEffect(() => {
     if (document.location.hostname === "localhost") {
       document.title = "TTodorov DEV";
+      //authCtx.login("fakeToken", "Sun Jan 15 3025");
     } else {
       document.title = "TTodorov";
     }
@@ -28,18 +31,14 @@ const App = () => {
   let backGround = "";
   if (theme === "regular") {
     // background-image: url("./components/UI/backgrounds/seaside.jpg");
-    backGround =
-      "linear-gradient(90deg, rgba(44,72,84,1) 0%, rgba(167,124,124,1) 60%)";
+    backGround = "linear-gradient(90deg, rgba(44,72,84,1) 0%, rgba(167,124,124,1) 60%)";
   }
 
   return (
-    <Card additionalClass="app" backGround={backGround}>
-      <div className={`${classes.app} ${classes[theme]}`}>
-        <Navigation />
-        <MealsList />
-        <Outlet />
-      </div>
-    </Card>
+    <div className={`${classes.app} ${classes[theme]}`}>
+      <Navigation />
+      <Outlet />
+    </div>
   );
 };
 

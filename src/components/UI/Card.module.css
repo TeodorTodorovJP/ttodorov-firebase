@@ -42,3 +42,15 @@
   margin: 1vh;
   border: rebeccapurple solid 3px;
 }
+
+.card.navLeftItems {
+  margin-top: 1rem;
+  background-color: rgba(0,0,0,.2);
+
+}
+
+
+.card.navRightItems {
+  margin-top: 1rem;
+  background-color: rgba(0,0,0,.2);
+}
