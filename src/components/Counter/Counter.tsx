@@ -1,16 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import { useAppSelector, useAppDispatch } from '../../app/hooks';
-import {
-  decrement,
-  increment,
-  incrementByAmount,
-  incrementAsync,
-  incrementIfOdd,
-  selectCount,
-} from './counterSlice';
+import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import { decrement, increment, incrementByAmount, incrementAsync, incrementIfOdd, selectCount } from "./counterSlice";
 import classes from "./Counter.module.css";
-import Card from "../../components/UI/Card";
+import Card from "../UI/Card";
 
 export function Counter() {
   const count = useAppSelector(selectCount);

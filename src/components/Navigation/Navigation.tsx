@@ -1,4 +1,8 @@
 import { useState } from "react";
+
+import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import { selectTheme, ALL_THEMES, setTheme, setStyle, GlassObj, MainObj } from "./navigationSlice";
+
 import NavElement from "../UI/NavElement";
 import classes from "./Navigation.module.css";
 import { ReactComponent as HamburgerMenu } from "../UI/SVG/hamburger-menu.svg";
@@ -8,17 +12,25 @@ import Logo from "../UI/SVG/logo.svg";
 
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
-import { iteratorSymbol } from "immer/dist/internal";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
-const Navigation = (props: {
-  theme: { main: string; light: string; medium: string; hard: string };
-  changeTheme: Function;
-  allThemes: { red: string; green: string; blue: string };
-  changeThemeStyle: Function;
-}) => {
+const Navigation = () => {
+  // Store
+  const theme = useAppSelector(selectTheme);
+  const dispatch = useAppDispatch();
+
+  // Context
+  const authCtx = useAuthContext();
+  const { isLoggedIn, logout } = authCtx;
+
+  // Local state
+  const [navLeftVisible, setNavLeftVisible] = useState(false);
+  const [navRightVisible, setNavRightVisible] = useState(false);
+
+  const [showThemes, setShowThemes] = useState(false);
+
   const navLeftItems = [
     { path: "/", text: "Home", icon: <HamburgerMenu /> },
     { path: "auth", text: "Authenticate", icon: <HamburgerMenu /> },
@@ -31,22 +43,14 @@ const Navigation = (props: {
     </NavElement>
   ));
 
-  const authCtx = useAuthContext();
-  const { isLoggedIn, logout } = authCtx;
-
   const logoutHandler = () => {
     logout();
   };
-
-  const [navLeftVisible, setNavLeftVisible] = useState(false);
 
   let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide;
   const navLeftClickHandle = () => {
     setNavLeftVisible(!navLeftVisible);
   };
-
-  const [navRightVisible, setNavRightVisible] = useState(false);
-  const [showThemes, setShowThemes] = useState(false);
 
   let navRightShowClass = navRightVisible ? classes.navRightItemsShow : classes.navRightItemsHide;
   const navRightClickHandle = () => {
@@ -55,11 +59,15 @@ const Navigation = (props: {
   };
 
   const changeThemeHandle = (theme: string) => {
-    props.changeTheme(theme);
+    let changeTheme: MainObj = { main: theme } as MainObj;
+
+    dispatch(setTheme(changeTheme));
   };
 
-  const changeThemeStyleHandle = (theme: string) => {
-    props.changeThemeStyle(theme);
+  const changeThemeStyleHandle = (glass: string) => {
+    let changeTheme: GlassObj = { glass: glass } as GlassObj;
+
+    dispatch(setStyle(changeTheme));
   };
 
   let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide;
@@ -69,7 +77,7 @@ const Navigation = (props: {
 
   return (
     <>
-      <header className={`${classes[props.theme.main]}`}>
+      <header className={`${classes[theme.main]}`}>
         <div className={classes.leftSide}>
           <div className={classes.logoAndBtn}>
             <img src={Logo} alt="" className={classes.logo} />
@@ -93,17 +101,14 @@ const Navigation = (props: {
             <Card additionalClass="navRightItems">
               <div className={classes.navRightItems}>
                 {
-                  /*!isLoggedIn &&*/ <NavElement
-                    path="auth"
-                    customStylingClass={`${"buttonStyling"} ${props.theme.hard}`}
-                  >
+                  /*!isLoggedIn &&*/ <NavElement path="auth" customStylingClass={`${"buttonStyling"} ${theme.button}`}>
                     Login
                   </NavElement>
                 }
                 {
                   /*isLoggedIn &&*/ <NavElement
                     path="/"
-                    customStylingClass={`${"buttonStyling"} ${props.theme.hard}`}
+                    customStylingClass={`${"buttonStyling"} ${theme.button}`}
                     onClick={logoutHandler}
                   >
                     Logout
@@ -112,7 +117,7 @@ const Navigation = (props: {
                 {
                   /*isLoggedIn &&*/ <button
                     type="button"
-                    className={`buttonStyling ${props.theme.hard}`}
+                    className={`buttonStyling ${theme.button}`}
                     onClick={handleToggleTheme}
                   >
                     Themes
@@ -126,21 +131,21 @@ const Navigation = (props: {
                   <button
                     type="button"
                     className={`${classes.themeBtn} ${classes.red}`}
-                    onClick={() => changeThemeHandle(props.allThemes.red)}
+                    onClick={() => changeThemeHandle(ALL_THEMES.red)}
                   >
                     R
                   </button>
                   <button
                     type="button"
                     className={`${classes.themeBtn} ${classes.green}`}
-                    onClick={() => changeThemeHandle(props.allThemes.green)}
+                    onClick={() => changeThemeHandle(ALL_THEMES.green)}
                   >
                     G
                   </button>
                   <button
                     type="button"
                     className={`${classes.themeBtn} ${classes.blue}`}
-                    onClick={() => changeThemeHandle(props.allThemes.blue)}
+                    onClick={() => changeThemeHandle(ALL_THEMES.blue)}
                   >
                     B
                   </button>

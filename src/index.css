@@ -15,7 +15,7 @@
   --theme-blue-el-l: rgb(147,214,229);
   --theme-blue-el-m: rgb(20,160,180);
   --theme-blue-el-h: rgb(0,44,124);
-  --theme-blue-el-btn: rgb(0,44,124);
+  --theme-blue-el-btn: rgb(40,110,233);
   --theme-blue-bg: linear-gradient(rgb(255, 255, 255) 0%, rgb(184,250,255) 20%);
 
   --theme-green-el-l: rgb(0 122 37);
@@ -72,6 +72,11 @@ img {
   background: var(--theme-red-el-h);
 }
 
+.button-red {
+  color: white;
+  background: var(--theme-red-el-btn);
+}
+
 .light-green {
   color: black;
   background: var(--theme-green-el-l);
@@ -85,6 +90,11 @@ img {
   background: var(--theme-green-el-h);
 }
 
+.button-green {
+  color: white;
+  background: var(--theme-green-el-btn);
+}
+
 .light-blue {
   color: black;
   background: var(--theme-blue-el-l);
@@ -96,6 +106,11 @@ img {
 .hard-blue {
   color: white;
   background: var(--theme-blue-el-h);
+}
+
+.button-blue {
+  color: white;
+  background: var(--theme-blue-el-btn);
 }
 
 

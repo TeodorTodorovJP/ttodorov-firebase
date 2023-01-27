@@ -1,12 +1,13 @@
 import "./Background.css";
+import { useAppSelector } from "../../../app/hooks";
+import { selectTheme } from "../../Navigation/navigationSlice";
 
-const Background = (props: { theme: string; themeStyle: string; side: "top" | "bottom" }) => {
-  const { theme, themeStyle, side } = props;
+const Background = () => {
+  const { main: theme, glass: themeStyle } = useAppSelector(selectTheme);
 
   // Decide how many elements we want
   const windowHeight: number = +window.innerHeight;
   const windowWidth: number = +window.innerWidth;
-  const sideOfScreen: string = side;
 
   const shapesDimensions = [
     // Width, Height of point

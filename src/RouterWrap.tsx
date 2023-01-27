@@ -4,7 +4,7 @@ import App from "./App";
 
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import AuthForm from "./components/Auth/AuthForm";
-import { Counter } from "./features/counter/Counter";
+import { Counter } from "./components/Counter/Counter";
 import Home from "./components/Home/Home";
 
 /**
