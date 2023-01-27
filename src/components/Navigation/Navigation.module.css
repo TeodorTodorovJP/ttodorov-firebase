@@ -1,7 +1,7 @@
 
 
 
-.navigation {
+/* .navigation {
     display: flex;
     font-size: 2.2rem;
     width: 100vw;
@@ -9,6 +9,26 @@
     padding-right: 1rem;
     align-items: center;
     position: absolute;
+} */
+
+.leftSide {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    top: 1vh;
+    left: 0;
+    z-index: 10000;
+}
+
+.rightSide {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: flex-end;
+    top: 1vh;
+    right: 0;
+    z-index: 10000;
 }
 
 .navLeftItems {
@@ -21,12 +41,16 @@
 .navLeftItemsShow {
     visibility: visible;
     opacity: 1;
+    max-height: 100%;
+    overflow: visible;
     transition: var(--transition-delay-menu);
 }
 
 .navLeftItemsHide {
     visibility: hidden;
     opacity: 0;
+    max-height: 0;
+    overflow: hidden;
     transition: var(--transition-delay-menu);
 }
 
@@ -35,21 +59,25 @@
     flex-direction: column;
     flex-wrap: wrap-reverse;
     align-items: center;
-    padding: 1rem;
-    width: 15rem;
-    height: 10rem;
+    padding: 2rem;
+    gap: 2rem;
 }
 
 .navRightItemsShow {
     visibility: visible;
     opacity: 1;
+    max-height: 100%;
+    overflow: visible;
     transition: var(--transition-delay-menu);
 }
 
 .navRightItemsHide {
     visibility: hidden;
     opacity: 0;
+    max-height: 0;
+    overflow: hidden;
     transition: var(--transition-delay-menu);
+    /* display: none; */
 }
 
 .logoAndBtn {
@@ -62,30 +90,86 @@
     align-self: flex-start;
 }
 
-.leftSide {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.rightSide {
-    align-self: flex-start;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.leftMenu {
+.leftMenuBtn {
     align-self: center;
+    background: transparent;
+    border: none;
 }
-.rightMenu {
+.rightMenuBtn {
+    background: transparent;
+    border: none;
 }
 
+.rightMenuBtn > svg {
+    display: block;
+    width: 7vh;
+    height: 7vh;
+}
+
+
+/* For all svg elements */
+.red {
+    fill: var(--theme-red-el-btn);
+}
+.green {
+    fill: var(--theme-green-el-btn);
+}
+.blue {
+    fill: var(--theme-blue-el-btn);
+}
+
+.themes {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.themesShow {
+    visibility: visible;
+    opacity: 1;
+    max-height: 100%;
+    overflow: visible;
+    transition: var(--transition-delay-menu);
+}
+
+.themesHide {
+    visibility: hidden;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: var(--transition-delay-menu);
+}
+
+.themeBtn {
+    color: white;
+    border: none;
+    border-radius: 0.4rem;
+    padding: 1rem;
+}
+
+.themeBtn.red {
+    background: var(--theme-red-el-btn);
+}
+.themeBtn.green {
+    background: var(--theme-green-el-btn);
+}
+.themeBtn.blue {
+    background: var(--theme-blue-el-btn);
+}
+.themeBtn.glass {
+    background: var(--theme-blue-el-m);
+}
 
 
 /* Web view */
 @media (min-width: 430px) {
     .navItems {
         top: 9vh;
+    }
+
+    .rightMenuBtn > svg {
+        width: 5vh;
+        height: 5vh;
     }
 }

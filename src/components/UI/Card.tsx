@@ -5,7 +5,6 @@ import classes from "./Card.module.css";
 
 const Card = (props: { children: ReactNode; additionalClass?: string; backGround?: string }) => {
   const additionalClass = props.additionalClass ? ` ${classes[props.additionalClass]}` : "";
-
   // const customBackground = props.backGround
   //   ? { backgroundImage: props.backGround }
   //   : {};

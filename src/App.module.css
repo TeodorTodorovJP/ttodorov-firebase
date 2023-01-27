@@ -1,23 +1,25 @@
 
 
 .app {
-  height: 98vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
 
-  padding-top: 2vh;
-  padding-bottom: 2vh;
-  
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 /* http://192.168.1.115:3000 */
-.app.regular {
-  background: linear-gradient(90deg, rgba(44,72,84,1) 0%, rgba(167,124,124,1) 60%);
-}
-.app.dark {
-}
-.app.aria {
-}
+
+
+/* .app > .background > svg > polygon {
+
+  points: "200,1000 250,1297 160,1297";
+} */
+
+
 
 /* Mobile view */
 @media (max-width: 430px) {
@@ -27,3 +29,10 @@
   }
 }
 
+
+.outlet {
+  display: flex;
+  position: absolute;
+  top: 0;
+  justify-content: center;
+}

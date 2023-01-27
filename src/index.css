@@ -1,0 +1,110 @@
+:root {
+  /* set the font size to 10px not 16 */
+  font-size: 62.5%;
+
+  --clr-text: #3d3d3d;
+  --transition-delay-menu: visibility 0.15s, max-height 0.15s, box-shadow 0.15s, overflow 0.15s, opacity 0.15s ease-in-out;
+
+
+  --theme-red-el-l: rgb(237, 95, 25);
+  --theme-red-el-m: rgb(255, 0, 52);
+  --theme-red-el-h: rgb(239, 55, 122);
+  --theme-red-el-btn: rgb(239, 55, 122);
+  --theme-red-bg: linear-gradient(rgb(255, 255, 255) 0%, rgb(255,248,228) 20%);
+
+  --theme-blue-el-l: rgb(147,214,229);
+  --theme-blue-el-m: rgb(20,160,180);
+  --theme-blue-el-h: rgb(0,44,124);
+  --theme-blue-el-btn: rgb(0,44,124);
+  --theme-blue-bg: linear-gradient(rgb(255, 255, 255) 0%, rgb(184,250,255) 20%);
+
+  --theme-green-el-l: rgb(0 122 37);
+  --theme-green-el-m: rgb(0 108 0);
+  --theme-green-el-h: rgb(0 140 100);
+  --theme-green-el-btn: rgb(0 140 100);
+  --theme-green-bg: linear-gradient(rgb(255, 255, 255) 0%, rgb(240,244,240) 20%);
+}
+
+html {
+  box-sizing: border-box; /*important*/
+  color: var(--clr-text);
+  /* Make the font as big as 16px again */
+  font-size: 1.6rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  /* background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,100,121,1) 61%); */
+  background: #35363a;
+  /* Make the font as big as 16px again */
+  font-size: 1.6rem;
+  color: antiquewhite;
+}
+
+/* The margin: 0 from body, doesn't effect it's children */
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+
+
+
+.light-red {
+  color: black;
+  background: var(--theme-red-el-l);
+}
+.medium-red {
+  color: black;
+  background: var(--theme-red-el-m);
+}
+.hard-red {
+  color: white;
+  background: var(--theme-red-el-h);
+}
+
+.light-green {
+  color: black;
+  background: var(--theme-green-el-l);
+}
+.medium-green {
+  color: black;
+  background: var(--theme-green-el-m);
+}
+.hard-green {
+  color: white;
+  background: var(--theme-green-el-h);
+}
+
+.light-blue {
+  color: black;
+  background: var(--theme-blue-el-l);
+}
+.medium-blue {
+  color: black;
+  background: var(--theme-blue-el-m);
+}
+.hard-blue {
+  color: white;
+  background: var(--theme-blue-el-h);
+}
+
+
+.buttonStyling {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.4rem;
+  height: 28px;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+}

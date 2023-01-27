@@ -2,7 +2,7 @@ import classes from "./MealsList.module.css";
 import Card from "../UI/Card";
 import { Outlet } from "react-router-dom";
 
-const MealsList = (props) => {
+const MealsList = () => {
   const DUMMY_MEALS = [
     {
       id: "m1",
@@ -30,7 +30,7 @@ const MealsList = (props) => {
     },
   ];
   const meals = DUMMY_MEALS.map((meal) => (
-    <Card key={meal.id} additionalClass="meals-list">
+    <Card key={meal.id} additionalClass="meals-list-item">
       <div className={classes["meals-list"]}>
         <p>{meal.name}</p>
         <p>{meal.price}</p>
@@ -40,10 +40,10 @@ const MealsList = (props) => {
   ));
 
   return (
-    <>
-      <div>{meals}</div>
-      <Outlet />
-    </>
+    <Card additionalClass="meals-list">
+      {meals}
+      {/* <Outlet /> */}
+    </Card>
   );
 };
 

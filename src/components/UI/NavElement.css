@@ -7,9 +7,9 @@
 
 
 .active {
-    color: red;
+    border: solid 1.5px white;
 }
 
 .pending {
-    color: aqua;
+    
 }

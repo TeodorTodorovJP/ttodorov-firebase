@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from "./app/store";
 import reportWebVitals from './reportWebVitals';
-import "./index.module.css";
+import "./index.css";
 
 import { AuthContextProvider } from "./app/auth-context";
 import RouterWrap from "./RouterWrap";

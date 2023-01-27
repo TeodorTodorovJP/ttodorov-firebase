@@ -1,0 +1,116 @@
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background-color: white;
+}
+
+.backgroundSvgElements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4)); */
+
+.glassFilter{
+  filter: url(#glassFilter);
+}
+
+
+  /* Red colors */
+.polygon-light.red {
+  fill-opacity: 0.1;
+  fill: var(--theme-red-el-l);
+}
+
+.polygon-medium.red {
+  fill-opacity: 0.2;
+  fill: var(--theme-red-el-m);
+}
+
+.polygon-hard.red {
+  fill-opacity: 0.2;
+  fill: var(--theme-red-el-h);
+}
+
+.background.red {
+  background: var(--theme-red-bg);
+}
+
+  /* Green colors */
+.polygon-light.green {
+  fill-opacity: 0.1;
+  fill: var(--theme-green-el-l);
+}
+
+.polygon-medium.green {
+  fill-opacity: 0.2;
+  fill: var(--theme-green-el-m);
+}
+
+.polygon-hard.green {
+  fill-opacity: 0.2;
+  fill: var(--theme-green-el-h);
+}
+
+.background.green {
+  background: var(--theme-green-bg);
+}
+
+  /* Blue colors */
+.polygon-light.blue {
+  fill-opacity: 0.4;
+  fill: var(--theme-blue-el-l);
+}
+
+.polygon-medium.blue {
+  fill-opacity: 0.3;
+  fill: var(--theme-blue-el-m);
+}
+
+.polygon-hard.blue {
+  fill-opacity: 0.2;
+  fill: var(--theme-blue-el-h);
+}
+
+.background.blue {
+  background: var(--theme-blue-bg);
+}
+
+
+
+/* 
+
+text { 
+  animation: 5s strokefill infinite alternate ease-in-out; 
+}
+
+@keyframes strokefill {
+  0% {
+    stroke: rgba(0,0,0,1); 
+    fill: rgba(0,0,0,0); 
+    stroke-dashoffset:  25%; 
+    stroke-dasharray: 00% 50%; 
+    stroke-width: 1.0; 
+  }
+  70%	{                       
+    fill: rgba(0,0,0,0);                                                                        
+  }
+  80%	{
+    stroke: rgba(0,0,0,1);                                                                                             
+  }
+  100% {
+    stroke: rgba(0,0,0,0); 
+    fill: rgba(0,0,0,1); 
+    stroke-dashoffset: -25%; 
+    stroke-dasharray: 50% 00%; 
+    stroke-width: 0.0; 
+  }
+} */

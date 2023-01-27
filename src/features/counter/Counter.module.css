@@ -1,7 +1,25 @@
+
+
+.counter {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
 .row {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.row.top {
+  width: fit-content;
+  align-self: center;
+}
+
+.row.bottom {
+  flex-direction: column;
 }
 
 .row > button {
@@ -76,4 +94,17 @@
   width: 0%;
   opacity: 1;
   transition: 0s;
+}
+
+
+
+
+/* Web view */
+@media (min-width: 430px) {
+  
+  .row.bottom {
+    flex-direction: row;
+    padding: 3rem;
+  }
+  
 }

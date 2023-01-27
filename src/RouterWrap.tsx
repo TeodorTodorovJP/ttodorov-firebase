@@ -5,6 +5,7 @@ import App from "./App";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import AuthForm from "./components/Auth/AuthForm";
 import { Counter } from "./features/counter/Counter";
+import Home from "./components/Home/Home";
 
 /**
  * The only purpose of this component is to address the router + context issue
@@ -23,24 +24,24 @@ const RouterWrap = () => {
         {
           errorElement: <div>Oops! There was an error.</div>,
           children: [
-            { index: true, element: <p>Index Element</p> },
+            { index: true, element: <Home /> },
             {
               path: "auth",
-              element: !authCtx.isLoggedIn && <AuthForm />,
+              element: /*!authCtx.isLoggedIn && */ <AuthForm />,
             },
             {
               path: "counter",
-              element: !authCtx.isLoggedIn && <Counter />,
+              element: /*authCtx.isLoggedIn && */ <Counter />,
             },
             {
               path: "meals",
-              element: !authCtx.isLoggedIn && <MealsList />,
-              children: [
-                {
-                  path: "meal",
-                  element: <p>Signle meal</p>,
-                },
-              ],
+              element: /*authCtx.isLoggedIn && */ <MealsList />,
+              // children: [
+              //   {
+              //     path: "meal",
+              //     element: <p>Signle meal</p>,
+              //   },
+              // ],
             },
             {
               path: "*",

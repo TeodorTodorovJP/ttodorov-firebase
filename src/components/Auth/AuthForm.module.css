@@ -1,0 +1,25 @@
+
+
+.auth {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+}
+
+.control {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.toggle {
+
+}

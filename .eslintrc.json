@@ -1,0 +1,13 @@
+{
+  // "plugins": ["@typescript-eslint"],
+  // "extends": ["@typescript-eslint"],
+  // "ignorePatterns": ["Background.tsx"],
+  "rules": {
+    // Note: you must disable the base rule as it can report incorrect errors
+    // "no-loop-func": "off",
+    // "@typescript-eslint/no-loop-func": "warn"
+    // "@types/eslint/no-loop-func": "off",
+    // "eslint-plugin-react/no-loop-func": "off",
+    // "eslint/no-loop-func": "off"
+  }
+}

@@ -1,21 +1,26 @@
-import classes from "./NavElement.module.css";
 import { NavLink } from "react-router-dom";
 import { ReactNode } from "react";
-// import "./Card.css";
+import "./NavElement.css";
 // import mySvg from "./mySvg.svg";
 
-const NavElement = (props: { children: ReactNode; path: string; customStylingClass?: string }) => {
+const NavElement = (props: { children: ReactNode; path: string; customStylingClass?: string; onClick?: Function }) => {
   // @ts-ignor
   const stateAndClass = ({ isActive, isPending }: { isActive: boolean; isPending: boolean }) => {
-    const state = isActive ? `${classes.active}` : isPending ? `${classes.pending}` : "";
+    const state = isActive ? `${"active"}` : isPending ? `${"pending"}` : "";
     const customStylingClass = props.customStylingClass ? props.customStylingClass : "";
-    const allClasses = `${state} ${classes[customStylingClass]}`;
+    const allClasses = `${state} ${customStylingClass}`;
     return allClasses;
+  };
+
+  const handleClick = () => {
+    if (props.onClick) {
+      props.onClick();
+    }
   };
 
   return (
     <NavLink to={props.path} className={stateAndClass}>
-      {props.children}
+      <div onClick={handleClick}>{props.children}</div>
     </NavLink>
   );
 };
