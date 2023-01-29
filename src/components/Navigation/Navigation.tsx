@@ -1,12 +1,22 @@
 import { useState } from "react";
 
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { selectTheme, ALL_THEMES, setTheme, setStyle, GlassObj, MainObj } from "./navigationSlice";
+import {
+  selectTheme,
+  selectUser,
+  ALL_THEMES,
+  setTheme,
+  MainObj,
+  Modal,
+  defaultTheme,
+  setModal,
+} from "./navigationSlice";
 
 import NavElement from "../UI/NavElement";
 import classes from "./Navigation.module.css";
 import { ReactComponent as HamburgerMenu } from "../UI/SVG/hamburger-menu.svg";
 import { ReactComponent as AccountSVG } from "./icons/account.svg";
+import { ReactComponent as SaveSVG } from "./icons/saveSVG.svg";
 
 import Logo from "../UI/SVG/logo.svg";
 
@@ -19,6 +29,7 @@ import Card from "../UI/Card";
 const Navigation = () => {
   // Store
   const theme = useAppSelector(selectTheme);
+  const { theme: userTheme } = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
 
   // Context
@@ -58,16 +69,34 @@ const Navigation = () => {
     setShowThemes(false);
   };
 
-  const changeThemeHandle = (theme: string) => {
-    let changeTheme: MainObj = { main: theme } as MainObj;
+  const changeThemeHandle = (toTheme: string) => {
+    if (toTheme === theme.main) return;
+
+    let changeTheme: MainObj = { main: toTheme } as MainObj;
 
     dispatch(setTheme(changeTheme));
   };
 
-  const changeThemeStyleHandle = (glass: string) => {
-    let changeTheme: GlassObj = { glass: glass } as GlassObj;
+  const saveThemeHandle = () => {
+    const message = `Change the default theme to ${theme.main}? Will be save in Local Storage!`;
 
-    dispatch(setStyle(changeTheme));
+    const modalObj: Modal = {
+      type: "changeDefaultTheme",
+      show: true,
+      header: "Theme Option",
+      message: message,
+      agree: "Yes",
+      deny: "No",
+      response: "deny",
+    };
+
+    if (theme.main === userTheme) {
+      modalObj.message = "Your theme is already saved!";
+      modalObj.agree = "OK";
+      modalObj.deny = null;
+    }
+
+    dispatch(setModal(modalObj));
   };
 
   let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide;
@@ -81,7 +110,7 @@ const Navigation = () => {
         <div className={classes.leftSide}>
           <div className={classes.logoAndBtn}>
             <img src={Logo} alt="" className={classes.logo} />
-            <button type="button" onClick={navLeftClickHandle} className={classes.leftMenuBtn}>
+            <button type="button" onClick={navLeftClickHandle} className={`${classes.leftMenuBtn} ${theme.decoration}`}>
               <HamburgerMenu />
             </button>
           </div>
@@ -101,25 +130,17 @@ const Navigation = () => {
             <Card additionalClass="navRightItems">
               <div className={classes.navRightItems}>
                 {
-                  /*!isLoggedIn &&*/ <NavElement path="auth" customStylingClass={`${"buttonStyling"} ${theme.button}`}>
+                  /*!isLoggedIn &&*/ <NavElement path="auth" customStylingClass={theme.button}>
                     Login
                   </NavElement>
                 }
                 {
-                  /*isLoggedIn &&*/ <NavElement
-                    path="/"
-                    customStylingClass={`${"buttonStyling"} ${theme.button}`}
-                    onClick={logoutHandler}
-                  >
+                  /*isLoggedIn &&*/ <NavElement path="/" customStylingClass={theme.button} onClick={logoutHandler}>
                     Logout
                   </NavElement>
                 }
                 {
-                  /*isLoggedIn &&*/ <button
-                    type="button"
-                    className={`buttonStyling ${theme.button}`}
-                    onClick={handleToggleTheme}
-                  >
+                  /*isLoggedIn &&*/ <button type="button" className={theme.button} onClick={handleToggleTheme}>
                     Themes
                   </button>
                 }
@@ -149,12 +170,8 @@ const Navigation = () => {
                   >
                     B
                   </button>
-                  <button
-                    type="button"
-                    className={`${classes.themeBtn} ${classes.glass}`}
-                    onClick={() => changeThemeStyleHandle("glassFilter")}
-                  >
-                    GL
+                  <button type="button" className={`${classes.saveSVG}`} onClick={() => saveThemeHandle()}>
+                    <SaveSVG />
                   </button>
                 </div>
               </Card>

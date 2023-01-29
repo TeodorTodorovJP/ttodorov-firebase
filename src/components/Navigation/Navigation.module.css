@@ -93,8 +93,10 @@
 .leftMenuBtn {
     align-self: center;
     background: transparent;
-    border: none;
+    border: solid 1px;
+    border-radius: 0.4rem;
 }
+
 .rightMenuBtn {
     background: transparent;
     border: none;
@@ -117,6 +119,13 @@
 .blue {
     fill: var(--theme-blue-el-btn);
 }
+
+.saveSVG {
+    padding: 0px;
+    fill: black;
+    border-radius: 0.4rem;
+}
+
 
 .themes {
     display: flex;
@@ -156,9 +165,6 @@
 }
 .themeBtn.blue {
     background: var(--theme-blue-el-btn);
-}
-.themeBtn.glass {
-    background: var(--theme-blue-el-m);
 }
 
 

@@ -5,14 +5,22 @@ import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
 import classes from "./AuthForm.module.css";
 
-const AuthForm = () => {
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const passwordInputRef = useRef<HTMLInputElement>(null);
+import { useAppSelector } from "../../app/hooks";
+import { selectTheme } from "../Navigation/navigationSlice";
 
+const AuthForm = () => {
+  // store
+  const { button } = useAppSelector(selectTheme);
+
+  // context
   const authCtx = useAuthContext();
 
+  // local state
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -89,9 +97,9 @@ const AuthForm = () => {
             />
           </div>
           <div className={classes.actions}>
-            {!isLoading && <button className="buttonStyling">{isLogin ? "Login" : "Create Account"}</button>}
+            {!isLoading && <button className={button}>{isLogin ? "Login" : "Create Account"}</button>}
             {isLoading && <p>Sending request...</p>}
-            <button type="button" className={`buttonStyling ${classes.toggle}`} onClick={switchAuthModeHandler}>
+            <button type="button" className={button} onClick={switchAuthModeHandler}>
               {isLogin ? "Create new account" : "Login with existing account"}
             </button>
           </div>

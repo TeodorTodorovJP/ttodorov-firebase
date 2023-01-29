@@ -46,7 +46,7 @@
   margin-top: 1rem;
   background-color: rgba(0,0,0,.2);
   position: relative;
-  right: 6rem;
+  right: 5rem;
   top: -4rem;
 }
 
@@ -82,6 +82,16 @@
 .card.meals-list-item {
   background-color: rgba(0,0,0,.2);
   margin: 3rem;
+}
+
+.card.modal {
+
+  position: relative;
+  top: 25vh;
+
+  background-color: rgb(255 255 255 / 70%);
+
+  z-index: 100000;
 }
 
 
