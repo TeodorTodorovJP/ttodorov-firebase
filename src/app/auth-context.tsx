@@ -84,7 +84,7 @@ export const AuthContextProvider = (props: { children: ReactNode }) => {
 
   useEffect(() => {
     if (tokenData) {
-      console.log("Token Duration", tokenData.duration);
+      // console.log("Token Duration", tokenData.duration);
       logoutTimer = setTimeout(logoutHandler, tokenData.duration);
     }
   }, [tokenData, logoutHandler]);

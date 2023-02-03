@@ -1,26 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import classes from "./App.module.css";
 // import "./App.css";
-import Card from "./components/UI/Card";
 import Navigation from "./components/Navigation/Navigation";
 import { Outlet } from "react-router-dom";
 import Background from "./components/UI/Background/Background";
 import Modal from "./components/Modal/Modal";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { selectModal, setTheme, setUser, MainObj, defaultTheme } from "./components/Navigation/navigationSlice";
+import useAuthContext from "./app/auth-context";
 
 // import useAuthContext from "./app/auth-context";
 
 const App = () => {
-  // const authCtx = useAuthContext();
-
-  const { show } = useAppSelector(selectModal);
   const dispatch = useAppDispatch();
+
+  // Context
+  const authCtx = useAuthContext();
+
+  const autoLogin = true;
 
   useEffect(() => {
     if (document.location.hostname === "localhost") {
       document.title = "TTodorov DEV";
-      //authCtx.login("fakeToken", "Sun Jan 15 3025");
+
+      if (autoLogin) {
+        const expirationTime = new Date(new Date().getTime() + 1 * 1000 * 60 * 60 * 24); // One day
+        authCtx.login("Fake-Token", expirationTime.toISOString());
+      }
     } else {
       document.title = "TTodorov";
     }

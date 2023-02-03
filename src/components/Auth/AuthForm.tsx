@@ -1,40 +1,95 @@
 import { useState, useRef, FormEvent } from "react";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
 import classes from "./AuthForm.module.css";
 
-import { useAppSelector } from "../../app/hooks";
-import { selectTheme } from "../Navigation/navigationSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { Modal, selectTheme, setModal } from "../Navigation/navigationSlice";
 
 const AuthForm = () => {
   // store
   const { button } = useAppSelector(selectTheme);
+  const dispatch = useAppDispatch();
 
   // context
   const authCtx = useAuthContext();
 
   // local state
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [createAccount, setCreateAccount] = useState(true);
+
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  // redux
+  const navigate = useNavigate();
+
+  if (generalError) {
+    const modalObj: Modal = {
+      type: "do nothing",
+      show: true,
+      header: "Error",
+      message: generalError,
+      agree: "OK",
+      deny: null,
+      response: "deny",
+    };
+
+    dispatch(setModal(modalObj));
+  }
+
+  // const errorDelay = 1000;
+  // let waitUserEmail: ReturnType<typeof setTimeout>;
+  // const handleEmailChange = () => {
+  //   clearTimeout(waitUserEmail);
+
+  //   waitUserEmail = setTimeout(() => {
+  //     let ifError = false;
+  //     if (emailInputRef.current?.value) {
+  //       if (emailInputRef.current.value.length < 3) {
+  //         ifError = true;
+  //       }
+  //       setIsEmailError(ifError);
+  //     }
+  //   }, errorDelay);
+  // };
+
+  // let waitUserPassword: ReturnType<typeof setTimeout>;
+  // const handlePasswordChange = () => {
+  //   clearTimeout(waitUserPassword);
+
+  //   waitUserPassword = setTimeout(() => {
+  //     let ifError = false;
+  //     if (passwordInputRef.current?.value) {
+  //       if (passwordInputRef.current.value.length < 3) {
+  //         ifError = true;
+  //       }
+  //       setIsPasswordError(ifError);
+  //     }
+  //   }, errorDelay);
+  // };
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
   };
 
+  const capitalizeFirstLetter = (word: string) => {
+    return word.charAt(0) + word.slice(1).toLowerCase();
+  };
+
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
-
+    setPasswordError(null);
+    setEmailError(null);
     const enteredEmail = emailInputRef.current;
     const enteredPassword = passwordInputRef.current;
 
-    // optional: Add validation
-
-    setIsLoading(true);
     let url;
     if (isLogin) {
       url =
@@ -54,53 +109,73 @@ const AuthForm = () => {
       },
     })
       .then((res) => {
-        setIsLoading(false);
         if (res.ok) {
           return res.json();
         } else {
           return res.json().then((data) => {
-            let errorMessage = "Authentication failed!";
-            // if (data && data.error && data.error.message) {
-            //   errorMessage = data.error.message;
-            // }
+            if (data && data.error && data.error.message) {
+              let type = "OTHER";
 
-            throw new Error(errorMessage);
+              const error = data.error.message
+                .split("_")
+                .map((word: string) => capitalizeFirstLetter(word))
+                .join(" ");
+
+              if (error.includes("Email")) type = "EMAIL";
+
+              if (error.includes("Password")) type = "PASSWORD";
+
+              setGeneralError(type == "OTHER" ? error : null);
+              setEmailError(type == "EMAIL" ? error : null);
+              setPasswordError(type == "PASSWORD" ? error : null);
+              // throw new Error(data.error.message);
+            }
           });
         }
       })
       .then((data) => {
+        if (!data) return;
+
         const expirationTime = new Date(new Date().getTime() + +data.expiresIn * 1000);
         authCtx.login(data.idToken, expirationTime.toISOString());
-        redirect("/");
+        navigate("/");
       })
       .catch((err) => {
-        alert(err.message);
+        // Store all errors
+        // alert(err.message);
       });
   };
+
+  /*
+  create account
+  login
+  logout
+  */
 
   return (
     <Card additionalClass="authForm">
       <section className={classes.auth}>
-        <h1>{isLogin ? "Login" : "Sign Up"}</h1>
+        <h1>{isLogin ? "Login" : "Create Account"}</h1>
+
         <form onSubmit={submitHandler}>
-          <div className={classes.control}>
+          <div className={`${classes.control} ${emailError && classes.error}`}>
             <label htmlFor="email">Your Email</label>
-            <input type="email" id="email" required ref={emailInputRef} />
+            <input id="email" type="email" required ref={emailInputRef} />
           </div>
-          <div className={classes.control}>
+
+          {emailError && <p className={classes.errorText}>{emailError}</p>}
+
+          <div className={`${classes.control} ${passwordError && classes.error}`}>
             <label htmlFor="password">Your Password</label>
-            <input
-              // type="password"
-              id="password"
-              required
-              ref={passwordInputRef}
-            />
+            <input id="password" type="password" required ref={passwordInputRef} />
           </div>
+
+          {passwordError && <p className={classes.errorText}>{passwordError}</p>}
+
           <div className={classes.actions}>
-            {!isLoading && <button className={button}>{isLogin ? "Login" : "Create Account"}</button>}
-            {isLoading && <p>Sending request...</p>}
+            <button className={button}>{isLogin ? "Login" : "Create Account"}</button>
             <button type="button" className={button} onClick={switchAuthModeHandler}>
-              {isLogin ? "Create new account" : "Login with existing account"}
+              {isLogin ? "Create account" : "Go to Login"}
             </button>
           </div>
         </form>

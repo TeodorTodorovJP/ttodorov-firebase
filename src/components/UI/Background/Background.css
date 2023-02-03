@@ -1,5 +1,8 @@
 
 .background {
+  user-select: none; /* you can't select the background */
+  touch-action: manipulation; /* you can't zoom the background */
+
   position: absolute;
   top: 0;
   left: 0;
@@ -79,34 +82,3 @@
 .background.blue {
   background: var(--theme-blue-bg);
 }
-
-
-
-/* 
-
-text { 
-  animation: 5s strokefill infinite alternate ease-in-out; 
-}
-
-@keyframes strokefill {
-  0% {
-    stroke: rgba(0,0,0,1); 
-    fill: rgba(0,0,0,0); 
-    stroke-dashoffset:  25%; 
-    stroke-dasharray: 00% 50%; 
-    stroke-width: 1.0; 
-  }
-  70%	{                       
-    fill: rgba(0,0,0,0);                                                                        
-  }
-  80%	{
-    stroke: rgba(0,0,0,1);                                                                                             
-  }
-  100% {
-    stroke: rgba(0,0,0,0); 
-    fill: rgba(0,0,0,1); 
-    stroke-dashoffset: -25%; 
-    stroke-dasharray: 50% 00%; 
-    stroke-width: 0.0; 
-  }
-} */

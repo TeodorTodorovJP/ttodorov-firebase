@@ -27,15 +27,15 @@ const RouterWrap = () => {
             { index: true, element: <Home /> },
             {
               path: "auth",
-              element: /*!authCtx.isLoggedIn && */ <AuthForm />,
+              element: <AuthForm />,
             },
             {
               path: "counter",
-              element: /*authCtx.isLoggedIn && */ <Counter />,
+              element: authCtx.isLoggedIn && <Counter />,
             },
             {
               path: "meals",
-              element: /*authCtx.isLoggedIn && */ <MealsList />,
+              element: authCtx.isLoggedIn && <MealsList />,
               // children: [
               //   {
               //     path: "meal",

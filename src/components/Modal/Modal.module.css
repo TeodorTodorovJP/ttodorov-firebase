@@ -32,7 +32,8 @@
 }
 
 .message {
-  white-space: pre;
+  width: 70vw;
+  text-align: center;
 }
 
 /* Mobile view */
@@ -40,6 +41,9 @@
   .modal {
     padding: 2rem;
     font-size: 2rem;
+  }
+  .message {
+    width: 40vw;
   }
 
 }

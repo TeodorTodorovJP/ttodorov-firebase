@@ -1,76 +1,117 @@
 import "./Background.css";
-import { useAppSelector } from "../../../app/hooks";
-import { selectTheme } from "../../Navigation/navigationSlice";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { selectTheme, setAllOpenToFalse } from "../../Navigation/navigationSlice";
+import { useEffect, useMemo, useRef, SVGProps, cloneElement } from "react";
+import { doubleClick } from "../../../app/utils";
 
 const Background = () => {
   const { main: theme } = useAppSelector(selectTheme);
+  const dispatch = useAppDispatch();
 
-  // Decide how many elements we want
-  const windowHeight: number = +window.innerHeight;
-  const windowWidth: number = +window.innerWidth;
+  const background = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    doubleClick({ ref: background }, () => dispatch(setAllOpenToFalse()), true);
+  }, []);
 
-  const shapesDimensions = [
-    // Width, Height of point
-    {
-      class: "polygon-light",
-      tLeft: `0 ${windowHeight * 0.15}`,
-      tRight: `0 ${windowHeight * 0.15}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth * 0.65} ${windowHeight}`,
-    },
-    {
-      class: "polygon-light",
-      tLeft: `0 ${windowHeight * 0.3}`,
-      tRight: `${windowWidth} ${windowHeight * 0.45}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth} ${windowHeight}`,
-    },
-    {
-      class: "polygon-light",
-      tLeft: `${windowWidth} ${windowHeight * 0.15}`,
-      tRight: `${windowWidth} ${windowHeight * 0.15}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth / 2} ${windowHeight}`,
-    },
-    {
-      class: "polygon-medium",
-      tLeft: `${windowWidth} ${windowHeight * 0.5}`,
-      tRight: `${windowWidth} ${windowHeight * 0.5}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth} ${windowHeight}`,
-    },
-    {
-      class: "polygon-medium",
-      tLeft: `0 ${windowHeight * 0.85}`,
-      tRight: `${windowWidth} ${windowHeight * 0.45}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth} ${windowHeight}`,
-    },
-    {
-      class: "polygon-medium",
-      tLeft: `0 ${windowHeight * 0.5}`,
-      tRight: `0 ${windowHeight * 0.5}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth} ${windowHeight}`,
-    },
-    {
-      class: "polygon-hard",
-      tLeft: `0 ${windowHeight * 0.7}`,
-      tRight: `${windowWidth} ${windowHeight * 0.8}`,
-      bLeft: `0 ${windowHeight}`,
-      bRight: `${windowWidth} ${windowHeight}`,
-    },
-  ];
+  const getSvgShapes = () => {
+    // Find the size of the screen
+    const body = document.body;
+    const html = document.documentElement;
 
-  const svgShapes = shapesDimensions.map((shape, index) => {
-    // Each of those is Width and Height of point in space
-    const points = `${shape.tLeft}, ${shape.tRight}, ${shape.bRight}, ${shape.bLeft}`;
+    const windowHeight: number = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+    const windowWidth: number = Math.max(
+      body.scrollWidth,
+      body.offsetWidth,
+      html.clientWidth,
+      html.scrollWidth,
+      html.offsetWidth
+    );
 
-    return <polygon key={index} points={points} className={`${shape.class} ${theme}`} />;
+    // const windowHeight: number = +window.innerHeight;
+    // const windowWidth: number = +window.innerWidth;
+
+    const shapesDimensions = [
+      // Width, Height of point
+      {
+        class: "polygon-light",
+        tLeft: `0 ${windowHeight * 0.15}`,
+        tRight: `0 ${windowHeight * 0.15}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth * 0.65} ${windowHeight}`,
+      },
+      {
+        class: "polygon-light",
+        tLeft: `0 ${windowHeight * 0.3}`,
+        tRight: `${windowWidth} ${windowHeight * 0.45}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth} ${windowHeight}`,
+      },
+      {
+        class: "polygon-light",
+        tLeft: `${windowWidth} ${windowHeight * 0.15}`,
+        tRight: `${windowWidth} ${windowHeight * 0.15}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth / 2} ${windowHeight}`,
+      },
+      {
+        class: "polygon-medium",
+        tLeft: `${windowWidth} ${windowHeight * 0.5}`,
+        tRight: `${windowWidth} ${windowHeight * 0.5}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth} ${windowHeight}`,
+      },
+      {
+        class: "polygon-medium",
+        tLeft: `0 ${windowHeight * 0.85}`,
+        tRight: `${windowWidth} ${windowHeight * 0.45}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth} ${windowHeight}`,
+      },
+      {
+        class: "polygon-medium",
+        tLeft: `0 ${windowHeight * 0.5}`,
+        tRight: `0 ${windowHeight * 0.5}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth} ${windowHeight}`,
+      },
+      {
+        class: "polygon-hard",
+        tLeft: `0 ${windowHeight * 0.7}`,
+        tRight: `${windowWidth} ${windowHeight * 0.8}`,
+        bLeft: `0 ${windowHeight}`,
+        bRight: `${windowWidth} ${windowHeight}`,
+      },
+    ];
+
+    const svgShapes = shapesDimensions.map((shape, index) => {
+      // Each of those is Width and Height of point in space
+      const points = `${shape.tLeft}, ${shape.tRight}, ${shape.bRight}, ${shape.bLeft}`;
+
+      return {
+        key: index,
+        points: points,
+        className: shape.class,
+      };
+    });
+
+    return svgShapes;
+  };
+
+  const svgShapesWithoutTheme = useMemo(() => getSvgShapes(), []);
+
+  // Assign the theme each time the theme changes
+  const svgShapes = svgShapesWithoutTheme.map((p) => {
+    return <polygon key={p.key} points={p.points} className={`${p.className} ${theme}`} />;
   });
 
   return (
-    <div className={`background ${theme}`}>
+    <div id="background" ref={background} className={`background ${theme}`}>
       <svg className="backgroundSvgElements">{svgShapes}</svg>
     </div>
   );

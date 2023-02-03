@@ -57,7 +57,7 @@ const Modal = () => {
   if (modalRoot !== null && modal.show) {
     return createPortal(modalJSX, modalRoot);
   } else {
-    return <div>Hello Modal</div>; // Todo Error handle
+    return null; // Todo Error handle
   }
 };
 

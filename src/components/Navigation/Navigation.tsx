@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import {
   selectTheme,
@@ -8,8 +6,9 @@ import {
   setTheme,
   MainObj,
   Modal,
-  defaultTheme,
   setModal,
+  selectIsOpen,
+  setIsOpenToTrue,
 } from "./navigationSlice";
 
 import NavElement from "../UI/NavElement";
@@ -30,17 +29,13 @@ const Navigation = () => {
   // Store
   const theme = useAppSelector(selectTheme);
   const { theme: userTheme } = useAppSelector(selectUser);
+  const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
+
   const dispatch = useAppDispatch();
 
   // Context
   const authCtx = useAuthContext();
   const { isLoggedIn, logout } = authCtx;
-
-  // Local state
-  const [navLeftVisible, setNavLeftVisible] = useState(false);
-  const [navRightVisible, setNavRightVisible] = useState(false);
-
-  const [showThemes, setShowThemes] = useState(false);
 
   const navLeftItems = [
     { path: "/", text: "Home", icon: <HamburgerMenu /> },
@@ -60,13 +55,13 @@ const Navigation = () => {
 
   let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide;
   const navLeftClickHandle = () => {
-    setNavLeftVisible(!navLeftVisible);
+    dispatch(setIsOpenToTrue({ item: "navLeftVisible", isOpen: !navLeftVisible }));
   };
 
   let navRightShowClass = navRightVisible ? classes.navRightItemsShow : classes.navRightItemsHide;
   const navRightClickHandle = () => {
-    setNavRightVisible(!navRightVisible);
-    setShowThemes(false);
+    dispatch(setIsOpenToTrue({ item: "navRightVisible", isOpen: !navRightVisible }));
+    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: false }));
   };
 
   const changeThemeHandle = (toTheme: string) => {
@@ -78,7 +73,7 @@ const Navigation = () => {
   };
 
   const saveThemeHandle = () => {
-    const message = `Change the default theme to ${theme.main}? Will be save in Local Storage!`;
+    const message = `Change the default theme to ${theme.main}? Will be saved in Local Storage!`;
 
     const modalObj: Modal = {
       type: "changeDefaultTheme",
@@ -101,7 +96,7 @@ const Navigation = () => {
 
   let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide;
   const handleToggleTheme = () => {
-    setShowThemes(!showThemes);
+    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: !showThemes }));
   };
 
   return (
@@ -129,21 +124,21 @@ const Navigation = () => {
           <nav className={navRightShowClass}>
             <Card additionalClass="navRightItems">
               <div className={classes.navRightItems}>
-                {
-                  /*!isLoggedIn &&*/ <NavElement path="auth" customStylingClass={theme.button}>
+                {!isLoggedIn && (
+                  <NavElement path="auth" customStylingClass={theme.button}>
                     Login
                   </NavElement>
-                }
-                {
-                  /*isLoggedIn &&*/ <NavElement path="/" customStylingClass={theme.button} onClick={logoutHandler}>
+                )}
+                {isLoggedIn && (
+                  <NavElement path="/" customStylingClass={theme.button} onClick={logoutHandler}>
                     Logout
                   </NavElement>
-                }
-                {
-                  /*isLoggedIn &&*/ <button type="button" className={theme.button} onClick={handleToggleTheme}>
+                )}
+                {isLoggedIn && (
+                  <button type="button" className={theme.button} onClick={handleToggleTheme}>
                     Themes
                   </button>
-                }
+                )}
               </div>
             </Card>
             <div className={themesOptionsClass}>
@@ -151,26 +146,26 @@ const Navigation = () => {
                 <div className={classes.themes}>
                   <button
                     type="button"
-                    className={`${classes.themeBtn} ${classes.red}`}
+                    className={`${classes.themeBtn} hover ${classes.red}`}
                     onClick={() => changeThemeHandle(ALL_THEMES.red)}
                   >
                     R
                   </button>
                   <button
                     type="button"
-                    className={`${classes.themeBtn} ${classes.green}`}
+                    className={`${classes.themeBtn} hover ${classes.green}`}
                     onClick={() => changeThemeHandle(ALL_THEMES.green)}
                   >
                     G
                   </button>
                   <button
                     type="button"
-                    className={`${classes.themeBtn} ${classes.blue}`}
+                    className={`${classes.themeBtn} hover ${classes.blue}`}
                     onClick={() => changeThemeHandle(ALL_THEMES.blue)}
                   >
                     B
                   </button>
-                  <button type="button" className={`${classes.saveSVG}`} onClick={() => saveThemeHandle()}>
+                  <button type="button" className={`${classes.saveSVG} hover`} onClick={() => saveThemeHandle()}>
                     <SaveSVG />
                   </button>
                 </div>
