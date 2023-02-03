@@ -2,8 +2,10 @@ import { createAsyncThunk, createSlice, PayloadAction, ThunkAction } from "@redu
 import { StringLiteral } from "typescript";
 import { RootState, AppThunk, AppDispatch } from "../../app/store";
 import { fetchTheme } from "./navigationApi";
+import { Langs } from "./texts";
 
 export const defaultTheme = "blue";
+export const defaultLang: keyof Langs = "en";
 
 const buttonStyling = "buttonStyling hover";
 
@@ -45,6 +47,7 @@ export interface Modal {
 
 interface User {
   theme: null | string;
+  lang: keyof Langs;
 }
 
 interface IsOpen {
@@ -74,7 +77,7 @@ const initialState: NavigationState = {
   },
   status: "idle",
   modal: { type: "", show: false, header: "Header", message: "Message", agree: "Yes", deny: "No", response: "deny" },
-  user: { theme: null },
+  user: { theme: null, lang: defaultLang },
   isOpen: initialIsOpen,
 };
 
@@ -119,7 +122,11 @@ export const navigationSlice = createSlice({
       }
     },
     setUser: (state, action: PayloadAction<User>) => {
-      state.user.theme = action.payload.theme;
+      state.user = action.payload;
+    },
+    setLang: (state, action: PayloadAction<{ lang: keyof Langs }>) => {
+      localStorage.setItem("lang", action.payload.lang);
+      state.user.lang = action.payload.lang;
     },
     setIsOpenToTrue: (state, action: PayloadAction<{ item: string; isOpen: boolean }>) => {
       const newIsOpen: IsOpen = { ...state.isOpen };
@@ -148,12 +155,13 @@ export const navigationSlice = createSlice({
   },
 });
 
-export const { setTheme, setModal, setUser, setAllOpenToFalse, setIsOpenToTrue } = navigationSlice.actions;
+export const { setTheme, setModal, setUser, setLang, setAllOpenToFalse, setIsOpenToTrue } = navigationSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectTheme = (state: RootState) => state.navigation.theme;
+export const selectLang = (state: RootState) => state.navigation.user.lang;
 export const selectModal = (state: RootState) => state.navigation.modal;
 export const selectUser = (state: RootState) => state.navigation.user;
 export const selectIsOpen = (state: RootState) => state.navigation.isOpen;

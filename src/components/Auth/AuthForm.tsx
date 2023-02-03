@@ -6,11 +6,13 @@ import Card from "../UI/Card";
 import classes from "./AuthForm.module.css";
 
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { Modal, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { langs } from "./texts";
 
 const AuthForm = () => {
   // store
   const { button } = useAppSelector(selectTheme);
+  const lang = useAppSelector(selectLang);
   const dispatch = useAppDispatch();
 
   // context
@@ -18,7 +20,6 @@ const AuthForm = () => {
 
   // local state
   const [isLogin, setIsLogin] = useState(true);
-  const [createAccount, setCreateAccount] = useState(true);
 
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -34,9 +35,9 @@ const AuthForm = () => {
     const modalObj: Modal = {
       type: "do nothing",
       show: true,
-      header: "Error",
+      header: langs.errorModal.agree[lang],
       message: generalError,
-      agree: "OK",
+      agree: langs.errorModal.agree[lang],
       deny: null,
       response: "deny",
     };
@@ -146,36 +147,30 @@ const AuthForm = () => {
       });
   };
 
-  /*
-  create account
-  login
-  logout
-  */
-
   return (
     <Card additionalClass="authForm">
       <section className={classes.auth}>
-        <h1>{isLogin ? "Login" : "Create Account"}</h1>
+        <h1>{isLogin ? langs.main.login[lang] : langs.main.createAccount[lang]}</h1>
 
         <form onSubmit={submitHandler}>
           <div className={`${classes.control} ${emailError && classes.error}`}>
-            <label htmlFor="email">Your Email</label>
+            <label htmlFor="email">{langs.main.yourEmail[lang]}</label>
             <input id="email" type="email" required ref={emailInputRef} />
           </div>
 
           {emailError && <p className={classes.errorText}>{emailError}</p>}
 
           <div className={`${classes.control} ${passwordError && classes.error}`}>
-            <label htmlFor="password">Your Password</label>
+            <label htmlFor="password">{langs.main.yourPassword[lang]}</label>
             <input id="password" type="password" required ref={passwordInputRef} />
           </div>
 
           {passwordError && <p className={classes.errorText}>{passwordError}</p>}
 
           <div className={classes.actions}>
-            <button className={button}>{isLogin ? "Login" : "Create Account"}</button>
+            <button className={button}>{isLogin ? langs.main.login[lang] : langs.main.createAccount[lang]}</button>
             <button type="button" className={button} onClick={switchAuthModeHandler}>
-              {isLogin ? "Create account" : "Go to Login"}
+              {isLogin ? langs.main.createAccount[lang] : langs.main.goToLogin[lang]}
             </button>
           </div>
         </form>

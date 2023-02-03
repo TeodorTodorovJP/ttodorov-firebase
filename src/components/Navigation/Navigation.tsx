@@ -9,6 +9,8 @@ import {
   setModal,
   selectIsOpen,
   setIsOpenToTrue,
+  setLang,
+  selectLang,
 } from "./navigationSlice";
 
 import NavElement from "../UI/NavElement";
@@ -21,6 +23,7 @@ import Logo from "../UI/SVG/logo.svg";
 
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
+import { Langs, langs } from "./texts";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -28,6 +31,7 @@ import Card from "../UI/Card";
 const Navigation = () => {
   // Store
   const theme = useAppSelector(selectTheme);
+  const lang = useAppSelector(selectLang);
   const { theme: userTheme } = useAppSelector(selectUser);
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
 
@@ -73,21 +77,21 @@ const Navigation = () => {
   };
 
   const saveThemeHandle = () => {
-    const message = `Change the default theme to ${theme.main}? Will be saved in Local Storage!`;
+    const message = langs.themeModal.message[lang].replace("${}", theme.main);
 
     const modalObj: Modal = {
       type: "changeDefaultTheme",
       show: true,
-      header: "Theme Option",
+      header: langs.themeModal.header[lang],
       message: message,
-      agree: "Yes",
-      deny: "No",
+      agree: langs.themeModal.agree[lang],
+      deny: langs.themeModal.deny[lang],
       response: "deny",
     };
 
     if (theme.main === userTheme) {
-      modalObj.message = "Your theme is already saved!";
-      modalObj.agree = "OK";
+      modalObj.message = langs.themeModal.messageDone[lang];
+      modalObj.agree = langs.themeModal.agreeDone[lang];
       modalObj.deny = null;
     }
 
@@ -97,6 +101,10 @@ const Navigation = () => {
   let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide;
   const handleToggleTheme = () => {
     dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: !showThemes }));
+  };
+
+  const handleToggleLanguage = () => {
+    dispatch(setLang({ lang: lang == "bg" ? "en" : "bg" }));
   };
 
   return (
@@ -126,17 +134,22 @@ const Navigation = () => {
               <div className={classes.navRightItems}>
                 {!isLoggedIn && (
                   <NavElement path="auth" customStylingClass={theme.button}>
-                    Login
+                    {langs.main.login[lang]}
                   </NavElement>
                 )}
                 {isLoggedIn && (
                   <NavElement path="/" customStylingClass={theme.button} onClick={logoutHandler}>
-                    Logout
+                    {langs.main.logout[lang]}
                   </NavElement>
                 )}
                 {isLoggedIn && (
                   <button type="button" className={theme.button} onClick={handleToggleTheme}>
-                    Themes
+                    {langs.main.themes[lang]}
+                  </button>
+                )}
+                {isLoggedIn && (
+                  <button type="button" className={theme.button} onClick={handleToggleLanguage}>
+                    {langs.main.button[lang]}
                   </button>
                 )}
               </div>

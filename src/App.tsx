@@ -6,8 +6,16 @@ import { Outlet } from "react-router-dom";
 import Background from "./components/UI/Background/Background";
 import Modal from "./components/Modal/Modal";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { selectModal, setTheme, setUser, MainObj, defaultTheme } from "./components/Navigation/navigationSlice";
+import {
+  selectModal,
+  setTheme,
+  setUser,
+  MainObj,
+  defaultTheme,
+  defaultLang,
+} from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
+import { Langs } from "./components/Navigation/texts";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -33,7 +41,11 @@ const App = () => {
 
     let userDefaultTheme = localStorage.getItem("theme");
     userDefaultTheme = userDefaultTheme ? userDefaultTheme : defaultTheme;
-    dispatch(setUser({ theme: userDefaultTheme }));
+
+    let userDefaultLang = localStorage.getItem("lang");
+    userDefaultLang = userDefaultLang ? userDefaultLang : defaultLang;
+
+    dispatch(setUser({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }));
 
     let changeTheme: MainObj = { main: userDefaultTheme } as MainObj;
     dispatch(setTheme(changeTheme));
