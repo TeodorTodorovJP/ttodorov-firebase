@@ -7,7 +7,11 @@ import classes from "./AuthForm.module.css";
 
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
-import { langs } from "./texts";
+import { langs } from "./AuthTexts";
+
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getFirebaseConfig } from "../../firebase-config";
 
 const AuthForm = () => {
   // store
@@ -35,7 +39,7 @@ const AuthForm = () => {
     const modalObj: Modal = {
       type: "do nothing",
       show: true,
-      header: langs.errorModal.agree[lang],
+      header: langs.errorModal.header[lang],
       message: generalError,
       agree: langs.errorModal.agree[lang],
       deny: null,
@@ -61,21 +65,6 @@ const AuthForm = () => {
   //   }, errorDelay);
   // };
 
-  // let waitUserPassword: ReturnType<typeof setTimeout>;
-  // const handlePasswordChange = () => {
-  //   clearTimeout(waitUserPassword);
-
-  //   waitUserPassword = setTimeout(() => {
-  //     let ifError = false;
-  //     if (passwordInputRef.current?.value) {
-  //       if (passwordInputRef.current.value.length < 3) {
-  //         ifError = true;
-  //       }
-  //       setIsPasswordError(ifError);
-  //     }
-  //   }, errorDelay);
-  // };
-
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
   };
@@ -83,6 +72,33 @@ const AuthForm = () => {
   const capitalizeFirstLetter = (word: string) => {
     return word.charAt(0) + word.slice(1).toLowerCase();
   };
+
+  async function googleSignIn() {
+    try {
+      // Sign in Firebase using popup auth and Google as the identity provider.
+      const provider = new GoogleAuthProvider();
+      const authData: any = await signInWithPopup(getAuth(), provider);
+      const validateSignIn = !!getAuth().currentUser;
+
+      // let tokenData = authData.user.stsTokenManager;
+      const tokenData = authData.user.stsTokenManager;
+
+      if (authData && validateSignIn) {
+        const expirationTime = new Date(new Date().getTime() + +tokenData.expirationTime);
+        authCtx.login(tokenData.accessToken, expirationTime.toISOString());
+      }
+    } catch (error: any) {
+      if (error.message.includes("auth/popup-closed-by-user")) {
+        // User has closed the window
+      } else {
+        // some other error
+        // Should have error log
+        setGeneralError("Error");
+      }
+    }
+  }
+  // Initialize Firebase
+  initializeApp(getFirebaseConfig());
 
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
@@ -168,10 +184,17 @@ const AuthForm = () => {
           {passwordError && <p className={classes.errorText}>{passwordError}</p>}
 
           <div className={classes.actions}>
-            <button className={button}>{isLogin ? langs.main.login[lang] : langs.main.createAccount[lang]}</button>
-            <button type="button" className={button} onClick={switchAuthModeHandler}>
-              {isLogin ? langs.main.createAccount[lang] : langs.main.goToLogin[lang]}
-            </button>
+            <div className={classes.emailAuth}>
+              <button className={button}>{isLogin ? langs.main.login[lang] : langs.main.createAccount[lang]}</button>
+              <button type="button" className={button} onClick={switchAuthModeHandler}>
+                {isLogin ? langs.main.createAccount[lang] : langs.main.goToLogin[lang]}
+              </button>
+            </div>
+            <div className={classes.googleAuth}>
+              <button type="button" className={button} onClick={googleSignIn}>
+                {langs.main.googleSignIn[lang]}
+              </button>
+            </div>
           </div>
         </form>
       </section>

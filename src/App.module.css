@@ -31,8 +31,9 @@
 
 
 .outlet {
+  touch-action: manipulation; /* you can't zoom the background */
   display: flex;
   position: absolute;
-  top: 0;
+  top: 20vh;
   justify-content: center;
 }

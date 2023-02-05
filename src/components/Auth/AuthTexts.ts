@@ -37,6 +37,10 @@ export const langs = {
       bg: "Вашата парола",
       en: "Your Password",
     },
+    googleSignIn: {
+      bg: "Влезте с Google",
+      en: "Sign In With Google",
+    },
   },
 
   errorModal: {

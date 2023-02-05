@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit";
-import { StringLiteral } from "typescript";
 import { RootState, AppThunk, AppDispatch } from "../../app/store";
 import { fetchTheme } from "./navigationApi";
-import { Langs } from "./texts";
+import { Langs } from "./NavigationTexts";
 
 export const defaultTheme = "blue";
 export const defaultLang: keyof Langs = "en";
@@ -165,7 +164,6 @@ export const selectLang = (state: RootState) => state.navigation.user.lang;
 export const selectModal = (state: RootState) => state.navigation.modal;
 export const selectUser = (state: RootState) => state.navigation.user;
 export const selectIsOpen = (state: RootState) => state.navigation.isOpen;
-
 
 // We can also write thunks by hand, which may contain both sync and async logic.
 // Here's an example of conditionally dispatching actions based on current state.

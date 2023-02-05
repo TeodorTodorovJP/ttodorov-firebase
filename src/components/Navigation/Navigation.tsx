@@ -23,7 +23,7 @@ import Logo from "../UI/SVG/logo.svg";
 
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
-import { Langs, langs } from "./texts";
+import { Langs, langs } from "./NavigationTexts";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";

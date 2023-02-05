@@ -15,7 +15,8 @@ import {
   defaultLang,
 } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
-import { Langs } from "./components/Navigation/texts";
+import { Langs } from "./components/Navigation/NavigationTexts";
+
 
 // import useAuthContext from "./app/auth-context";
 
