@@ -1,56 +1,56 @@
 export interface Langs {
-  bg: string;
-  en: string;
+  bg: Lang;
+  en: Lang;
 }
 
-interface Grouped {
-  [key: string]: Langs;
+interface Lang {
+  main: Main;
+  errorModal: ErrorModal;
 }
+
 interface Main {
-  login: Langs;
+  login: string;
+  createAccount: string;
+  goToLogin: string;
+  yourEmail: string;
+  yourPassword: string;
+  googleSignIn: string;
 }
 
-interface Translates {
-  main: Grouped;
-  themeModal: Grouped;
+interface ErrorModal {
+  header: string;
+  agree: string;
 }
 
-export const langs = {
-  main: {
-    login: {
-      bg: "Влез",
-      en: "Login",
+export const langs: Langs = {
+  en: {
+    main: {
+      login: "Login",
+      createAccount: "Create Account",
+      goToLogin: "Go to Login",
+      yourEmail: "Your Email",
+      yourPassword: "Your Password",
+      googleSignIn: "Sign In With Google",
     },
-    createAccount: {
-      bg: "Създай профил",
-      en: "Create Account",
-    },
-    goToLogin: {
-      bg: "Влез в профил",
-      en: "Go to Login",
-    },
-    yourEmail: {
-      bg: "Вашата поща",
-      en: "Your Email",
-    },
-    yourPassword: {
-      bg: "Вашата парола",
-      en: "Your Password",
-    },
-    googleSignIn: {
-      bg: "Влезте с Google",
-      en: "Sign In With Google",
+
+    errorModal: {
+      header: "Error",
+      agree: "OK",
     },
   },
-
-  errorModal: {
-    header: {
-      bg: "Грешка",
-      en: "Error",
+  bg: {
+    main: {
+      login: "Влез",
+      createAccount: "Създай профил",
+      goToLogin: "Влез в профил",
+      yourEmail: "Вашата поща",
+      yourPassword: "Вашата парола",
+      googleSignIn: "Влезте с Google",
     },
-    agree: {
-      bg: "Добре",
-      en: "OK",
+
+    errorModal: {
+      header: "Грешка",
+      agree: "Добре",
     },
   },
 };

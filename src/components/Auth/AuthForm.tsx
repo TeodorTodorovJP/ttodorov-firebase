@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useAuthContext from "../../app/auth-context";
@@ -7,7 +7,7 @@ import classes from "./AuthForm.module.css";
 
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
-import { langs } from "./AuthTexts";
+import { langs, Langs } from "./AuthTexts";
 
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -32,6 +32,9 @@ const AuthForm = () => {
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
+  // Texts
+  const { main, errorModal } = langs[lang as keyof Langs];
+
   // redux
   const navigate = useNavigate();
 
@@ -39,9 +42,9 @@ const AuthForm = () => {
     const modalObj: Modal = {
       type: "do nothing",
       show: true,
-      header: langs.errorModal.header[lang],
+      header: errorModal.header,
       message: generalError,
-      agree: langs.errorModal.agree[lang],
+      agree: errorModal.agree,
       deny: null,
       response: "deny",
     };
@@ -73,7 +76,7 @@ const AuthForm = () => {
     return word.charAt(0) + word.slice(1).toLowerCase();
   };
 
-  async function googleSignIn() {
+  const googleSignIn = async () => {
     try {
       // Sign in Firebase using popup auth and Google as the identity provider.
       const provider = new GoogleAuthProvider();
@@ -96,7 +99,7 @@ const AuthForm = () => {
         setGeneralError("Error");
       }
     }
-  }
+  };
   // Initialize Firebase
   initializeApp(getFirebaseConfig());
 
@@ -166,18 +169,18 @@ const AuthForm = () => {
   return (
     <Card additionalClass="authForm">
       <section className={classes.auth}>
-        <h1>{isLogin ? langs.main.login[lang] : langs.main.createAccount[lang]}</h1>
+        <h1>{isLogin ? main.login : main.createAccount}</h1>
 
         <form onSubmit={submitHandler}>
           <div className={`${classes.control} ${emailError && classes.error}`}>
-            <label htmlFor="email">{langs.main.yourEmail[lang]}</label>
+            <label htmlFor="email">{main.yourEmail}</label>
             <input id="email" type="email" required ref={emailInputRef} />
           </div>
 
           {emailError && <p className={classes.errorText}>{emailError}</p>}
 
           <div className={`${classes.control} ${passwordError && classes.error}`}>
-            <label htmlFor="password">{langs.main.yourPassword[lang]}</label>
+            <label htmlFor="password">{main.yourPassword}</label>
             <input id="password" type="password" required ref={passwordInputRef} />
           </div>
 
@@ -185,14 +188,14 @@ const AuthForm = () => {
 
           <div className={classes.actions}>
             <div className={classes.emailAuth}>
-              <button className={button}>{isLogin ? langs.main.login[lang] : langs.main.createAccount[lang]}</button>
+              <button className={button}>{isLogin ? main.login : main.createAccount}</button>
               <button type="button" className={button} onClick={switchAuthModeHandler}>
-                {isLogin ? langs.main.createAccount[lang] : langs.main.goToLogin[lang]}
+                {isLogin ? main.createAccount : main.goToLogin}
               </button>
             </div>
             <div className={classes.googleAuth}>
               <button type="button" className={button} onClick={googleSignIn}>
-                {langs.main.googleSignIn[lang]}
+                {main.googleSignIn}
               </button>
             </div>
           </div>

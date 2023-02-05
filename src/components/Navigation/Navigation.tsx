@@ -23,7 +23,7 @@ import Logo from "../UI/SVG/logo.svg";
 
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
-import { Langs, langs } from "./NavigationTexts";
+import { langs, Langs } from "./NavigationTexts";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -36,6 +36,9 @@ const Navigation = () => {
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
 
   const dispatch = useAppDispatch();
+
+  // Texts
+  const { main, themeModal } = langs[lang as keyof Langs];
 
   // Context
   const authCtx = useAuthContext();
@@ -77,21 +80,21 @@ const Navigation = () => {
   };
 
   const saveThemeHandle = () => {
-    const message = langs.themeModal.message[lang].replace("${}", theme.main);
+    const message = themeModal.message.replace("${}", theme.main);
 
     const modalObj: Modal = {
       type: "changeDefaultTheme",
       show: true,
-      header: langs.themeModal.header[lang],
+      header: themeModal.header,
       message: message,
-      agree: langs.themeModal.agree[lang],
-      deny: langs.themeModal.deny[lang],
+      agree: themeModal.agree,
+      deny: themeModal.deny,
       response: "deny",
     };
 
     if (theme.main === userTheme) {
-      modalObj.message = langs.themeModal.messageDone[lang];
-      modalObj.agree = langs.themeModal.agreeDone[lang];
+      modalObj.message = themeModal.messageDone;
+      modalObj.agree = themeModal.agreeDone;
       modalObj.deny = null;
     }
 
@@ -134,22 +137,22 @@ const Navigation = () => {
               <div className={classes.navRightItems}>
                 {!isLoggedIn && (
                   <NavElement path="auth" customStylingClass={theme.button}>
-                    {langs.main.login[lang]}
+                    {main.login}
                   </NavElement>
                 )}
                 {isLoggedIn && (
                   <NavElement path="/" customStylingClass={theme.button} onClick={logoutHandler}>
-                    {langs.main.logout[lang]}
+                    {main.logout}
                   </NavElement>
                 )}
                 {isLoggedIn && (
                   <button type="button" className={theme.button} onClick={handleToggleTheme}>
-                    {langs.main.themes[lang]}
+                    {main.themes}
                   </button>
                 )}
                 {isLoggedIn && (
                   <button type="button" className={theme.button} onClick={handleToggleLanguage}>
-                    {langs.main.button[lang]}
+                    {main.button}
                   </button>
                 )}
               </div>

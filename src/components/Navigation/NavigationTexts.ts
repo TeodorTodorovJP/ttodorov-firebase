@@ -1,64 +1,61 @@
 export interface Langs {
-  bg: string;
-  en: string;
+  bg: Lang;
+  en: Lang;
 }
 
-interface Grouped {
-  [key: string]: Langs;
+interface Lang {
+  main: Main;
+  errorModal: ErrorModal;
 }
+
 interface Main {
-  login: Langs;
+  login: string;
+  createAccount: string;
+  goToLogin: string;
+  yourEmail: string;
+  yourPassword: string;
+  googleSignIn: string;
 }
 
-interface Translates {
-  main: Grouped;
-  themeModal: Grouped;
+interface ErrorModal {
+  header: string;
+  agree: string;
 }
 
 export const langs = {
-  main: {
-    login: {
-      bg: "Влез",
-      en: "Login",
+  en: {
+    main: {
+      login: "Login",
+      logout: "Logout",
+      themes: "Themes",
+      button: "English",
     },
-    logout: {
-      bg: "Излез",
-      en: "Logout",
-    },
-    themes: {
-      bg: "Теми",
-      en: "Themes",
-    },
-    button: {
-      bg: "Български",
-      en: "English",
+
+    themeModal: {
+      header: "Theme Option",
+      agree: "Yes",
+      deny: "No",
+      message: "Change the default theme to '${}'? Will be saved in Local Storage!",
+      messageDone: "Your theme is already saved!",
+      agreeDone: "OK",
     },
   },
 
-  themeModal: {
-    header: {
-      bg: "Теми",
-      en: "Theme Option",
+  bg: {
+    main: {
+      login: "Влез",
+      logout: "Излез",
+      themes: "Теми",
+      button: "Български",
     },
-    agree: {
-      bg: "Да",
-      en: "Yes",
-    },
-    deny: {
-      bg: "Не",
-      en: "No",
-    },
-    message: {
-      bg: "Запазете тази тема '${}'? Ще бъде запазена във вашият браузър!",
-      en: "Change the default theme to '${}'? Will be saved in Local Storage!",
-    },
-    messageDone: {
-      bg: "Вашата тема е вече запазена!",
-      en: "Your theme is already saved!",
-    },
-    agreeDone: {
-      bg: "Добре",
-      en: "OK",
+
+    themeModal: {
+      header: "Теми",
+      agree: "Да",
+      deny: "Не",
+      message: "Запазете тази тема '${}'? Ще бъде запазена във вашият браузър!",
+      messageDone: "Вашата тема е вече запазена!",
+      agreeDone: "Добре",
     },
   },
 };
