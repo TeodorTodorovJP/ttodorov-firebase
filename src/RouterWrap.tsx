@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import AuthForm from "./components/Auth/AuthForm";
 import { Counter } from "./components/Counter/Counter";
 import Home from "./components/Home/Home";
+import Chat from "./components/Chat/Chat";
 
 /**
  * The only purpose of this component is to address the router + context issue
@@ -34,15 +35,19 @@ const RouterWrap = () => {
               element: authCtx.isLoggedIn && <Counter />,
             },
             {
-              path: "meals",
-              element: authCtx.isLoggedIn && <MealsList />,
-              // children: [
-              //   {
-              //     path: "meal",
-              //     element: <p>Signle meal</p>,
-              //   },
-              // ],
+              path: "chat",
+              element: authCtx.isLoggedIn && <Chat />,
             },
+            // {
+            //   path: "meals",
+            //   element: authCtx.isLoggedIn && <MealsList />,
+            //   // children: [
+            //   //   {
+            //   //     path: "meal",
+            //   //     element: <p>Signle meal</p>,
+            //   //   },
+            //   // ],
+            // },
             {
               path: "*",
               element: <Navigate to="/" replace={true} />,

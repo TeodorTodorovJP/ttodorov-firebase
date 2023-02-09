@@ -102,14 +102,14 @@
     border: none;
 }
 
+/* For all svg elements */
+
 .rightMenuBtn > svg {
     display: block;
     width: 7vh;
     height: 7vh;
 }
 
-
-/* For all svg elements */
 .red {
     fill: var(--theme-red-el-btn);
 }

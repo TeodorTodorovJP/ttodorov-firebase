@@ -1,11 +1,16 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import counterReducer from "../components/Counter/counterSlice";
 import navigationReducer from "../components/Navigation/navigationSlice";
+import chatReducer from "../components/Chat/chatSlice";
+import userReducer from "../components/Auth/userSlice";
+
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     navigation: navigationReducer,
+    chat: chatReducer,
+    user: userReducer,
   },
 });
 

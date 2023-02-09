@@ -12,7 +12,7 @@ const NavElement = (props: { children: ReactNode; path: string; customStylingCla
   const stateAndClass = ({ isActive, isPending }: { isActive: boolean; isPending: boolean }) => {
     const state = isActive ? `${"active"}` : isPending ? `${"pending"}` : "";
     const customStylingClass = props.customStylingClass ? props.customStylingClass : "";
-    const allClasses = `${state} ${customStylingClass}`;
+    const allClasses = `${state} ${customStylingClass} hover`;
     return allClasses;
   };
 

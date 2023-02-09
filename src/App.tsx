@@ -17,7 +17,6 @@ import {
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
 
-
 // import useAuthContext from "./app/auth-context";
 
 const App = () => {

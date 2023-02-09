@@ -69,6 +69,12 @@
   position: relative;
 }
 
+.card.chat {
+  margin-top: 1rem;
+  background-color: rgba(0,0,0,.2);
+  position: relative;
+}
+
 .card.meals-list {
   margin-top: 1rem;
   background-color: rgba(0,0,0,.2);

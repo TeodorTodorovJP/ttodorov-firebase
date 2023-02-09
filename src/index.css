@@ -82,6 +82,10 @@ img {
   background: var(--theme-red-el-btn);
 }
 
+.svg-red {
+  fill: var(--theme-red-el-btn);
+}
+
 .decoration-red {
   color: var(--theme-red-decoration);
 }
@@ -104,6 +108,10 @@ img {
   background: var(--theme-green-el-btn);
 }
 
+.svg-green {
+  fill: var(--theme-green-el-btn);
+}
+
 .decoration-green {
   color: var(--theme-green-decoration);
 }
@@ -124,6 +132,10 @@ img {
 .button-blue {
   color: white;
   background: var(--theme-blue-el-btn);
+}
+
+.svg-blue {
+  fill: var(--theme-blue-el-btn);
 }
 
 .decoration-blue {

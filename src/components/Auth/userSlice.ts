@@ -1,0 +1,33 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../../app/store";
+
+export interface UserData {
+  id: string;
+  names: string;
+  email?: string;
+  profilePic?: string;
+}
+
+export interface UserState {
+  userData: UserData;
+}
+
+const initialState: UserState = {
+  userData: { id: "", names: "Anonymous", profilePic: "" },
+};
+
+export const userSlice = createSlice({
+  name: "user",
+  initialState,
+  reducers: {
+    setUserData: (state, action: PayloadAction<UserData>) => {
+      state.userData = action.payload;
+    },
+  },
+});
+
+export const { setUserData } = userSlice.actions;
+
+export const selectUserData = (state: RootState) => state.user.userData;
+
+export default userSlice.reducer;

@@ -23,6 +23,7 @@ type Button =
   | `${typeof buttonStyling} button-red`
   | `${typeof buttonStyling} button-green`
   | `${typeof buttonStyling} button-blue`;
+type SVG = "svg-red" | "svg-green" | "svg-blue";
 type Decoration = "decoration-red" | "decoration-green" | "decoration-blue";
 
 interface Theme {
@@ -31,6 +32,7 @@ interface Theme {
   medium: Medium;
   hard: Hard;
   button: Button;
+  svg: SVG;
   decoration: Decoration;
 }
 
@@ -72,6 +74,7 @@ const initialState: NavigationState = {
     medium: `medium-${defaultTheme}`,
     hard: `hard-${defaultTheme}`,
     button: `${buttonStyling} button-${defaultTheme}`,
+    svg: `svg-${defaultTheme}`,
     decoration: `decoration-${defaultTheme}`,
   },
   status: "idle",
@@ -104,6 +107,7 @@ export const navigationSlice = createSlice({
         medium: `medium-${theme}`,
         hard: `hard-${theme}`,
         button: `${buttonStyling} button-${theme}`,
+        svg: `svg-${theme}`,
         decoration: `decoration-${theme}`,
       };
 

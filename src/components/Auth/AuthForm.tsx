@@ -9,9 +9,12 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
 import { langs, Langs } from "./AuthTexts";
 
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { setUserData, UserData } from "./userSlice";
+
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection, getFirestore } from "firebase/firestore";
 import { getFirebaseConfig } from "../../firebase-config";
+import { initializeApp } from "firebase/app";
 
 const AuthForm = () => {
   // store
@@ -28,29 +31,69 @@ const AuthForm = () => {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [browserError, setBrowserError] = useState<string | null>(null);
+  const [successFulLogin, setSuccessFulLogin] = useState<string | null>(null);
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
+  let provider = useRef<GoogleAuthProvider>();
+  useEffect(() => {
+    provider.current = new GoogleAuthProvider();
+  });
+
   // Texts
-  const { main, errorModal } = langs[lang as keyof Langs];
+  const { main, errorModal, successModal, browserErrorModal } = langs[lang as keyof Langs];
 
   // redux
   const navigate = useNavigate();
 
-  if (generalError) {
-    const modalObj: Modal = {
-      type: "do nothing",
-      show: true,
-      header: errorModal.header,
-      message: generalError,
-      agree: errorModal.agree,
-      deny: null,
-      response: "deny",
-    };
+  useEffect(() => {
+    if (generalError) {
+      const modalObj: Modal = {
+        type: "notification",
+        show: true,
+        header: errorModal.header,
+        message: generalError,
+        agree: errorModal.agree,
+        deny: null,
+        response: "deny",
+      };
 
-    dispatch(setModal(modalObj));
-  }
+      dispatch(setModal(modalObj));
+      setGeneralError(null);
+    }
+
+    if (browserError) {
+      const modalObj: Modal = {
+        type: "notification",
+        show: true,
+        header: browserErrorModal.header,
+        message: browserErrorModal.message,
+        agree: browserErrorModal.agree,
+        deny: null,
+        response: "deny",
+      };
+
+      dispatch(setModal(modalObj));
+      setGeneralError(null);
+    }
+
+    if (successFulLogin) {
+      const modalObj: Modal = {
+        type: "notification",
+        show: true,
+        header: successModal.header,
+        message: successFulLogin,
+        agree: successModal.agree,
+        deny: null,
+        response: "deny",
+      };
+
+      dispatch(setModal(modalObj));
+      setSuccessFulLogin(null);
+    }
+  }, [generalError, browserError, successFulLogin]);
 
   // const errorDelay = 1000;
   // let waitUserEmail: ReturnType<typeof setTimeout>;
@@ -76,32 +119,106 @@ const AuthForm = () => {
     return word.charAt(0) + word.slice(1).toLowerCase();
   };
 
-  const googleSignIn = async () => {
+  // Saves error message to Cloud Firestore.
+  // Try to use anonymous way of credentials to avoid required auth errors
+  const saveError = async (error: object) => {
+    // Add a new message entry to the Firebase database.
     try {
-      // Sign in Firebase using popup auth and Google as the identity provider.
-      const provider = new GoogleAuthProvider();
-      const authData: any = await signInWithPopup(getAuth(), provider);
-      const validateSignIn = !!getAuth().currentUser;
-
-      // let tokenData = authData.user.stsTokenManager;
-      const tokenData = authData.user.stsTokenManager;
-
-      if (authData && validateSignIn) {
-        const expirationTime = new Date(new Date().getTime() + +tokenData.expirationTime);
-        authCtx.login(tokenData.accessToken, expirationTime.toISOString());
-      }
-    } catch (error: any) {
-      if (error.message.includes("auth/popup-closed-by-user")) {
-        // User has closed the window
-      } else {
-        // some other error
-        // Should have error log
-        setGeneralError("Error");
-      }
+      await addDoc(collection(getFirestore(), "errors"), {
+        error: JSON.stringify(error),
+      });
+    } catch (error) {
+      console.error("Error writing new message to Firebase Database", error);
     }
   };
+
   // Initialize Firebase
   initializeApp(getFirebaseConfig());
+
+  const anonymousSignIn = () => {
+    try {
+      signInAnonymously(getAuth());
+      setSuccessFulLogin(successModal.anonymous);
+    } catch (error: any) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setGeneralError(`Error: ${errorCode} - ${errorMessage}`);
+    }
+  };
+
+  const googleSignIn = async () => {
+    if (provider.current) {
+      // Sign in Firebase using popup auth and Google as the identity provider.
+      signInWithPopup(getAuth(), provider.current)
+        .then(() => {
+          setSuccessFulLogin(successModal.google);
+        })
+        .catch((error) => {
+          if (error.message.includes("auth/popup-closed-by-user")) {
+            // User has closed the window
+          } else if (error.message.toLowerCase().includes("disallowed_useragent")) {
+            setBrowserError("disallowed_useragent");
+          } else {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+
+            // The email of the user's account used.
+            // const email = error.customData.email;
+            // The AuthCredential type that was used.
+            const credential = GoogleAuthProvider.credentialFromError(error);
+
+            let userObj = {
+              errorCode,
+              errorMessage,
+              // email,
+              credential,
+            };
+
+            // saveError(userObj);
+
+            setGeneralError(`Error: ${errorCode} - ${errorMessage}`);
+          }
+        });
+    } else {
+      setGeneralError(`Error: could not create new Google Provider`);
+    }
+  };
+
+  useEffect(() => {
+    return onAuthStateChanged(
+      getAuth(),
+      async (user: any) => {
+        if (user) {
+          // The signed-in user info.
+          const getIdTokenResult = await user.getIdTokenResult();
+          if (getIdTokenResult) {
+            let id: string = user.uid;
+            let names = "Anonymous";
+
+            let userObj: UserData = { id, names };
+
+            if (!user.isAnonymous) {
+              userObj.names = user.displayName;
+              userObj.email = user.email;
+              userObj.profilePic = user.photoURL || "/images/profile_placeholder.png";
+            }
+            dispatch(setUserData(userObj));
+            authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime);
+          }
+        } else {
+          authCtx.logout();
+          console.log("onAuthStateChanged signed out");
+        }
+      },
+      (error: Error) => {
+        const errorName = error.name;
+        const errorMessage = error.message;
+
+        setGeneralError(`Error: ${errorName} - ${errorMessage}`);
+      }
+    );
+  }, [onAuthStateChanged]);
 
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
@@ -196,6 +313,9 @@ const AuthForm = () => {
             <div className={classes.googleAuth}>
               <button type="button" className={button} onClick={googleSignIn}>
                 {main.googleSignIn}
+              </button>
+              <button type="button" className={button} onClick={anonymousSignIn}>
+                {main.anonymousSignIn}
               </button>
             </div>
           </div>

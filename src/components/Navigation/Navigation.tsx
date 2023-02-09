@@ -15,9 +15,13 @@ import {
 
 import NavElement from "../UI/NavElement";
 import classes from "./Navigation.module.css";
-import { ReactComponent as HamburgerMenu } from "../UI/SVG/hamburger-menu.svg";
+import { ReactComponent as HamburgerMenu } from "./icons/hamburger-menu.svg";
 import { ReactComponent as AccountSVG } from "./icons/account.svg";
-import { ReactComponent as SaveSVG } from "./icons/saveSVG.svg";
+import { ReactComponent as SaveSVG } from "./icons/save.svg";
+import { ReactComponent as HomeSVG } from "./icons/home.svg";
+import { ReactComponent as LoginSVG } from "./icons/login.svg";
+import { ReactComponent as CounterSVG } from "./icons/counter.svg";
+import { ReactComponent as ChatSVG } from "./icons/chat.svg";
 
 import Logo from "../UI/SVG/logo.svg";
 
@@ -45,13 +49,13 @@ const Navigation = () => {
   const { isLoggedIn, logout } = authCtx;
 
   const navLeftItems = [
-    { path: "/", text: "Home", icon: <HamburgerMenu /> },
-    { path: "auth", text: "Authenticate", icon: <HamburgerMenu /> },
-    { path: "counter", text: "Your Counter", icon: <HamburgerMenu /> },
-    { path: "meals", text: "Your Meals", icon: <HamburgerMenu /> },
+    { path: "/", text: "Home", icon: <HomeSVG /> },
+    { path: "auth", text: "Authenticate", icon: <LoginSVG /> },
+    { path: "counter", text: "Your Counter", icon: <CounterSVG /> },
+    { path: "chat", text: "Chat", icon: <ChatSVG /> },
     // { path: "meals/meal", text: "Your Single Meal", icon: <HamburgerMenu /> },
   ].map((link) => (
-    <NavElement key={link.path} path={link.path}>
+    <NavElement key={link.path} path={link.path} customStylingClass={theme.svg}>
       {link.icon}
     </NavElement>
   ));
@@ -116,7 +120,11 @@ const Navigation = () => {
         <div className={classes.leftSide}>
           <div className={classes.logoAndBtn}>
             <img src={Logo} alt="" className={classes.logo} />
-            <button type="button" onClick={navLeftClickHandle} className={`${classes.leftMenuBtn} ${theme.decoration}`}>
+            <button
+              type="button"
+              onClick={navLeftClickHandle}
+              className={`${classes.leftMenuBtn} ${theme.decoration} ${theme.svg}`}
+            >
               <HamburgerMenu />
             </button>
           </div>
@@ -129,7 +137,7 @@ const Navigation = () => {
         </div>
 
         <div className={classes.rightSide}>
-          <button type="button" onClick={navRightClickHandle} className={classes.rightMenuBtn}>
+          <button type="button" onClick={navRightClickHandle} className={`${classes.rightMenuBtn} ${theme.svg}`}>
             <AccountSVG />
           </button>
           <nav className={navRightShowClass}>
@@ -150,11 +158,9 @@ const Navigation = () => {
                     {main.themes}
                   </button>
                 )}
-                {isLoggedIn && (
-                  <button type="button" className={theme.button} onClick={handleToggleLanguage}>
-                    {main.button}
-                  </button>
-                )}
+                <button type="button" className={theme.button} onClick={handleToggleLanguage}>
+                  {main.button}
+                </button>
               </div>
             </Card>
             <div className={themesOptionsClass}>
