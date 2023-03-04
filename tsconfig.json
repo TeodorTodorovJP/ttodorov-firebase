@@ -16,5 +16,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "src/firebase-config.ts"]
+  "include": ["src", "src/firebase-config.js", "public/firebase-messaging-sw.js"]
 }

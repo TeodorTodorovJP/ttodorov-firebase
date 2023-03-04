@@ -2,7 +2,7 @@ import "./Background.css";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { selectTheme, setAllOpenToFalse } from "../../Navigation/navigationSlice";
 import { useEffect, useMemo, useRef, SVGProps, cloneElement } from "react";
-import { doubleClick } from "../../../app/utils";
+import { singleClick } from "../../../app/utils";
 
 const Background = () => {
   const { main: theme } = useAppSelector(selectTheme);
@@ -10,7 +10,7 @@ const Background = () => {
 
   const background = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    doubleClick({ ref: background }, () => dispatch(setAllOpenToFalse()), true);
+    singleClick({ ref: background }, () => dispatch(setAllOpenToFalse()));
   }, []);
 
   const getSvgShapes = () => {
@@ -18,13 +18,8 @@ const Background = () => {
     const body = document.body;
     const html = document.documentElement;
 
-    const windowHeight: number = Math.max(
-      body.scrollHeight,
-      body.offsetHeight,
-      html.clientHeight,
-      html.scrollHeight,
-      html.offsetHeight
-    );
+    const windowHeight: number =
+      Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight) * 1.1; // remove the * 1.1
     const windowWidth: number = Math.max(
       body.scrollWidth,
       body.offsetWidth,

@@ -1,5 +1,5 @@
 import { useState, useRef, FormEvent, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
@@ -9,17 +9,27 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
 import { langs, Langs } from "./AuthTexts";
 
-import { setUserData, UserData } from "./userSlice";
+import { selectUserData, setUserData, UserData, clearUserData } from "./userSlice";
 
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
-import { getFirebaseConfig } from "../../firebase-config";
-import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInAnonymously,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updatePassword,
+} from "firebase/auth";
+import { addDoc, collection } from "firebase/firestore";
+import { fireStore } from "../../firebase-config";
+import { FirebaseError } from "firebase/app";
 
 const AuthForm = () => {
   // store
   const { button } = useAppSelector(selectTheme);
   const lang = useAppSelector(selectLang);
+  const userData = useAppSelector(selectUserData);
   const dispatch = useAppDispatch();
 
   // context
@@ -27,6 +37,9 @@ const AuthForm = () => {
 
   // local state
   const [isLogin, setIsLogin] = useState(true);
+
+  type AuthMethod = "options" | "email" | "google" | "anonymous" | "changePassword";
+  const [authMethod, setAuthMethod] = useState<AuthMethod>("options");
 
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -36,17 +49,26 @@ const AuthForm = () => {
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const newPasswordInputRef = useRef<HTMLInputElement>(null);
 
   let provider = useRef<GoogleAuthProvider>();
   useEffect(() => {
+    console.log("provider");
     provider.current = new GoogleAuthProvider();
-  });
+  }, []);
 
   // Texts
-  const { main, errorModal, successModal, browserErrorModal } = langs[lang as keyof Langs];
+  const { main, errorModal, successModal, browserErrorModal, loaderModal } = langs[lang as keyof Langs];
 
-  // redux
-  const navigate = useNavigate();
+  const loaderModalData: Modal = {
+    type: "notification",
+    show: true,
+    header: loaderModal.header,
+    message: "",
+    agree: "Loader",
+    deny: null,
+    response: "deny",
+  };
 
   useEffect(() => {
     if (generalError) {
@@ -115,8 +137,8 @@ const AuthForm = () => {
     setIsLogin((prevState) => !prevState);
   };
 
-  const capitalizeFirstLetter = (word: string) => {
-    return word.charAt(0) + word.slice(1).toLowerCase();
+  const switchAuthMethodHandler = (method: AuthMethod) => {
+    setAuthMethod(method);
   };
 
   // Saves error message to Cloud Firestore.
@@ -124,7 +146,7 @@ const AuthForm = () => {
   const saveError = async (error: object) => {
     // Add a new message entry to the Firebase database.
     try {
-      await addDoc(collection(getFirestore(), "errors"), {
+      await addDoc(collection(fireStore, "errors"), {
         error: JSON.stringify(error),
       });
     } catch (error) {
@@ -132,185 +154,93 @@ const AuthForm = () => {
     }
   };
 
-  // Initialize Firebase
-  initializeApp(getFirebaseConfig());
+  const handleError = (errorObj: FirebaseError) => {
+    let type = "OTHER";
+    const error = errorObj.code.toLowerCase();
+
+    if (error.includes("email")) type = "EMAIL";
+    if (error.includes("password")) type = "PASSWORD";
+
+    setGeneralError(type == "OTHER" ? errorObj.message : null);
+    setEmailError(type == "EMAIL" ? errorModal.email : null);
+    setPasswordError(type == "PASSWORD" ? errorModal.password : null);
+  };
 
   const anonymousSignIn = () => {
+    dispatch(setModal(loaderModalData));
     try {
       signInAnonymously(getAuth());
-      setSuccessFulLogin(successModal.anonymous);
+      //setSuccessFulLogin(successModal.anonymous);
     } catch (error: any) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      setGeneralError(`Error: ${errorCode} - ${errorMessage}`);
+      handleError(error);
     }
   };
 
-  const googleSignIn = async () => {
+  const googleSignIn = () => {
+    dispatch(setModal(loaderModalData));
     if (provider.current) {
       // Sign in Firebase using popup auth and Google as the identity provider.
-      signInWithPopup(getAuth(), provider.current)
-        .then(() => {
-          setSuccessFulLogin(successModal.google);
-        })
-        .catch((error) => {
-          if (error.message.includes("auth/popup-closed-by-user")) {
-            // User has closed the window
-          } else if (error.message.toLowerCase().includes("disallowed_useragent")) {
-            setBrowserError("disallowed_useragent");
-          } else {
-            // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
-
-            // The email of the user's account used.
-            // const email = error.customData.email;
-            // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
-
-            let userObj = {
-              errorCode,
-              errorMessage,
-              // email,
-              credential,
-            };
-
-            // saveError(userObj);
-
-            setGeneralError(`Error: ${errorCode} - ${errorMessage}`);
-          }
-        });
+      signInWithPopup(getAuth(), provider.current).catch((error) => {
+        if (error.message.includes("auth/popup-closed-by-user")) {
+          dispatch(setModal({ ...loaderModalData, show: false }));
+        } else if (error.message.toLowerCase().includes("disallowed_useragent")) {
+          setBrowserError("disallowed_useragent");
+        } else {
+          handleError(error);
+        }
+      });
     } else {
       setGeneralError(`Error: could not create new Google Provider`);
     }
   };
 
-  useEffect(() => {
-    return onAuthStateChanged(
-      getAuth(),
-      async (user: any) => {
-        if (user) {
-          // The signed-in user info.
-          const getIdTokenResult = await user.getIdTokenResult();
-          if (getIdTokenResult) {
-            let id: string = user.uid;
-            let names = "Anonymous";
+  const updateProfilePassword = () => {
+    const auth = getAuth();
 
-            let userObj: UserData = { id, names };
-
-            if (!user.isAnonymous) {
-              userObj.names = user.displayName;
-              userObj.email = user.email;
-              userObj.profilePic = user.photoURL || "/images/profile_placeholder.png";
-            }
-            dispatch(setUserData(userObj));
-            authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime);
-          }
-        } else {
-          authCtx.logout();
-          console.log("onAuthStateChanged signed out");
-        }
-      },
-      (error: Error) => {
-        const errorName = error.name;
-        const errorMessage = error.message;
-
-        setGeneralError(`Error: ${errorName} - ${errorMessage}`);
+    const newPassword = newPasswordInputRef.current?.value;
+    if (auth && newPassword) {
+      const user = auth.currentUser;
+      if (user) {
+        updatePassword(user, newPassword)
+          .then(() => {
+            // Update successful.
+          })
+          .catch((error) => {
+            // An error ocurred
+            // ...
+          });
       }
-    );
-  }, [onAuthStateChanged]);
+    }
+  };
 
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
+    dispatch(setModal(loaderModalData));
     setPasswordError(null);
     setEmailError(null);
-    const enteredEmail = emailInputRef.current;
-    const enteredPassword = passwordInputRef.current;
+    const enteredEmail = emailInputRef.current?.value;
+    const enteredPassword = passwordInputRef.current?.value;
 
-    let url;
-    if (isLogin) {
-      url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB-oRc7j1XHEkdr4ZkEM3crAIU7Yrx-EBo";
-    } else {
-      url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyB-oRc7j1XHEkdr4ZkEM3crAIU7Yrx-EBo";
-    }
-    fetch(url, {
-      method: "POST",
-      body: JSON.stringify({
-        email: enteredEmail && enteredEmail.value,
-        password: enteredPassword && enteredPassword.value,
-        returnSecureToken: true,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          return res.json().then((data) => {
-            if (data && data.error && data.error.message) {
-              let type = "OTHER";
+    if (enteredEmail && enteredPassword) {
+      const authRequest = isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
 
-              const error = data.error.message
-                .split("_")
-                .map((word: string) => capitalizeFirstLetter(word))
-                .join(" ");
-
-              if (error.includes("Email")) type = "EMAIL";
-
-              if (error.includes("Password")) type = "PASSWORD";
-
-              setGeneralError(type == "OTHER" ? error : null);
-              setEmailError(type == "EMAIL" ? error : null);
-              setPasswordError(type == "PASSWORD" ? error : null);
-              // throw new Error(data.error.message);
-            }
-          });
-        }
-      })
-      .then((data) => {
-        if (!data) return;
-
-        const expirationTime = new Date(new Date().getTime() + +data.expiresIn * 1000);
-        authCtx.login(data.idToken, expirationTime.toISOString());
-        navigate("/");
-      })
-      .catch((err) => {
-        // Store all errors
-        // alert(err.message);
+      authRequest(getAuth(), enteredEmail, enteredPassword).catch((error) => {
+        handleError(error);
       });
+    }
   };
 
   return (
     <Card additionalClass="authForm">
       <section className={classes.auth}>
-        <h1>{isLogin ? main.login : main.createAccount}</h1>
+        {authMethod === "options" && (
+          <div className={classes.options}>
+            <h1>{main.options}</h1>
 
-        <form onSubmit={submitHandler}>
-          <div className={`${classes.control} ${emailError && classes.error}`}>
-            <label htmlFor="email">{main.yourEmail}</label>
-            <input id="email" type="email" required ref={emailInputRef} />
-          </div>
-
-          {emailError && <p className={classes.errorText}>{emailError}</p>}
-
-          <div className={`${classes.control} ${passwordError && classes.error}`}>
-            <label htmlFor="password">{main.yourPassword}</label>
-            <input id="password" type="password" required ref={passwordInputRef} />
-          </div>
-
-          {passwordError && <p className={classes.errorText}>{passwordError}</p>}
-
-          <div className={classes.actions}>
-            <div className={classes.emailAuth}>
-              <button className={button}>{isLogin ? main.login : main.createAccount}</button>
-              <button type="button" className={button} onClick={switchAuthModeHandler}>
-                {isLogin ? main.createAccount : main.goToLogin}
+            <div className={classes.optionsBtns}>
+              <button type="button" className={button} onClick={() => switchAuthMethodHandler("email")}>
+                {main.email}
               </button>
-            </div>
-            <div className={classes.googleAuth}>
               <button type="button" className={button} onClick={googleSignIn}>
                 {main.googleSignIn}
               </button>
@@ -319,7 +249,42 @@ const AuthForm = () => {
               </button>
             </div>
           </div>
-        </form>
+        )}
+        {authMethod === "email" && (
+          <div className={classes.emailForm}>
+            <div className={classes.backBtn}>
+              <button type="button" className={button} onClick={() => switchAuthMethodHandler("options")}>
+                {main.goBack}
+              </button>
+            </div>
+            <h1>{isLogin ? main.login : main.createAccount}</h1>
+
+            <form onSubmit={submitHandler}>
+              <div className={`${classes.control} ${emailError && classes.error}`}>
+                <label htmlFor="email">{main.yourEmail}</label>
+                <input id="email" type="email" required ref={emailInputRef} />
+              </div>
+
+              {emailError && <p className={classes.errorText}>{emailError}</p>}
+
+              <div className={`${classes.control} ${passwordError && classes.error}`}>
+                <label htmlFor="password">{main.yourPassword}</label>
+                <input id="password" type="password" required ref={passwordInputRef} />
+              </div>
+
+              {passwordError && <p className={classes.errorText}>{passwordError}</p>}
+
+              <div className={classes.actions}>
+                <div className={classes.emailAuth}>
+                  <button className={button}>{isLogin ? main.login : main.createAccount}</button>
+                  <button type="button" className={button} onClick={switchAuthModeHandler}>
+                    {isLogin ? main.createAccount : main.goToLogin}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
       </section>
     </Card>
   );

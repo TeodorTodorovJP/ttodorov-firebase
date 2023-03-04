@@ -1,0 +1,41 @@
+
+
+.profile {
+    padding: 1rem;
+}
+
+.profile > h1 {
+    text-align: center;
+}
+
+.data {
+    display: flex;
+}
+
+.leftSide {
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.rightSide {
+    width: fit-content;
+}
+
+.rightSide > img {
+    border-radius: 50%;
+}
+
+.rightSide > svg {
+    display: block;
+    width: 10vh;
+    height: 10vh;
+}
+
+
+/* Web view */
+@media (min-width: 430px) {
+    .rightSide > svg {
+        width: 7vh;
+        height: 7vh;
+    }
+}

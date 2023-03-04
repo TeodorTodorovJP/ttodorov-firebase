@@ -1,4 +1,7 @@
 import { initializeApp } from "firebase/app";
+import { getMessaging } from "firebase/messaging";
+import { getFirestore } from "firebase/firestore";
+
 /**
  * To find your Firebase config object:
  *
@@ -33,5 +36,11 @@ export function getFirebaseConfig() {
   }
 }
 
+export const VAPID_KEY = "BGTum42lGqEdsfdrQPrPkw7Tagx7OFNNidBk5MAbJ4aD5atTv2ocJV0Qr6w6uRdZA8K2kRbuRZepiJJ1a6SYRoE";
+console.log("çonfig initialized");
 // Initialize Firebase
 const app = initializeApp(config);
+const fireStore = getFirestore(app);
+const messaging = getMessaging();
+
+export { app, fireStore, messaging };

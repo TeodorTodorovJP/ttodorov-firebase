@@ -1,11 +1,41 @@
 
 
 .auth {
-    padding: 2rem;
+    padding: 3rem;
+}
+
+.emailForm {
     display: flex;
     flex-direction: column;
     align-items: center;
     color: white;
+}
+
+.emailForm > h1 {
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+.backBtn {
+    display: flex;
+    position: absolute;
+    left: 2rem;
+    top: 2rem;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: white;
+}
+
+.optionsBtns {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-self: center;
 }
 
 .control {
@@ -26,16 +56,6 @@
     display: flex;
     justify-content: space-evenly;
     gap: 1rem;
-}
-
-.googleAuth {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;}
-
-.toggle {
-
 }
 
 .error {

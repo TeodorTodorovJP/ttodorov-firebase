@@ -5,6 +5,7 @@ export interface Langs {
 
 interface Lang {
   main: Main;
+  loaderModal: LoaderModal;
   errorModal: ErrorModal;
   browserErrorModal: BrowserErrorModal;
   successModal: SuccessModal;
@@ -12,6 +13,9 @@ interface Lang {
 
 interface Main {
   login: string;
+  email: string;
+  goBack: string;
+  options: string;
   createAccount: string;
   goToLogin: string;
   yourEmail: string;
@@ -20,9 +24,15 @@ interface Main {
   anonymousSignIn: string;
 }
 
+interface LoaderModal {
+  header: string;
+}
+
 interface ErrorModal {
   header: string;
   agree: string;
+  email: string;
+  password: string;
 }
 
 interface BrowserErrorModal {
@@ -35,6 +45,7 @@ interface SuccessModal {
   header: string;
   agree: string;
   google: string;
+  email: string;
   anonymous: string;
 }
 
@@ -42,6 +53,9 @@ export const langs: Langs = {
   en: {
     main: {
       login: "Login",
+      email: "Email",
+      goBack: "back",
+      options: "Choose a Login method",
       createAccount: "Create Account",
       goToLogin: "Go to Login",
       yourEmail: "Your Email",
@@ -50,9 +64,15 @@ export const langs: Langs = {
       anonymousSignIn: "Anonymous Login",
     },
 
+    loaderModal: {
+      header: "Loading",
+    },
+
     errorModal: {
       header: "Error",
       agree: "OK",
+      email: "Invalid email",
+      password: "Invalid password",
     },
 
     browserErrorModal: {
@@ -65,12 +85,16 @@ export const langs: Langs = {
       header: "Successful Login",
       agree: "OK",
       google: "LoggedIn with Google",
+      email: "LoggedIn with Email",
       anonymous: "LoggedIn as Anonymous",
     },
   },
   bg: {
     main: {
       login: "Влез",
+      email: "Email",
+      goBack: "назад",
+      options: "Изберете начин на влизане",
       createAccount: "Създай профил",
       goToLogin: "Влез в профил",
       yourEmail: "Вашата поща",
@@ -79,9 +103,15 @@ export const langs: Langs = {
       anonymousSignIn: "Влезте като анонимен потребител",
     },
 
+    loaderModal: {
+      header: "Зареждане",
+    },
+
     errorModal: {
       header: "Грешка",
       agree: "Добре",
+      email: "Грешен Email",
+      password: "Грешна парола",
     },
 
     browserErrorModal: {
@@ -94,6 +124,7 @@ export const langs: Langs = {
       header: "Успешно влизане",
       agree: "Добре",
       google: "Влезнахте чрез Google",
+      email: "Влезнахте чрез Email",
       anonymous: "Влезнахте като Анонимен",
     },
   },

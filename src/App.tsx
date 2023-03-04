@@ -13,9 +13,17 @@ import {
   MainObj,
   defaultTheme,
   defaultLang,
+  setModal,
+  Modal as ModalType,
 } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { setUserData, UserData } from "./components/Auth/userSlice";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -25,16 +33,31 @@ const App = () => {
   // Context
   const authCtx = useAuthContext();
 
-  const autoLogin = true;
+  // Router
+  const navigate = useNavigate();
+
+  // const autoLogin = true;
+  let localHost = false;
+
+  const loaderModalData: ModalType = {
+    type: "notification",
+    show: false,
+    header: "",
+    message: "",
+    agree: "Loader",
+    deny: null,
+    response: "deny",
+  };
 
   useEffect(() => {
     if (document.location.hostname === "localhost") {
       document.title = "TTodorov DEV";
+      localHost = true;
 
-      if (autoLogin) {
-        const expirationTime = new Date(new Date().getTime() + 1 * 1000 * 60 * 60 * 24); // One day
-        authCtx.login("Fake-Token", expirationTime.toISOString());
-      }
+      // if (autoLogin) {
+      //   const expirationTime = new Date(new Date().getTime() + 1 * 1000 * 60 * 60 * 24); // One day
+      //   authCtx.login("Fake-Token", expirationTime.toISOString());
+      // }
     } else {
       document.title = "TTodorov";
     }
@@ -50,6 +73,109 @@ const App = () => {
     let changeTheme: MainObj = { main: userDefaultTheme } as MainObj;
     dispatch(setTheme(changeTheme));
   }, []);
+
+  useEffect(() => {
+    return onAuthStateChanged(getAuth(), async (user: any) => {
+      if (user) {
+        // The signed-in user info.
+        const getIdTokenResult = await user.getIdTokenResult();
+        if (getIdTokenResult) {
+          let id: string = user.uid;
+          let names = "Anonymous";
+
+          let userObj: UserData = { id, names };
+
+          if (!user.isAnonymous) {
+            userObj.names = user.displayName ? user.displayName : user.email;
+            userObj.email = user.email ? user.email : "No Email";
+            userObj.profilePic = user.photoURL && !localHost ? user.photoURL : null; // Got 403 for too many requests of the image
+          }
+          dispatch(setUserData(userObj));
+          authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime); // Not correct, firebase returns 2 hours old current date and expiration 1h after that is 1 hour behind
+          console.log("Signed in");
+
+          dispatch(setModal(loaderModalData));
+
+          const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname;
+          navigate(navigateTo);
+          saveMessagingDeviceToken();
+          addUserToFriends(userObj);
+        }
+      } else if (authCtx.isLoggedIn) {
+        authCtx.logout();
+        dispatch(setUserData({ id: "", names: "" }));
+        console.log("Signed out");
+      }
+    });
+  }, [onAuthStateChanged]);
+
+  // if ("serviceWorker" in navigator) {
+  //   navigator.serviceWorker
+  //     .register("./firebase-messaging-sw.js")
+  //   }
+
+  // Saves the messaging device token to Cloud Firestore.
+  async function saveMessagingDeviceToken() {
+    try {
+      console.log("before reg");
+      // const registration = await navigator.serviceWorker.register("../firebase-messaging-sw.js", {
+      //   type: "module",
+      // });
+      const currentToken = await getToken(messaging, {
+        vapidKey: VAPID_KEY,
+        // serviceWorkerRegistration: registration,
+      });
+      console.log(currentToken);
+      if (currentToken) {
+        //console.log("Got FCM device token:", currentToken);
+        // Saving the Device Token to Cloud Firestore.
+        const tokenRef = doc(fireStore, "fcmTokens", currentToken);
+        const auth = getAuth();
+        if (auth && auth.currentUser) {
+          await setDoc(tokenRef, { uid: auth.currentUser.uid });
+
+          // This will fire when a message is received while the app is in the foreground.
+          // When the app is in the background, firebase-messaging-sw.js will receive the message instead.
+          onMessage(messaging, (message: any) => {
+            console.log("New foreground notification from Firebase Messaging!");
+          });
+        }
+      } else {
+        // Need to request permissions to show notifications.
+        requestNotificationsPermissions();
+      }
+    } catch (error) {
+      console.error("Unable to get messaging token.", error);
+    }
+  }
+
+  // Requests permissions to show notifications.
+  async function requestNotificationsPermissions() {
+    console.log("Requesting notifications permission...");
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      console.log("Notification permission granted.");
+      // Notification permission granted.
+      await saveMessagingDeviceToken();
+    } else {
+      console.log("Unable to get permission to notify.");
+    }
+  }
+
+  const addUserToFriends = async (userData: UserData) => {
+    try {
+      const friendRef = doc(fireStore, "friends", userData.id);
+      const friendSnap = await getDoc(friendRef);
+
+      if (!friendSnap.exists()) {
+        const timestamp = serverTimestamp();
+        await setDoc(friendRef, { timestamp, ...userData });
+      }
+    } catch (error) {
+      console.error("Error creating new friend to Firebase Database", error);
+    }
+  };
 
   // Make these like helper functions
   // const accessibility = accessibilityProvider('div', 'label', 'customMessage');

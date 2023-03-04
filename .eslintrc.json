@@ -10,4 +10,13 @@
     // "eslint-plugin-react/no-loop-func": "off",
     // "eslint/no-loop-func": "off"
   }
+  // "parser": "@babel/eslint-parser",
+  // "requireConfigFile": false,
+
+  // "parserOptions": {
+  //   "babelOptions": {
+  //     "plugins": ["@babel/eslint-parser"]
+  //   }
+  // },
+  // "plugins": ["@babel"]
 }

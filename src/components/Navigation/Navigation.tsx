@@ -16,7 +16,7 @@ import {
 import NavElement from "../UI/NavElement";
 import classes from "./Navigation.module.css";
 import { ReactComponent as HamburgerMenu } from "./icons/hamburger-menu.svg";
-import { ReactComponent as AccountSVG } from "./icons/account.svg";
+import { ReactComponent as AccountSVG } from "../UI/SVG/account.svg";
 import { ReactComponent as SaveSVG } from "./icons/save.svg";
 import { ReactComponent as HomeSVG } from "./icons/home.svg";
 import { ReactComponent as LoginSVG } from "./icons/login.svg";
@@ -28,6 +28,7 @@ import Logo from "../UI/SVG/logo.svg";
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
 import { langs, Langs } from "./NavigationTexts";
+import { selectUserData } from "../Auth/userSlice";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -38,6 +39,7 @@ const Navigation = () => {
   const lang = useAppSelector(selectLang);
   const { theme: userTheme } = useAppSelector(selectUser);
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
+  const { profilePic } = useAppSelector(selectUserData);
 
   const dispatch = useAppDispatch();
 
@@ -138,11 +140,16 @@ const Navigation = () => {
 
         <div className={classes.rightSide}>
           <button type="button" onClick={navRightClickHandle} className={`${classes.rightMenuBtn} ${theme.svg}`}>
-            <AccountSVG />
+            {profilePic ? <img className={classes.profilePic} src={profilePic}></img> : <AccountSVG />}
           </button>
           <nav className={navRightShowClass}>
             <Card additionalClass="navRightItems">
               <div className={classes.navRightItems}>
+                {isLoggedIn && (
+                  <NavElement path="profile" customStylingClass={theme.button}>
+                    {main.profile}
+                  </NavElement>
+                )}
                 {!isLoggedIn && (
                   <NavElement path="auth" customStylingClass={theme.button}>
                     {main.login}

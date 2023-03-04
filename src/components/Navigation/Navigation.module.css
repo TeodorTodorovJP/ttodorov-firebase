@@ -106,8 +106,14 @@
 
 .rightMenuBtn > svg {
     display: block;
-    width: 7vh;
-    height: 7vh;
+    width: 8vh;
+    height: 8vh;
+}
+
+.profilePic {
+    border-radius: 50%;
+    height: 8vh;
+    width: 8vh;
 }
 
 .red {
@@ -175,7 +181,7 @@
     }
 
     .rightMenuBtn > svg {
-        width: 5vh;
-        height: 5vh;
+        width: 6vh;
+        height: 6vh;
     }
 }

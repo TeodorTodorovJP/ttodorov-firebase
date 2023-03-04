@@ -25,11 +25,38 @@ const AuthContext = createContext<AuthContent>({
   logout: () => {},
 });
 
-const calculateRemainingTime = (expirationTime: string | number | Date) => {
-  const currentTime = new Date().getTime();
-  const adjExpirationTime = new Date(expirationTime).getTime();
+const getDateDataInUTC = (date?: string | number | Date) => {
+  let useDate;
+  if (date) {
+    useDate = new Date(date);
+  } else {
+    useDate = new Date();
+  }
 
-  const remainingDuration = adjExpirationTime - currentTime;
+  const year = +useDate.getUTCFullYear().toString().substring(2);
+  const month = useDate.getUTCMonth();
+  const day = useDate.getUTCDate();
+  const hours = useDate.getUTCHours();
+  const minutes = useDate.getUTCMinutes();
+  return {
+    year,
+    month,
+    day,
+    hours,
+    minutes,
+  };
+};
+
+const calculateRemainingTime = (expirationDate: string | number | Date) => {
+  // Don't use getTime, it get's the current timezone's milliseconds
+  // If both dates come from different timezones, comparison would be inaccurate
+  const c = getDateDataInUTC();
+  const currentTimeUTCms = Date.UTC(c.year, c.month, c.day, c.hours, c.minutes);
+
+  const exp = getDateDataInUTC(expirationDate);
+  const expTimeUTCms = Date.UTC(exp.year, exp.month, exp.day, exp.hours, exp.minutes);
+
+  const remainingDuration = expTimeUTCms - currentTimeUTCms;
 
   return remainingDuration;
 };

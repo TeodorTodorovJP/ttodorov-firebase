@@ -35,6 +35,7 @@ html {
   /* Make the font as big as 16px again */
   font-size: 1.6rem;
   height: 100vh; /*For mobile get's the screen size without address bar*/
+  height: 100svh; /*For mobile fixes the top address bar eating space*/
 }
 
 *,

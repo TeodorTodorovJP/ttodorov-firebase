@@ -75,6 +75,26 @@
   position: relative;
 }
 
+.card.chatRooms {
+  margin-top: 1rem;
+  background-color: rgba(0,0,0,.2);
+  position: relative;
+}
+
+.card.chatFriends {
+  background-color: rgba(0,0,0,.2);
+
+  position: fixed;
+  right: 1rem;
+  top: 20vh;
+}
+
+.card.profile {
+  margin: 1rem;
+  background-color: rgba(0,0,0,.2);
+  position: relative;
+}
+
 .card.meals-list {
   margin-top: 1rem;
   background-color: rgba(0,0,0,.2);
@@ -103,6 +123,13 @@
     box-shadow: none;
     border-radius: 0px;
     margin: 0;
+  }
+
+  .card.chatRooms {
+    position: fixed;
+    top: 12vh;
+    left: 2rem;
+    height: 73vh;
   }
 
 }

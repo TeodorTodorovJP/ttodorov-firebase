@@ -1,0 +1,21 @@
+
+
+.chatFriends {
+    border: solid black 1px;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+}
+
+.image {
+    border-radius: 50%;
+}
+
+
+/* Web view */
+@media (min-width: 430px) {
+    .chatFriends {
+        width: 6vh;
+        height: 6vh;
+    }
+}

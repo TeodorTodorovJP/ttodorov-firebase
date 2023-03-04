@@ -1,5 +1,15 @@
 import { RefObject } from "react";
 
+export const singleClick = (element: { ref?: RefObject<HTMLElement>; dom?: HTMLElement }, onSingleClick: Function) => {
+  const htmlElement = element.ref ? element.ref.current : element.dom;
+
+  if (htmlElement) {
+    htmlElement.addEventListener("click", () => {
+      onSingleClick();
+    });
+  }
+};
+
 export const doubleClick = (
   element: { ref?: RefObject<HTMLElement>; dom?: HTMLElement },
   onDoubleClick: Function,
@@ -82,4 +92,8 @@ export const getDateFromEGN = (egn: string) => {
   }
   let dateOfBirth = year + "/" + month + "/" + date;
   return new Date(dateOfBirth);
+};
+
+export const capitalizeFirstLetter = (word: string) => {
+  return word.charAt(0) + word.slice(1).toLowerCase();
 };

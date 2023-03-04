@@ -7,7 +7,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 110svh; /*return to 100*/
 
   background-color: white;
 }
@@ -17,7 +17,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 110svh; /*return to 100*/
 }
 
 /* filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4)); */

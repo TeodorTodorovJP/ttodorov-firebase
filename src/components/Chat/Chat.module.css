@@ -2,3 +2,23 @@
 .chat {
     padding: 1rem;
 }
+
+
+.messages {
+    
+}
+
+.rooms {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    right: 1rem;
+    bottom: 30vh;
+}
+
+.chatFriends {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+}

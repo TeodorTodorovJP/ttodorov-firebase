@@ -5,30 +5,34 @@ export interface Langs {
 
 interface Lang {
   main: Main;
-  errorModal: ErrorModal;
+  themeModal: ТhemeModal;
 }
 
 interface Main {
   login: string;
-  createAccount: string;
-  goToLogin: string;
-  yourEmail: string;
-  yourPassword: string;
-  googleSignIn: string;
+  logout: string;
+  themes: string;
+  button: string;
+  profile: string;
 }
 
-interface ErrorModal {
+interface ТhemeModal {
   header: string;
   agree: string;
+  deny: string;
+  message: string;
+  messageDone: string;
+  agreeDone: string;
 }
 
-export const langs = {
+export const langs: Langs = {
   en: {
     main: {
       login: "Login",
       logout: "Logout",
       themes: "Themes",
       button: "English",
+      profile: "Profile",
     },
 
     themeModal: {
@@ -47,6 +51,7 @@ export const langs = {
       logout: "Излез",
       themes: "Теми",
       button: "Български",
+      profile: "Профил",
     },
 
     themeModal: {
