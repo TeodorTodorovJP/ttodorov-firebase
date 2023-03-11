@@ -4,6 +4,8 @@ import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { decrement, increment, incrementByAmount, incrementAsync, incrementIfOdd, selectCount } from "./counterSlice";
 import classes from "./Counter.module.css";
 import Card from "../UI/Card";
+import { fireStore } from "../../firebase-config";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 export function Counter() {
   const count = useAppSelector(selectCount);
@@ -11,6 +13,20 @@ export function Counter() {
   const [incrementAmount, setIncrementAmount] = useState("2");
 
   const incrementValue = Number(incrementAmount) || 0;
+
+  // Test it !!!
+  const testError = async (error: any) => {
+    const errorText = JSON.stringify(error);
+    const time = new Date().toString();
+    try {
+      const friendRef = doc(fireStore, "errors", time);
+
+      const timestamp = serverTimestamp();
+      await setDoc(friendRef, { timestamp, errorText });
+    } catch (error) {
+      console.error("Error writing Error to Firebase Database", error);
+    }
+  };
 
   return (
     <Card additionalClass="counter">

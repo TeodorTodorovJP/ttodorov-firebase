@@ -18,8 +18,9 @@ const Background = () => {
     const body = document.body;
     const html = document.documentElement;
 
+    /* The * 1.1 is to help with window resize when address bar is hidden*/
     const windowHeight: number =
-      Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight) * 1.1; // remove the * 1.1
+      Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight) * 1.1;
     const windowWidth: number = Math.max(
       body.scrollWidth,
       body.offsetWidth,

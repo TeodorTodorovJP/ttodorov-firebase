@@ -8,6 +8,8 @@ import classes from "./AuthForm.module.css";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
 import { langs, Langs } from "./AuthTexts";
+import useError from "../CustomHooks/useError";
+import ErrorTexts, { ErrorsType } from "../CustomHooks/ErrorTexts";
 
 import { selectUserData, setUserData, UserData, clearUserData } from "./userSlice";
 
@@ -28,7 +30,7 @@ import { FirebaseError } from "firebase/app";
 const AuthForm = () => {
   // store
   const { button } = useAppSelector(selectTheme);
-  const lang = useAppSelector(selectLang);
+  const currentLang = useAppSelector(selectLang);
   const userData = useAppSelector(selectUserData);
   const dispatch = useAppDispatch();
 
@@ -41,11 +43,9 @@ const AuthForm = () => {
   type AuthMethod = "options" | "email" | "google" | "anonymous" | "changePassword";
   const [authMethod, setAuthMethod] = useState<AuthMethod>("options");
 
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [generalError, setGeneralError] = useState<string | null>(null);
-  const [browserError, setBrowserError] = useState<string | null>(null);
-  const [successFulLogin, setSuccessFulLogin] = useState<string | null>(null);
+  const [setEmailError, emailError] = useError();
+  const [setPasswordError, passwordError] = useError();
+  const [setGeneralError] = useError();
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
@@ -53,69 +53,24 @@ const AuthForm = () => {
 
   let provider = useRef<GoogleAuthProvider>();
   useEffect(() => {
-    console.log("provider");
-    provider.current = new GoogleAuthProvider();
+    try {
+      provider.current = new GoogleAuthProvider();
+    } catch (error) {
+      setGeneralError(error);
+    }
   }, []);
 
   // Texts
-  const { main, errorModal, successModal, browserErrorModal, loaderModal } = langs[lang as keyof Langs];
+  const { main, loaderModal } = langs[currentLang as keyof Langs];
 
   const loaderModalData: Modal = {
-    type: "notification",
-    show: true,
+    useModal: true,
     header: loaderModal.header,
     message: "",
-    agree: "Loader",
+    agree: "Loader", // Should be replaced with loading animation
     deny: null,
     response: "deny",
   };
-
-  useEffect(() => {
-    if (generalError) {
-      const modalObj: Modal = {
-        type: "notification",
-        show: true,
-        header: errorModal.header,
-        message: generalError,
-        agree: errorModal.agree,
-        deny: null,
-        response: "deny",
-      };
-
-      dispatch(setModal(modalObj));
-      setGeneralError(null);
-    }
-
-    if (browserError) {
-      const modalObj: Modal = {
-        type: "notification",
-        show: true,
-        header: browserErrorModal.header,
-        message: browserErrorModal.message,
-        agree: browserErrorModal.agree,
-        deny: null,
-        response: "deny",
-      };
-
-      dispatch(setModal(modalObj));
-      setGeneralError(null);
-    }
-
-    if (successFulLogin) {
-      const modalObj: Modal = {
-        type: "notification",
-        show: true,
-        header: successModal.header,
-        message: successFulLogin,
-        agree: successModal.agree,
-        deny: null,
-        response: "deny",
-      };
-
-      dispatch(setModal(modalObj));
-      setSuccessFulLogin(null);
-    }
-  }, [generalError, browserError, successFulLogin]);
 
   // const errorDelay = 1000;
   // let waitUserEmail: ReturnType<typeof setTimeout>;
@@ -154,26 +109,11 @@ const AuthForm = () => {
     }
   };
 
-  const handleError = (errorObj: FirebaseError) => {
-    let type = "OTHER";
-    const error = errorObj.code.toLowerCase();
-
-    if (error.includes("email")) type = "EMAIL";
-    if (error.includes("password")) type = "PASSWORD";
-
-    setGeneralError(type == "OTHER" ? errorObj.message : null);
-    setEmailError(type == "EMAIL" ? errorModal.email : null);
-    setPasswordError(type == "PASSWORD" ? errorModal.password : null);
-  };
-
   const anonymousSignIn = () => {
     dispatch(setModal(loaderModalData));
     try {
       signInAnonymously(getAuth());
-      //setSuccessFulLogin(successModal.anonymous);
-    } catch (error: any) {
-      handleError(error);
-    }
+    } catch (error: any) {}
   };
 
   const googleSignIn = () => {
@@ -182,15 +122,11 @@ const AuthForm = () => {
       // Sign in Firebase using popup auth and Google as the identity provider.
       signInWithPopup(getAuth(), provider.current).catch((error) => {
         if (error.message.includes("auth/popup-closed-by-user")) {
-          dispatch(setModal({ ...loaderModalData, show: false }));
-        } else if (error.message.toLowerCase().includes("disallowed_useragent")) {
-          setBrowserError("disallowed_useragent");
+          dispatch(setModal({ useModal: false }));
         } else {
-          handleError(error);
+          setGeneralError(error);
         }
       });
-    } else {
-      setGeneralError(`Error: could not create new Google Provider`);
     }
   };
 
@@ -215,9 +151,9 @@ const AuthForm = () => {
 
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
-    dispatch(setModal(loaderModalData));
-    setPasswordError(null);
     setEmailError(null);
+    setPasswordError(null);
+    dispatch(setModal(loaderModalData));
     const enteredEmail = emailInputRef.current?.value;
     const enteredPassword = passwordInputRef.current?.value;
 
@@ -225,7 +161,15 @@ const AuthForm = () => {
       const authRequest = isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
 
       authRequest(getAuth(), enteredEmail, enteredPassword).catch((error) => {
-        handleError(error);
+        dispatch(setModal({ useModal: false }));
+        const errorCode = error.code;
+        if (errorCode.includes("email")) {
+          setEmailError(error);
+        } else if (errorCode.includes("password")) {
+          setPasswordError(error);
+        } else {
+          setGeneralError(error);
+        }
       });
     }
   };
@@ -244,9 +188,9 @@ const AuthForm = () => {
               <button type="button" className={button} onClick={googleSignIn}>
                 {main.googleSignIn}
               </button>
-              <button type="button" className={button} onClick={anonymousSignIn}>
+              {/* <button type="button" className={button} onClick={anonymousSignIn}>
                 {main.anonymousSignIn}
-              </button>
+              </button> */}
             </div>
           </div>
         )}
@@ -262,7 +206,7 @@ const AuthForm = () => {
             <form onSubmit={submitHandler}>
               <div className={`${classes.control} ${emailError && classes.error}`}>
                 <label htmlFor="email">{main.yourEmail}</label>
-                <input id="email" type="email" required ref={emailInputRef} />
+                <input id="email" required ref={emailInputRef} />
               </div>
 
               {emailError && <p className={classes.errorText}>{emailError}</p>}

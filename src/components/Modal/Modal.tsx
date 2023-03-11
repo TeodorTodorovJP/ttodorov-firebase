@@ -15,7 +15,7 @@ const Modal = () => {
 
   const handleBackdropClick = () => {
     const modifiedModal = { ...modal };
-    modifiedModal.show = false;
+    modifiedModal.useModal = false;
 
     dispatch(setModal(modifiedModal));
   };
@@ -26,7 +26,7 @@ const Modal = () => {
     const button = (event.target as HTMLInputElement).name;
 
     const modifiedModal = { ...modal };
-    modifiedModal.show = false;
+    modifiedModal.useModal = false;
     modifiedModal.response = button;
 
     dispatch(setModal(modifiedModal));
@@ -54,7 +54,7 @@ const Modal = () => {
     </div>
   );
 
-  if (modalRoot !== null && modal.show) {
+  if (modalRoot !== null && modal.useModal) {
     return createPortal(modalJSX, modalRoot);
   } else {
     return null; // Todo Error handle

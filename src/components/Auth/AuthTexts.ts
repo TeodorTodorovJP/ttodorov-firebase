@@ -6,9 +6,6 @@ export interface Langs {
 interface Lang {
   main: Main;
   loaderModal: LoaderModal;
-  errorModal: ErrorModal;
-  browserErrorModal: BrowserErrorModal;
-  successModal: SuccessModal;
 }
 
 interface Main {
@@ -26,27 +23,6 @@ interface Main {
 
 interface LoaderModal {
   header: string;
-}
-
-interface ErrorModal {
-  header: string;
-  agree: string;
-  email: string;
-  password: string;
-}
-
-interface BrowserErrorModal {
-  header: string;
-  message: string;
-  agree: string;
-}
-
-interface SuccessModal {
-  header: string;
-  agree: string;
-  google: string;
-  email: string;
-  anonymous: string;
 }
 
 export const langs: Langs = {
@@ -67,27 +43,6 @@ export const langs: Langs = {
     loaderModal: {
       header: "Loading",
     },
-
-    errorModal: {
-      header: "Error",
-      agree: "OK",
-      email: "Invalid email",
-      password: "Invalid password",
-    },
-
-    browserErrorModal: {
-      header: "Error",
-      message: "Please update your browser with a new version of Chrome or try other Login method!",
-      agree: "OK",
-    },
-
-    successModal: {
-      header: "Successful Login",
-      agree: "OK",
-      google: "LoggedIn with Google",
-      email: "LoggedIn with Email",
-      anonymous: "LoggedIn as Anonymous",
-    },
   },
   bg: {
     main: {
@@ -105,27 +60,6 @@ export const langs: Langs = {
 
     loaderModal: {
       header: "Зареждане",
-    },
-
-    errorModal: {
-      header: "Грешка",
-      agree: "Добре",
-      email: "Грешен Email",
-      password: "Грешна парола",
-    },
-
-    browserErrorModal: {
-      header: "Грешка",
-      message: "Моля обновете вашият браузър с нова версия на Хром или опитайте друг метод за влизане!",
-      agree: "Добре",
-    },
-
-    successModal: {
-      header: "Успешно влизане",
-      agree: "Добре",
-      google: "Влезнахте чрез Google",
-      email: "Влезнахте чрез Email",
-      anonymous: "Влезнахте като Анонимен",
     },
   },
 };

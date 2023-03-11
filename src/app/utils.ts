@@ -97,3 +97,88 @@ export const getDateFromEGN = (egn: string) => {
 export const capitalizeFirstLetter = (word: string) => {
   return word.charAt(0) + word.slice(1).toLowerCase();
 };
+
+/**
+* @return Array of strings - each string is the name of the browser - should be only 1
+*/
+export const checkBrowser = () => {
+  let isOpera;
+  try {
+    // Opera 8.0+
+    // @ts-ignore
+    isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(" OPR/") >= 0;
+  } catch (e) {
+    console.error(e);
+  }
+  let isFirefox;
+  try {
+    // Firefox 1.0+
+    // @ts-ignore
+    isFirefox = typeof InstallTrigger !== "undefined";
+  } catch (e) {
+    console.error(e);
+  }
+  let isSafari;
+  try {
+    // Safari 3.0+ "[object HTMLElementConstructor]"
+    isSafari =
+      // @ts-ignore
+      /constructor/i.test(window.HTMLElement) ||
+      (function (p) {
+        return p.toString() === "[object SafariRemoteNotification]";
+        // @ts-ignore
+      })(!window["safari"] || (typeof safari !== "undefined" && safari.pushNotification));
+  } catch (e) {
+    console.error(e);
+  }
+  let isIE;
+  try {
+    // Internet Explorer 6-11
+    // @ts-ignore
+    isIE = /*@cc_on!@*/ false || !!document.documentMode;
+  } catch (e) {
+    console.error(e);
+  }
+  let isEdge;
+  try {
+    // Edge 20+
+    // @ts-ignore
+    isEdge = !isIE && !!window.StyleMedia;
+  } catch (e) {
+    console.error(e);
+  }
+  let isChrome;
+  try {
+    // Chrome 1 - 71
+    // @ts-ignore
+    isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+  } catch (e) {
+    console.error(e);
+  }
+  let isBlink;
+  try {
+    // Blink engine detection
+    // @ts-ignore
+    isBlink = (isChrome || isOpera) && !!window.CSS;
+  } catch (e) {
+    console.error(e);
+  }
+
+  const browsers = {
+    isOpera,
+    isFirefox,
+    isSafari,
+    isIE,
+    isEdge,
+    isChrome,
+    isBlink,
+  };
+
+  const browser = Object.keys(browsers)
+    .filter((b) => {
+      // @ts-ignore
+      if (!!browsers[b]) return b;
+    });
+
+  return browser;
+};

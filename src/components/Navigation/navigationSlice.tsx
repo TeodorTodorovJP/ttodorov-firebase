@@ -37,13 +37,13 @@ interface Theme {
 }
 
 export interface Modal {
-  type: string;
-  show: boolean;
-  header: string;
-  message: string;
-  agree: string;
-  deny: null | string;
-  response: string;
+  useModal?: boolean;
+  action?: null | string;
+  header?: null | string;
+  message?: string;
+  agree?: string;
+  deny?: null | string;
+  response?: null | string;
 }
 
 interface User {
@@ -78,7 +78,7 @@ const initialState: NavigationState = {
     decoration: `decoration-${defaultTheme}`,
   },
   status: "idle",
-  modal: { type: "", show: false, header: "Header", message: "Message", agree: "Yes", deny: "No", response: "deny" },
+  modal: { useModal: false, action: null, header: null, message: "Message", agree: "OK", deny: null, response: null },
   user: { theme: null, lang: defaultLang },
   isOpen: initialIsOpen,
 };
@@ -118,7 +118,7 @@ export const navigationSlice = createSlice({
       state.modal = data;
 
       if (data.response === "agree") {
-        if ((data.type = "changeDefaultTheme")) {
+        if (data.action === "changeDefaultTheme") {
           localStorage.setItem("theme", state.theme.main);
           state.user.theme = state.theme.main;
         }

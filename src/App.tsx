@@ -18,7 +18,7 @@ import {
 } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { setUserData, UserData } from "./components/Auth/userSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
@@ -40,8 +40,7 @@ const App = () => {
   let localHost = false;
 
   const loaderModalData: ModalType = {
-    type: "notification",
-    show: false,
+    useModal: false,
     header: "",
     message: "",
     agree: "Loader",
@@ -68,11 +67,23 @@ const App = () => {
     let userDefaultLang = localStorage.getItem("lang");
     userDefaultLang = userDefaultLang ? userDefaultLang : defaultLang;
 
+    if (!authCtx.isLoggedIn) {
+      anonymousSignIn();
+    }
+
     dispatch(setUser({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }));
 
     let changeTheme: MainObj = { main: userDefaultTheme } as MainObj;
     dispatch(setTheme(changeTheme));
   }, []);
+
+  const anonymousSignIn = () => {
+    dispatch(setModal(loaderModalData));
+    try {
+      signInAnonymously(getAuth());
+      //setSuccessFulLogin(successModal.anonymous);
+    } catch (error: any) {}
+  };
 
   useEffect(() => {
     return onAuthStateChanged(getAuth(), async (user: any) => {
@@ -89,6 +100,7 @@ const App = () => {
             userObj.names = user.displayName ? user.displayName : user.email;
             userObj.email = user.email ? user.email : "No Email";
             userObj.profilePic = user.photoURL && !localHost ? user.photoURL : null; // Got 403 for too many requests of the image
+            addUserToFriends(userObj);
           }
           dispatch(setUserData(userObj));
           authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime); // Not correct, firebase returns 2 hours old current date and expiration 1h after that is 1 hour behind
@@ -99,7 +111,6 @@ const App = () => {
           const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname;
           navigate(navigateTo);
           saveMessagingDeviceToken();
-          addUserToFriends(userObj);
         }
       } else if (authCtx.isLoggedIn) {
         authCtx.logout();

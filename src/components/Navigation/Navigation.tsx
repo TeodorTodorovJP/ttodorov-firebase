@@ -89,8 +89,8 @@ const Navigation = () => {
     const message = themeModal.message.replace("${}", theme.main);
 
     const modalObj: Modal = {
-      type: "changeDefaultTheme",
-      show: true,
+      action: "changeDefaultTheme",
+      useModal: true,
       header: themeModal.header,
       message: message,
       agree: themeModal.agree,
@@ -166,7 +166,7 @@ const Navigation = () => {
                   </button>
                 )}
                 <button type="button" className={theme.button} onClick={handleToggleLanguage}>
-                  {main.button}
+                  {lang == "bg" ? "English" : "Български"}
                 </button>
               </div>
             </Card>

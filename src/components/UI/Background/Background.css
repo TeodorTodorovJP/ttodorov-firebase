@@ -7,7 +7,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 110svh; /*return to 100*/
+  height: 100svh;
 
   background-color: white;
 }
@@ -17,7 +17,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 110svh; /*return to 100*/
+  height: 100svh;
 }
 
 /* filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4)); */
@@ -82,3 +82,17 @@
 .background.blue {
   background: var(--theme-blue-bg);
 }
+
+
+/* Mobile view */
+@media (max-width: 430px) {
+  .background {
+    height: 110svh; /*+10 is to help with window resize when address bar is hidden*/
+  }
+  
+  .backgroundSvgElements {
+    height: 110svh; /*+10 is to help with window resize when address bar is hidden*/
+  }
+
+}
+
