@@ -35,7 +35,7 @@ const useError = (modalObj?: Modal) => {
     }
 
     if (modalObj || unexpectedError) {
-      const sendModal: Modal = { useModal: true, header: "Error", agree: "OK", message: errorMessage };
+      const sendModal: Modal = { header: "Error", agree: "OK", message: errorMessage };
       if (modalObj) {
         if (modalObj.header) sendModal.header = modalObj.header;
         if (modalObj.agree) sendModal.agree = modalObj.agree;

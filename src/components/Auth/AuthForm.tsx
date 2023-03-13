@@ -63,15 +63,6 @@ const AuthForm = () => {
   // Texts
   const { main, loaderModal } = langs[currentLang as keyof Langs];
 
-  const loaderModalData: Modal = {
-    useModal: true,
-    header: loaderModal.header,
-    message: "",
-    agree: "Loader", // Should be replaced with loading animation
-    deny: null,
-    response: "deny",
-  };
-
   // const errorDelay = 1000;
   // let waitUserEmail: ReturnType<typeof setTimeout>;
   // const handleEmailChange = () => {
@@ -110,14 +101,14 @@ const AuthForm = () => {
   };
 
   const anonymousSignIn = () => {
-    dispatch(setModal(loaderModalData));
+    dispatch(setModal({ modalType: "loader" }));
     try {
       signInAnonymously(getAuth());
     } catch (error: any) {}
   };
 
   const googleSignIn = () => {
-    dispatch(setModal(loaderModalData));
+    dispatch(setModal({ modalType: "loader" }));
     if (provider.current) {
       // Sign in Firebase using popup auth and Google as the identity provider.
       signInWithPopup(getAuth(), provider.current).catch((error) => {
@@ -153,7 +144,7 @@ const AuthForm = () => {
     event.preventDefault();
     setEmailError(null);
     setPasswordError(null);
-    dispatch(setModal(loaderModalData));
+    dispatch(setModal({ modalType: "loader" }));
     const enteredEmail = emailInputRef.current?.value;
     const enteredPassword = passwordInputRef.current?.value;
 

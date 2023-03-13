@@ -14,7 +14,6 @@ import {
   defaultTheme,
   defaultLang,
   setModal,
-  Modal as ModalType,
 } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
@@ -38,15 +37,6 @@ const App = () => {
 
   // const autoLogin = true;
   let localHost = false;
-
-  const loaderModalData: ModalType = {
-    useModal: false,
-    header: "",
-    message: "",
-    agree: "Loader",
-    deny: null,
-    response: "deny",
-  };
 
   useEffect(() => {
     if (document.location.hostname === "localhost") {
@@ -78,7 +68,6 @@ const App = () => {
   }, []);
 
   const anonymousSignIn = () => {
-    dispatch(setModal(loaderModalData));
     try {
       signInAnonymously(getAuth());
       //setSuccessFulLogin(successModal.anonymous);
@@ -106,7 +95,7 @@ const App = () => {
           authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime); // Not correct, firebase returns 2 hours old current date and expiration 1h after that is 1 hour behind
           console.log("Signed in");
 
-          dispatch(setModal(loaderModalData));
+          dispatch(setModal({ useModal: false }));
 
           const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname;
           navigate(navigateTo);

@@ -2,22 +2,26 @@ import { ReactElement, useEffect, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import classes from "./Modal.module.css";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { selectModal, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { Modal as ModalType, selectModal, selectTheme, setModal } from "../Navigation/navigationSlice";
 import Card from "../UI/Card";
 
 const Modal = () => {
   // Store
-  const modal = useAppSelector(selectModal);
+  const modalStore = useAppSelector(selectModal);
   const theme = useAppSelector(selectTheme);
   const dispatch = useAppDispatch();
 
   const modalRoot = document.getElementById("modal") as HTMLInputElement | null;
 
-  const handleBackdropClick = () => {
-    const modifiedModal = { ...modal };
-    modifiedModal.useModal = false;
+  // Default, show the modal
+  let modal: ModalType = {
+    ...modalStore,
+    useModal: modalStore.useModal === false ? false : true,
+  };
 
-    dispatch(setModal(modifiedModal));
+  const handleBackdropClick = () => {
+    if (modal.modalType === "loader") return;
+    dispatch(setModal({ useModal: false }));
   };
 
   const handleAction = (event: MouseEvent<HTMLButtonElement>) => {
@@ -32,24 +36,34 @@ const Modal = () => {
     dispatch(setModal(modifiedModal));
   };
 
-  const modalJSX = (
+  let modalContent: JSX.Element;
+
+  if (modal.modalType === "loader") {
+    modalContent = <div className={theme.loader}></div>;
+  } else {
+    modalContent = (
+      <>
+        <h2>{modal.header}</h2>
+        <div className={classes.message}>{modal.message}</div>
+        <div className={classes.actions}>
+          <button name="agree" className={theme.button} onClick={handleAction}>
+            {modal.agree}
+          </button>
+          {modal.deny && (
+            <button name="deny" className={theme.button} onClick={handleAction}>
+              {modal.deny}
+            </button>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  const modalJSX: JSX.Element = (
     <div className={classes.modalWrapper}>
       <div className={classes.backdrop} onClick={handleBackdropClick} />
       <Card additionalClass="modal">
-        <div className={`${classes.modal}`}>
-          <h2>{modal.header}</h2>
-          <div className={classes.message}>{modal.message}</div>
-          <div className={classes.actions}>
-            <button name="agree" className={theme.button} onClick={handleAction}>
-              {modal.agree}
-            </button>
-            {modal.deny && (
-              <button name="deny" className={theme.button} onClick={handleAction}>
-                {modal.deny}
-              </button>
-            )}
-          </div>
-        </div>
+        <div className={`${classes.modal}`}>{modalContent}</div>
       </Card>
     </div>
   );

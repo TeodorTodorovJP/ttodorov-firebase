@@ -25,6 +25,7 @@ type Button =
   | `${typeof buttonStyling} button-blue`;
 type SVG = "svg-red" | "svg-green" | "svg-blue";
 type Decoration = "decoration-red" | "decoration-green" | "decoration-blue";
+type Loader = "loader loader-red" | "loader loader-green" | "loader loader-blue";
 
 interface Theme {
   main: Main;
@@ -34,10 +35,12 @@ interface Theme {
   button: Button;
   svg: SVG;
   decoration: Decoration;
+  loader: Loader;
 }
 
 export interface Modal {
   useModal?: boolean;
+  modalType?: "loader";
   action?: null | string;
   header?: null | string;
   message?: string;
@@ -76,6 +79,7 @@ const initialState: NavigationState = {
     button: `${buttonStyling} button-${defaultTheme}`,
     svg: `svg-${defaultTheme}`,
     decoration: `decoration-${defaultTheme}`,
+    loader: `loader loader-${defaultTheme}`,
   },
   status: "idle",
   modal: { useModal: false, action: null, header: null, message: "Message", agree: "OK", deny: null, response: null },
@@ -109,6 +113,7 @@ export const navigationSlice = createSlice({
         button: `${buttonStyling} button-${theme}`,
         svg: `svg-${theme}`,
         decoration: `decoration-${theme}`,
+        loader: `loader loader-${theme}`,
       };
 
       state.theme = newThemeObj;

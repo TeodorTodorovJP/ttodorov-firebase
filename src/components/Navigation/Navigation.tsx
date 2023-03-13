@@ -90,12 +90,10 @@ const Navigation = () => {
 
     const modalObj: Modal = {
       action: "changeDefaultTheme",
-      useModal: true,
       header: themeModal.header,
       message: message,
       agree: themeModal.agree,
       deny: themeModal.deny,
-      response: "deny",
     };
 
     if (theme.main === userTheme) {
