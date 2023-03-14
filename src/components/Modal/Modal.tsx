@@ -19,10 +19,12 @@ const Modal = () => {
     useModal: modalStore.useModal === false ? false : true,
   };
 
-  const handleBackdropClick = () => {
-    if (modal.modalType === "loader") return;
-    dispatch(setModal({ useModal: false }));
-  };
+  // Clicking the backdrop shouldn't hide the modal
+  // It makes it useless
+  // const handleBackdropClick = () => {
+  //   if (modal.modalType === "loader") return;
+  //   dispatch(setModal({ useModal: false }));
+  // };
 
   const handleAction = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -61,7 +63,7 @@ const Modal = () => {
 
   const modalJSX: JSX.Element = (
     <div className={classes.modalWrapper}>
-      <div className={classes.backdrop} onClick={handleBackdropClick} />
+      <div className={classes.backdrop} />
       <Card additionalClass="modal">
         <div className={`${classes.modal}`}>{modalContent}</div>
       </Card>

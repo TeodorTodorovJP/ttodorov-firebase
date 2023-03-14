@@ -49,6 +49,9 @@ const App = () => {
       // }
     } else {
       document.title = "TTodorov";
+      if (!authCtx.isLoggedIn) {
+        anonymousSignIn();
+      }
     }
 
     let userDefaultTheme = localStorage.getItem("theme");
@@ -56,10 +59,6 @@ const App = () => {
 
     let userDefaultLang = localStorage.getItem("lang");
     userDefaultLang = userDefaultLang ? userDefaultLang : defaultLang;
-
-    if (!authCtx.isLoggedIn) {
-      anonymousSignIn();
-    }
 
     dispatch(setUser({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }));
 

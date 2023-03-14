@@ -1,7 +1,7 @@
 import "./Background.css";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { selectTheme, setAllOpenToFalse } from "../../Navigation/navigationSlice";
-import { useEffect, useMemo, useRef, SVGProps, cloneElement } from "react";
+import { useEffect, useMemo, useRef, SVGProps, cloneElement, useState } from "react";
 import { singleClick } from "../../../app/utils";
 
 const Background = () => {
@@ -9,11 +9,26 @@ const Background = () => {
   const dispatch = useAppDispatch();
 
   const background = useRef<HTMLDivElement>(null);
+  const [windowHeight, setWindowHeight] = useState<number>();
+  const [windowWidth, setWindowWidth] = useState<number>();
+
   useEffect(() => {
     singleClick({ ref: background }, () => dispatch(setAllOpenToFalse()));
+
+    // Set sized on init
+    setSizes();
+
+    const delay = 500;
+    let waitUserResize: ReturnType<typeof setTimeout>;
+    window.addEventListener("resize", () => {
+      clearTimeout(waitUserResize);
+      waitUserResize = setTimeout(() => {
+        setSizes();
+      }, delay);
+    });
   }, []);
 
-  const getSvgShapes = () => {
+  const setSizes = () => {
     // Find the size of the screen
     const body = document.body;
     const html = document.documentElement;
@@ -29,8 +44,14 @@ const Background = () => {
       html.offsetWidth
     );
 
+    setWindowHeight(windowHeight);
+    setWindowWidth(windowWidth);
+  };
+
+  const getSvgShapes = () => {
     // const windowHeight: number = +window.innerHeight;
     // const windowWidth: number = +window.innerWidth;
+    if (windowHeight === undefined || windowWidth === undefined) return;
 
     const shapesDimensions = [
       // Width, Height of point
@@ -99,9 +120,10 @@ const Background = () => {
     return svgShapes;
   };
 
-  const svgShapesWithoutTheme = useMemo(() => getSvgShapes(), []);
+  const svgShapesWithoutTheme = useMemo(() => getSvgShapes(), [windowHeight, windowWidth]);
 
   // Assign the theme each time the theme changes
+  if (svgShapesWithoutTheme === undefined) return null;
   const svgShapes = svgShapesWithoutTheme.map((p) => {
     return <polygon key={p.key} points={p.points} className={`${p.className} ${theme}`} />;
   });
