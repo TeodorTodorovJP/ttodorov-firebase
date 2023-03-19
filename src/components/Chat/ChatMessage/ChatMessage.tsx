@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useRef } from "react";
-import { FriendsContent } from "../Chat";
 import { MessageData } from "../ChatRoom/ChatRoom";
+import { FriendsContent } from "../chatSlice";
 import classes from "./ChatMessage.module.css";
 
 const ChatMessage = (props: { data: MessageData; otherUser: FriendsContent }) => {

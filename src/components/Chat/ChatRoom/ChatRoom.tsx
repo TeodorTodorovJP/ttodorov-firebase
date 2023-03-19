@@ -19,9 +19,8 @@ import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fireStore } from "../../../firebase-config";
 import { selectUserData } from "../../Auth/userSlice";
-import { ChatRoomsContent, FriendsContent } from "../Chat";
 import ChatMessage from "../ChatMessage/ChatMessage";
-import { selectFriends } from "../chatSlice";
+import { ChatRoomsContent, closeRoom, selectFriends } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
 import { ReactComponent as SendSVG } from "./sendSVG.svg";
 import { ReactComponent as CloseSVG } from "../closeSVG.svg";
@@ -45,7 +44,7 @@ type MessageDataArr = MessageData[] | [];
 type Error = FirestoreError | undefined;
 type Snapshot = QuerySnapshot<DocumentData> | undefined;
 
-const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
+const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const dispatch = useAppDispatch();
   const userData = useAppSelector(selectUserData);
   const chatFriends = useAppSelector(selectFriends);
@@ -53,9 +52,10 @@ const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
   // Local state
   const [message, setMessage] = useState("");
 
-  const { creator, roomId } = props.room;
+  const { creator, roomId, otherUserId } = props.room;
 
-  const otherUserId = roomId.replace("room", "").replace(userData.id, "");
+  // console.log("ChatRoom");
+
   const otherUser = chatFriends.filter((user) => user.id == otherUserId)[0];
 
   // Returns true if a user is signed-in.
@@ -64,7 +64,7 @@ const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
   }
 
   const recentMessagesQuery = query(
-    collection(fireStore, "allRooms", roomId, "messages"),
+    collection(fireStore, "allChatRooms", roomId, "messages"),
     orderBy("timestamp"),
     limit(12)
   );
@@ -91,12 +91,18 @@ const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
   const sendNewRoomData = async (roomId: string) => {
     try {
       console.log("Check for room in db");
-      const roomRef = doc(fireStore, "allRooms", roomId);
+      const roomRef = doc(fireStore, "allChatRooms", roomId);
       const roomSnap = await getDoc(roomRef);
 
       if (!roomSnap.exists()) {
         const timestamp = serverTimestamp();
-        await setDoc(roomRef, { timestamp, creator: userData.id, roomId });
+        await setDoc(roomRef, {
+          timestamp,
+          creator: userData.id,
+          otherUserId: otherUserId,
+          otherUserNames: otherUser.names,
+          roomId,
+        });
         console.log("room added to db");
       }
     } catch (error) {
@@ -108,10 +114,10 @@ const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
   const saveMessage = async (messageText: string, usersRoom: string) => {
     // Add a new message entry to the Firebase database.
     try {
-      if (messages.length) {
+      if (messages.length === 0) {
         await sendNewRoomData(usersRoom);
       }
-      await addDoc(collection(fireStore, "allRooms", usersRoom, "messages"), {
+      await addDoc(collection(fireStore, "allChatRooms", usersRoom, "messages"), {
         userId: userData.id,
         name: userData.names,
         text: messageText,
@@ -139,8 +145,8 @@ const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
     }
   }
 
-  const closeRoom = () => {
-    props.closeRoom(roomId);
+  const handleCloseRoom = () => {
+    dispatch(closeRoom({ roomId }));
   };
 
   // if (props.imageUrl) {
@@ -151,7 +157,7 @@ const ChatRoom = (props: { room: ChatRoomsContent; closeRoom: Function }) => {
     <div className={classes.ChatRoom}>
       <div className={classes.Header}>
         <h2>{otherUser.names}</h2>
-        <button type="button" className={classes.closeBtn} onClick={() => closeRoom()}>
+        <button type="button" className={classes.closeBtn} onClick={() => handleCloseRoom()}>
           <CloseSVG />
         </button>
       </div>

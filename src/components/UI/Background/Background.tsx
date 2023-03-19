@@ -123,10 +123,13 @@ const Background = () => {
   const svgShapesWithoutTheme = useMemo(() => getSvgShapes(), [windowHeight, windowWidth]);
 
   // Assign the theme each time the theme changes
-  if (svgShapesWithoutTheme === undefined) return null;
-  const svgShapes = svgShapesWithoutTheme.map((p) => {
-    return <polygon key={p.key} points={p.points} className={`${p.className} ${theme}`} />;
-  });
+  let svgShapes: JSX.Element[] = [];
+  if (svgShapesWithoutTheme !== undefined) {
+    svgShapes = svgShapesWithoutTheme.map((p) => {
+      return <polygon key={p.key} points={p.points} className={`${p.className} ${theme}`} />;
+    });
+  }
+
 
   return (
     <div id="background" ref={background} className={`background ${theme}`}>

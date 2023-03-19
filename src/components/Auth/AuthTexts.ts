@@ -5,7 +5,6 @@ export interface Langs {
 
 interface Lang {
   main: Main;
-  loaderModal: LoaderModal;
 }
 
 interface Main {
@@ -19,10 +18,6 @@ interface Main {
   yourPassword: string;
   googleSignIn: string;
   anonymousSignIn: string;
-}
-
-interface LoaderModal {
-  header: string;
 }
 
 export const langs: Langs = {
@@ -39,10 +34,6 @@ export const langs: Langs = {
       googleSignIn: "Sign In With Google",
       anonymousSignIn: "Anonymous Login",
     },
-
-    loaderModal: {
-      header: "Loading",
-    },
   },
   bg: {
     main: {
@@ -56,10 +47,6 @@ export const langs: Langs = {
       yourPassword: "Вашата парола",
       googleSignIn: "Влезте с Google",
       anonymousSignIn: "Влезте като анонимен потребител",
-    },
-
-    loaderModal: {
-      header: "Зареждане",
     },
   },
 };

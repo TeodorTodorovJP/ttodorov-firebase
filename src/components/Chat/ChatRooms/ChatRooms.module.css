@@ -10,22 +10,68 @@
 
 .tabs{
     display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: fit-content;
+    right: -6rem;
+    top: 8rem;
 }
+
+.tabToggle{
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    left: -5rem;
+}
+
+.tabToggle > svg {
+    display: block;
+    width: 5rem !important;
+    height: 5rem !important;
+}
+
 .tab{
-    text-align: center;
-    background: linear-gradient(360deg, rgba(255,255,255,0) 0%, rgba(168,168,168,0.20) 60%);
-    color: #fff;
-    border-radius: 8px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border: 1px solid ;
-    border-bottom: none;
-    padding: 1.2rem;
+    border-radius: 50px;
+    border: 2px solid;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    animation: 100ms linear 0s alternate forwards close-tabs;
 }
-.activeTab{
-    background: linear-gradient(360deg, rgba(255, 255, 255, 0) 0%, rgba(255,255,255,0.20) 60%);
+
+.showTabs {
+    animation: 100ms linear 0s alternate forwards open-tabs;
 }
-    
+
+@keyframes open-tabs {
+    from {
+      /* pushes the sun down past the viewport */
+      transform: translateX(0);
+    }
+    to {
+      /* returns the sun to its default position */
+      transform: translateX(-6rem);
+    }
+}
+
+@keyframes close-tabs {
+    from {
+      /* pushes the sun down past the viewport */
+      transform: translateX(-6rem);
+    }
+    to {
+      /* returns the sun to its default position */
+      transform: translateX(0);
+    }
+}
+
+.tab > svg {
+    display: block;
+    width: 6rem;
+    height: 6rem;
+}
+
 .btnText {
     color: black;
 }
@@ -54,4 +100,35 @@
         height: 75vh;
         width: 45vw;
     }
+
+    .tabs{
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        width: fit-content;
+        right: -6rem;
+    }
+
+    .tabToggle{
+        display: none;
+    }
+
 }
+
+
+/* 
+.tab{
+    text-align: center;
+    background: linear-gradient(360deg, rgba(255,255,255,0) 0%, rgba(168,168,168,0.20) 60%);
+    color: #fff;
+    border-radius: 8px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border: 1px solid ;
+    border-bottom: none;
+    padding: 1.2rem;
+}
+.activeTab{
+    background: linear-gradient(360deg, rgba(255, 255, 255, 0) 0%, rgba(255,255,255,0.20) 60%);
+}
+     */

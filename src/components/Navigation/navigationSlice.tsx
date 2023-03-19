@@ -39,8 +39,8 @@ interface Theme {
 }
 
 export interface Modal {
-  useModal?: boolean;
-  modalType?: "loader";
+  useModal?: boolean; // false for closing the modal
+  modalType?: "loader" | "error";
   action?: null | string;
   header?: null | string;
   message?: string;

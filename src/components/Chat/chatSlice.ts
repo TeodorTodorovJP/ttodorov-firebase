@@ -5,26 +5,49 @@ import { Langs } from "./ChatTexts";
 
 import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnapshot } from "firebase/firestore";
 import { fireStore } from "../../firebase-config";
-import { FriendsArr, FriendsContent } from "./Chat";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
-interface ChatRooms {
-  roomId: string;
-  roomData: DocumentData;
-  roomMessages?: { id: string; message: DocumentData }[] | null;
+export interface FriendsContent {
+  id: string;
+  names: string;
+  timestamp: Date | string;
+  email?: string;
+  profilePic?: string;
 }
-type UserRoomsArr = ChatRooms[] | null;
+type FriendsArr = FriendsContent[] | [];
+
+export interface ChatRoomsContent {
+  creator: string;
+  roomId: string;
+  timestamp: Date | string;
+  otherUserNames: string;
+  otherUserId: string;
+  isOpened: boolean;
+  active: boolean;
+  tabClass: string;
+}
+export type UserRoomsArr = ChatRoomsContent[] | [];
+
+interface OpenRoomProps {
+  userId: string;
+  otherUserId: string;
+  otherUserNames: string;
+}
 
 export interface ChatState {
   userRooms: UserRoomsArr;
-  friends: FriendsArr;
+  friends: Record<string, FriendsContent>;
+  friendsSnap: boolean;
   status: string;
+  showRooms: boolean;
 }
 
 const initialState: ChatState = {
-  userRooms: null,
-  friends: [],
+  userRooms: [],
+  friends: {},
+  friendsSnap: false,
   status: "idle",
+  showRooms: false,
 };
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -39,11 +62,86 @@ export const chatSlice = createSlice({
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    setUserRooms: (state, action: PayloadAction<UserRoomsArr>) => {
+    setUserRooms: (state, action: PayloadAction<ChatRoomsContent[]>) => {
       state.userRooms = action.payload;
     },
-    setFriends: (state, action: PayloadAction<FriendsArr>) => {
-      state.friends = action.payload;
+
+    openNewRoom: (state, action: PayloadAction<OpenRoomProps>) => {
+      const { userId, otherUserId, otherUserNames } = action.payload;
+
+      const newRoomId = "room" + [userId, otherUserId].sort().join("");
+
+      const prev = state.userRooms;
+      let roomFound = false;
+      const updatedRooms = prev.map((currentRoom) => {
+        let room = { ...currentRoom };
+
+        if (room.roomId === newRoomId) {
+          room.otherUserNames = otherUserNames;
+          room.isOpened = true;
+          room.active = true;
+          room.tabClass = "";
+          roomFound = true;
+        } else {
+          room.active = false;
+        }
+        return room;
+      });
+
+      if (!roomFound) {
+        // add room to local array
+        const timeStamp = new Date().toString();
+        updatedRooms.push({
+          creator: userId,
+          roomId: newRoomId,
+          timestamp: timeStamp,
+          otherUserNames,
+          otherUserId,
+          isOpened: true,
+          active: true,
+          tabClass: "",
+        });
+      }
+      state.userRooms = updatedRooms;
+      state.showRooms = true;
+    },
+    closeRoom: (state, action: PayloadAction<{ roomId: string }>) => {
+      const { roomId } = action.payload;
+
+      const prev = state.userRooms;
+      let assignedActive = false;
+
+      const updatedRooms = prev.map((room) => {
+        if (room.roomId === roomId) {
+          room.isOpened = false;
+          room.active = false;
+        } else if (room.isOpened && !assignedActive) {
+          assignedActive = true;
+          room.active = true;
+        }
+        return room;
+      });
+      state.userRooms = updatedRooms;
+
+      if (!assignedActive) {
+        state.showRooms = false;
+      }
+    },
+    setShowRooms: (state, action: PayloadAction<{ showRooms: boolean }>) => {
+      const { showRooms } = action.payload;
+
+      state.showRooms = showRooms;
+    },
+    addFriends: (state, action: PayloadAction<FriendsArr>) => {
+      action.payload.forEach((friend) => {
+        if (!state.friends[friend.id]) {
+          state.friends[friend.id] = friend;
+          return friend;
+        }
+      });
+    },
+    setFriendsSnap: (state, action: PayloadAction<any>) => {
+      state.friendsSnap = action.payload;
     },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,
@@ -63,13 +161,16 @@ export const chatSlice = createSlice({
   },
 });
 
-export const { setUserRooms, setFriends } = chatSlice.actions;
+export const { setUserRooms, setFriendsSnap, addFriends, openNewRoom, closeRoom, setShowRooms } = chatSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectUserRooms = (state: RootState) => state.chat.userRooms;
-export const selectFriends = (state: RootState) => state.chat.friends;
+export const selectShowRooms = (state: RootState) => state.chat.showRooms;
+export const selectFriends = (state: RootState) => Object.values(state.chat.friends);
+export const selectFriendsSnap = (state: RootState) => state.chat.friendsSnap;
+
 
 
 // We can also write thunks by hand, which may contain both sync and async logic.

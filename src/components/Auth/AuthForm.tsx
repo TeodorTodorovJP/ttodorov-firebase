@@ -26,6 +26,8 @@ import {
 import { addDoc, collection } from "firebase/firestore";
 import { fireStore } from "../../firebase-config";
 import { FirebaseError } from "firebase/app";
+import { ReactComponent as Eye } from "./SVG/eye.svg";
+import { ReactComponent as EyeOff } from "./SVG/eyeOff.svg";
 
 const AuthForm = () => {
   // store
@@ -43,13 +45,14 @@ const AuthForm = () => {
   type AuthMethod = "options" | "email" | "google" | "anonymous" | "changePassword";
   const [authMethod, setAuthMethod] = useState<AuthMethod>("options");
 
-  const [setEmailError, emailError] = useError();
-  const [setPasswordError, passwordError] = useError();
-  const [setGeneralError] = useError();
+  const [emailError, setEmailError] = useError();
+  const [passwordError, setPasswordError] = useError();
+  const [generalError, setGeneralError] = useError();
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const newPasswordInputRef = useRef<HTMLInputElement>(null);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   let provider = useRef<GoogleAuthProvider>();
   useEffect(() => {
@@ -60,8 +63,21 @@ const AuthForm = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (emailError === 0 || passwordError === 0 || generalError === 0) {
+      // default error modal
+      console.log("default error");
+      dispatch(setModal({ modalType: "error" }));
+      setEmailError(null);
+      setPasswordError(null);
+    } else if (generalError) {
+      setGeneralError(null);
+      dispatch(setModal({ message: generalError }));
+    }
+  }, [emailError, passwordError, generalError]);
+
   // Texts
-  const { main, loaderModal } = langs[currentLang as keyof Langs];
+  const { main } = langs[currentLang as keyof Langs];
 
   // const errorDelay = 1000;
   // let waitUserEmail: ReturnType<typeof setTimeout>;
@@ -140,6 +156,10 @@ const AuthForm = () => {
     }
   };
 
+  const togglePassword = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
     setEmailError(null);
@@ -159,6 +179,7 @@ const AuthForm = () => {
         } else if (errorCode.includes("password")) {
           setPasswordError(error);
         } else {
+          console.log("from submitHandler");
           setGeneralError(error);
         }
       });
@@ -204,7 +225,10 @@ const AuthForm = () => {
 
               <div className={`${classes.control} ${passwordError && classes.error}`}>
                 <label htmlFor="password">{main.yourPassword}</label>
-                <input id="password" type="password" required ref={passwordInputRef} />
+                <input id="password" type={passwordVisible ? "text" : "password"} required ref={passwordInputRef} />
+                <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
+                  {passwordVisible ? <Eye /> : <EyeOff />}
+                </button>
               </div>
 
               {passwordError && <p className={classes.errorText}>{passwordError}</p>}

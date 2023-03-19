@@ -8,48 +8,31 @@ interface Langs {
   bg: string;
   en: string;
 }
-type ErrorMessage = string | null;
+// The type has to be either a string or a falsy value for easier check for error in the UI
+type ErrorMessage = string | null | 0;
 type errorObjSet = any | null;
 
-const useError = (modalObj?: Modal) => {
+const useError = () => {
   const currentLang = useAppSelector(selectLang);
-  const dispatch = useAppDispatch();
 
   const [errorObj, setError] = useState<errorObjSet>(null);
 
   let errorMessage: ErrorMessage = null;
 
   if (errorObj !== null) {
-    // save error to DB
     const FireErrors = ErrorTexts[currentLang as keyof Langs];
 
     const errorSource = errorObj.code ? errorObj.code : errorObj.message;
 
     const error = errorSource.toLowerCase().replace("auth/", "").replace("_", "-");
 
-    let unexpectedError = false;
     errorMessage = FireErrors[error as keyof ErrorsType];
     if (!errorMessage) {
-      unexpectedError = true;
-      errorMessage = FireErrors["error-not-found" as keyof ErrorsType];
-    }
-
-    if (modalObj || unexpectedError) {
-      const sendModal: Modal = { header: "Error", agree: "OK", message: errorMessage };
-      if (modalObj) {
-        if (modalObj.header) sendModal.header = modalObj.header;
-        if (modalObj.agree) sendModal.agree = modalObj.agree;
-        if (modalObj.action) sendModal.action = modalObj.action;
-        if (modalObj.deny) sendModal.deny = modalObj.deny;
-        if (modalObj.response) sendModal.response = modalObj.response;
-      }
-
-      errorMessage = null;
-      dispatch(setModal(sendModal));
+      errorMessage = 0;
     }
   }
 
-  const returnArr = [setError, errorMessage] as [errorObjSet, ErrorMessage];
+  const returnArr = [errorMessage, setError] as [ErrorMessage, errorObjSet];
 
   return returnArr;
 };

@@ -2,14 +2,20 @@ import { ReactElement, useEffect, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import classes from "./Modal.module.css";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { Modal as ModalType, selectModal, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { Modal as ModalType, selectLang, selectModal, selectTheme, setModal } from "../Navigation/navigationSlice";
 import Card from "../UI/Card";
+import { langs, Langs } from "./ModalTexts";
 
 const Modal = () => {
   // Store
   const modalStore = useAppSelector(selectModal);
   const theme = useAppSelector(selectTheme);
+  const currentLang = useAppSelector(selectLang);
+
   const dispatch = useAppDispatch();
+
+  // Texts
+  const { defaultModal, loader, defaultError } = langs[currentLang as keyof Langs];
 
   const modalRoot = document.getElementById("modal") as HTMLInputElement | null;
 
@@ -17,7 +23,14 @@ const Modal = () => {
   let modal: ModalType = {
     ...modalStore,
     useModal: modalStore.useModal === false ? false : true,
+    agree: defaultModal.agree,
   };
+
+  if (modal.modalType === "error") {
+    modal.header = defaultError.message;
+    modal.message = defaultError.message;
+    modal.agree = defaultError.agree;
+  }
 
   // Clicking the backdrop shouldn't hide the modal
   // It makes it useless

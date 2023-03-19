@@ -19,6 +19,7 @@
     top: 1vh;
     left: 0;
     z-index: 10000;
+    height: 0;
 }
 
 .rightSide {
@@ -29,6 +30,7 @@
     top: 1vh;
     right: 0;
     z-index: 10000;
+    height: 0;
 }
 
 .navLeftItems {
@@ -39,19 +41,32 @@
 }
 
 .navLeftItemsShow {
-    visibility: visible;
-    opacity: 1;
-    max-height: 100%;
-    overflow: visible;
-    transition: var(--transition-delay-menu);
+    animation: 100ms linear 0s alternate forwards open-nav-left;
 }
 
 .navLeftItemsHide {
-    visibility: hidden;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: var(--transition-delay-menu);
+    animation: 100ms linear 0s alternate forwards close-nav-left;
+}
+
+@keyframes open-nav-left {
+    from {
+        transform: scale(0, 0);
+        transform-origin: 40% 0px;
+    }
+    to {
+        transform: scale(1, 1);
+        transform-origin: 40% 0px;
+    }
+}
+@keyframes close-nav-left {
+    from {
+        transform: scale(1, 1);
+        transform-origin: 40% 0px;
+      }
+      to {
+        transform: scale(0, 0);
+        transform-origin: 40% 0px;
+      }
 }
 
 .navRightItems {
@@ -64,20 +79,32 @@
 }
 
 .navRightItemsShow {
-    visibility: visible;
-    opacity: 1;
-    max-height: 100%;
-    overflow: visible;
-    transition: var(--transition-delay-menu);
+    animation: 100ms linear 0s alternate forwards open-nav-right;
 }
 
 .navRightItemsHide {
-    visibility: hidden;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: var(--transition-delay-menu);
-    /* display: none; */
+    animation: 100ms linear 0s alternate forwards close-nav-right;
+}
+
+@keyframes open-nav-right {
+    from {
+        transform: scale(0, 0);
+        transform-origin: 70% 0px;
+    }
+    to {
+        transform: scale(1, 1);
+        transform-origin: 70% 0px;
+    }
+}
+@keyframes close-nav-right {
+    from {
+        transform: scale(1, 1);
+        transform-origin: 70% 0px;
+      }
+      to {
+        transform: scale(0, 0);
+        transform-origin: 70% 0px;
+      }
 }
 
 .logoAndBtn {
@@ -141,19 +168,32 @@
 }
 
 .themesShow {
-    visibility: visible;
-    opacity: 1;
-    max-height: 100%;
-    overflow: visible;
-    transition: var(--transition-delay-menu);
+    animation: 100ms linear 0s alternate forwards open-themes;
 }
 
 .themesHide {
-    visibility: hidden;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: var(--transition-delay-menu);
+    animation: 100ms linear 0s alternate forwards close-themes;
+}
+
+@keyframes open-themes {
+    from {
+        transform: scale(0, 0);
+        transform-origin: 40% 0px;
+    }
+    to {
+        transform: scale(1, 1);
+        transform-origin: 40% 0px;
+    }
+}
+@keyframes close-themes {
+    from {
+        transform: scale(1, 1);
+        transform-origin: 40% 0px;
+      }
+      to {
+        transform: scale(0, 0);
+        transform-origin: 40% 0px;
+      }
 }
 
 .themeBtn {
