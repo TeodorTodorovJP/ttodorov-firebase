@@ -23,6 +23,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { useAddUserAsFriendMutation } from "./components/Chat/chatApi";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -37,6 +38,8 @@ const App = () => {
 
   // const autoLogin = true;
   let localHost = false;
+
+  const [addUserToFriends, { isLoading: isSendingPost }] = useAddUserAsFriendMutation();
 
   useEffect(() => {
     if (document.location.hostname === "localhost") {
@@ -162,19 +165,19 @@ const App = () => {
     }
   }
 
-  const addUserToFriends = async (userData: UserData) => {
-    try {
-      const friendRef = doc(fireStore, "friends", userData.id);
-      const friendSnap = await getDoc(friendRef);
+  // const addUserToFriends = async (userData: UserData) => {
+  //   try {
+  //     const friendRef = doc(fireStore, "friends", userData.id);
+  //     const friendSnap = await getDoc(friendRef);
 
-      if (!friendSnap.exists()) {
-        const timestamp = serverTimestamp();
-        await setDoc(friendRef, { timestamp, ...userData });
-      }
-    } catch (error) {
-      console.error("Error creating new friend to Firebase Database", error);
-    }
-  };
+  //     if (!friendSnap.exists()) {
+  //       const timestamp = serverTimestamp();
+  //       await setDoc(friendRef, { timestamp, ...userData });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error creating new friend to Firebase Database", error);
+  //   }
+  // };
 
   // Make these like helper functions
   // const accessibility = accessibilityProvider('div', 'label', 'customMessage');

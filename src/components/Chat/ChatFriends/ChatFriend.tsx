@@ -7,14 +7,14 @@ import { FriendsContent, openNewRoom, selectFriends } from "../chatSlice";
 
 const ChatFriend = (props: { otherUser: FriendsContent }) => {
   const dispatch = useAppDispatch();
-  const { id: userId } = useAppSelector(selectUserData);
+  const { id: userId, names: userNames } = useAppSelector(selectUserData);
 
   const [profileImage, setProfileImage] = useState<ReactElement>();
 
   const { id: otherUserId, names: otherUserNames, profilePic } = props.otherUser;
 
   const openRoom = () => {
-    dispatch(openNewRoom({ userId, otherUserId, otherUserNames }));
+    dispatch(openNewRoom({ userId, userNames, otherUserId, otherUserNames }));
   };
 
   useEffect(() => {

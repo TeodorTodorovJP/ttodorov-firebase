@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState, AppThunk } from "../../app/store";
 import { fetchCount } from "./counterAPI";
-
+import { setShowRooms } from "../Chat/chatSlice";
 export interface CounterState {
   value: number;
   status: "idle" | "loading" | "failed";
@@ -56,6 +56,9 @@ export const counterSlice = createSlice({
       })
       .addCase(incrementAsync.rejected, (state) => {
         state.status = "failed";
+      })
+      .addCase(setShowRooms, (state) => {
+        //state.value += 1;
       });
   },
 });

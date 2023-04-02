@@ -94,6 +94,11 @@ export const getDateFromEGN = (egn: string) => {
   return new Date(dateOfBirth);
 };
 
+// export const getGenderFromEgn = (egn: string | number) => {
+  // not working properly
+//   return +String(egn).substring(8, 1) % 2 == 0 ? 1 : 0;
+// };
+
 export const capitalizeFirstLetter = (word: string) => {
   return word.charAt(0) + word.slice(1).toLowerCase();
 };

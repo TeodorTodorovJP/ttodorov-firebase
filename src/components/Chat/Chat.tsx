@@ -38,14 +38,13 @@ import {
   selectFriends,
   selectShowRooms,
   selectUserRooms,
-  addFriends,
   setUserRooms,
   UserRoomsArr,
-  selectFriendsSnap,
-  setFriendsSnap,
+  fetchFriends,
 } from "./chatSlice";
 import ChatRooms from "./ChatRooms/ChatRooms";
 import ChatFriends from "./ChatFriends/ChatFriends";
+import { useGetFriendsQuery } from "./chatApi";
 
 const Chat = () => {
   // Store
@@ -53,39 +52,33 @@ const Chat = () => {
   const { id: userId } = useAppSelector(selectUserData);
   const rooms = useAppSelector(selectUserRooms);
   const showRooms = useAppSelector(selectShowRooms);
-  const chatFriendsArr = useAppSelector(selectFriends);
-  const friendsSnap = useAppSelector(selectFriendsSnap);
 
-  useEffect(() => {
-    console.log("useEffect");
-    if (friendsSnap) return;
-    const friendsCollectionQuery = query(collection(fireStore, "friends"));
-    console.log("snapshot set");
-    onSnapshot(friendsCollectionQuery, (querySnapshot) => {
-      let prepareFriends: FriendsContent[] = [];
-      console.log("snapshot");
+  // const { data, error, status } = useGetFriendsQuery(name, {
+  //   skip: true, // if skip is true, it will skip loading the data, if set to false, it will load the data
+  //   refetchOnMountOrArgChange: 30 // refetch the data every 30 seconds
+  //   selectFromResult: ({ data, error, isLoading }) => ({ // filter the fetched data, or modify it
+  //      data: data?.filter((item: Pokemon) => item.name.endsWith("saur")),
+  //      error,
+  //      isLoading
+  //   }),
+  // });
 
-      // This will trigger when a new room is added
-      querySnapshot.docChanges().forEach((change) => {
-        // types: "added", "modified", "removed"
-        const changeData = change.doc.data();
-        if (!changeData.timestamp) return;
-
-        const prepareFriendsData: FriendsContent = {
-          id: changeData.id,
-          names: changeData.email,
-          timestamp: JSON.stringify(changeData.timestamp),
-          email: changeData.email,
-          profilePic: changeData.profilePic,
-        };
-        prepareFriends.push(prepareFriendsData);
-        // console.log("added friend: ", change.doc.data());
-      });
-
-      dispatch(addFriends(prepareFriends));
-    });
-    dispatch(setFriendsSnap(true));
-  }, [chatFriendsArr]);
+  const {
+    data: chatFriendsArr, // The latest returned result regardless of hook arg, if present.
+    isSuccess, // When true, indicates that the query has data from a successful request.
+    //currentData, // The latest returned result for the current hook arg, if present.
+    isLoading, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
+    isFetching, // When true, indicates that the query is currently fetching, but might have data from an earlier request. This will be true for both the first request fired off, as well as subsequent requests.
+    isUninitialized, // When true, indicates that the query has not started yet.
+    isError, // When true, indicates that the query is in an error state.
+    error, // The error result if present.
+    //refetch, // A function to force refetch the query
+    //endpointName, // from useGetFriendsQuery -> getFriends
+    //originalArgs, // the hook parameter
+    //requestId, // unique id
+    //fulfilledTimeStamp,
+    //startedTimeStamp,
+  } = useGetFriendsQuery();
 
   // Returns true if a user is signed-in.
   function isUserSignedIn() {
@@ -101,7 +94,7 @@ const Chat = () => {
         <Card additionalClass="chatRooms">{rooms.length > 0 ? <ChatRooms /> : <p>No rooms</p>}</Card>
       )}
       <Card additionalClass={`${showRooms ? "chatFriendsHide" : "chatFriends"}`}>
-        {chatFriendsArr.length > 0 ? <ChatFriends /> : <p>No friends</p>}
+        {chatFriendsArr && chatFriendsArr.length > 0 ? <ChatFriends /> : <p>No friends</p>}
       </Card>
     </div>
   );

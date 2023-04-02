@@ -24,6 +24,7 @@ import { ChatRoomsContent, closeRoom, selectFriends } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
 import { ReactComponent as SendSVG } from "./sendSVG.svg";
 import { ReactComponent as CloseSVG } from "../closeSVG.svg";
+import { useGetFriendsQuery } from "../chatApi";
 
 type ReactArr = React.ReactElement[];
 const initReactElArr: ReactArr = [];
@@ -47,7 +48,14 @@ type Snapshot = QuerySnapshot<DocumentData> | undefined;
 const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const dispatch = useAppDispatch();
   const userData = useAppSelector(selectUserData);
-  const chatFriends = useAppSelector(selectFriends);
+  // const chatFriends = useAppSelector(selectFriends);
+
+  const {
+    data: chatFriends, // The latest returned result regardless of hook arg, if present.
+    isSuccess, // When true, indicates that the query has data from a successful request.
+    isError, // When true, indicates that the query is in an error state.
+    error: friendsError, // The error result if present.
+  } = useGetFriendsQuery();
 
   // Local state
   const [message, setMessage] = useState("");
@@ -55,6 +63,14 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const { creator, roomId, otherUserId } = props.room;
 
   // console.log("ChatRoom");
+
+  if (!isSuccess) {
+    return null;
+  }
+
+  if (isError) {
+    return <p>{friendsError}</p>;
+  }
 
   const otherUser = chatFriends.filter((user) => user.id == otherUserId)[0];
 
@@ -98,6 +114,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
         const timestamp = serverTimestamp();
         await setDoc(roomRef, {
           timestamp,
+          userNames: userData.names ? userData.names : userData.email ? userData.email : "Anonymous",
           creator: userData.id,
           otherUserId: otherUserId,
           otherUserNames: otherUser.names,
