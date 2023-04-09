@@ -28,7 +28,8 @@ import Logo from "../UI/SVG/logo.svg";
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
 import { langs, Langs } from "./NavigationTexts";
-import { selectUserData } from "../Auth/userSlice";
+import { clearUserData, selectUserData, setUserData } from "../Auth/userSlice";
+import { getAuth, signOut } from "firebase/auth";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -63,7 +64,12 @@ const Navigation = () => {
   ));
 
   const logoutHandler = () => {
+    // Context, local storage, state
     logout();
+    // Firebase
+    signOut(getAuth());
+    // Store
+    dispatch(clearUserData());
   };
 
   let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide;

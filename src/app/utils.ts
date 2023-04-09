@@ -224,6 +224,14 @@ export const stringifyJSON = (data: any): any => {
 };
 
 export const getError = (err: any) => {
-  const errorValue = err.code ? err.code : err.message ? err.message : err.text ? err.text : Object.values(err);
+  const errorValue = err.code
+    ? err.code
+    : err.message
+    ? err.message
+    : err.text
+    ? err.text
+    : err.error
+    ? err.error
+    : Object.values(err).join(",");
   return errorValue;
 };

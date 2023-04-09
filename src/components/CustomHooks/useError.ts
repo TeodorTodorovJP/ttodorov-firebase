@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAppSelector } from "../../app/hooks";
-import { stringifyJSON } from "../../app/utils";
+import { getError, stringifyJSON } from "../../app/utils";
 import { selectLang } from "../Navigation/navigationSlice";
 import ErrorTexts, { ErrorsType } from "./ErrorTexts";
 
@@ -43,11 +43,7 @@ const useError = () => {
     const FireErrors = ErrorTexts[currentLang as keyof Langs];
 
     const errorSource = typeof errorObj === "string" ? JSON.parse(errorObj) : errorObj;
-    const errorData = errorSource.code
-      ? errorSource.code
-      : errorSource.message
-      ? errorSource.message
-      : errorSource.error;
+    const errorData = getError(errorSource);
 
     const error = errorData.toLowerCase().replace("auth/", "").replace("_", "-");
 

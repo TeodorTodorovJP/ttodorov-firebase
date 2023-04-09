@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import classes from "./App.module.css";
 // import "./App.css";
 import Navigation from "./components/Navigation/Navigation";
@@ -17,8 +17,8 @@ import {
 } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { setUserData, UserData } from "./components/Auth/userSlice";
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
+import { clearUserData, setUserData, UserData, userHasData } from "./components/Auth/userSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
@@ -30,16 +30,19 @@ import useError from "./components/CustomHooks/useError";
 
 const App = () => {
   const dispatch = useAppDispatch();
+  const userHasDataR = useAppSelector(userHasData);
+
   const [friendsError, setFriendsError] = useError();
+  const [loginError, setLoginError] = useError();
+
+  // const autoLogin = true;
+  const [localHost, setLocalHost] = useState(false);
 
   // Context
   const authCtx = useAuthContext();
 
   // Router
   const navigate = useNavigate();
-
-  // const autoLogin = true;
-  let localHost = false;
 
   const [addUserToFriends, { data: friendsData, isLoading: isSendingPost, isError, error }] =
     useAddUserAsFriendMutation();
@@ -57,14 +60,19 @@ const App = () => {
   }, [friendsError]);
 
   useEffect(() => {
+    if (loginError) {
+      dispatch(setModal({ message: loginError }));
+    }
+  }, [loginError]);
+
+  useEffect(() => {
     if (document.location.hostname === "localhost") {
       document.title = "TTodorov DEV";
-      localHost = true;
+      setLocalHost(true);
 
-      // if (autoLogin) {
-      //   const expirationTime = new Date(new Date().getTime() + 1 * 1000 * 60 * 60 * 24); // One day
-      //   authCtx.login("Fake-Token", expirationTime.toISOString());
-      // }
+      if (!authCtx.isLoggedIn) {
+        anonymousSignIn();
+      }
     } else {
       document.title = "TTodorov";
       if (!authCtx.isLoggedIn) {
@@ -95,28 +103,40 @@ const App = () => {
     return onAuthStateChanged(getAuth(), async (user: any) => {
       if (user) {
         // The signed-in user info.
-        const getIdTokenResult = await user.getIdTokenResult();
-        if (getIdTokenResult) {
-          let id: string = user.uid;
-          let names = "Anonymous";
+        try {
+          const getIdTokenResult = await user.getIdTokenResult();
+          if (getIdTokenResult) {
+            if (!user.isAnonymous && !userHasDataR) {
+              const userObj: UserData = {
+                id: user.uid,
+                names: user.displayName ? user.displayName : user.email ? user.email : "Anonymous",
+                email: user.email ? user.email : "No Email",
+                profilePic: user.photoURL && !localHost ? user.photoURL : null, // Got 403 for too many requests of the image
+              };
 
-          let userObj: UserData = { id, names };
+              // Add user to firebase
+              addUserToFriends(userObj);
+              // Add user to context
+              authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime);
+              // Add user to store
+              dispatch(setUserData(userObj));
 
-          if (!user.isAnonymous && !authCtx.isLoggedIn) {
-            userObj.names = user.displayName ? user.displayName : user.email;
-            userObj.email = user.email ? user.email : "No Email";
-            userObj.profilePic = user.photoURL && !localHost ? user.photoURL : null; // Got 403 for too many requests of the image
-            addUserToFriends(userObj);
+              const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname;
+              navigate(navigateTo);
+
+              console.log("Signed in");
+            } else if (user.isAnonymous && authCtx.isLoggedIn) {
+              // If the user didn't login, but there is data in local storage
+              // Context, local storage, state
+              authCtx.logout();
+              // Store
+              dispatch(clearUserData());
+            }
+            dispatch(setModal({ useModal: false }));
+            saveMessagingDeviceToken();
           }
-          dispatch(setUserData(userObj));
-          authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime); // Not correct, firebase returns 2 hours old current date and expiration 1h after that is 1 hour behind
-          console.log("Signed in");
-
-          dispatch(setModal({ useModal: false }));
-
-          const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname;
-          navigate(navigateTo);
-          saveMessagingDeviceToken();
+        } catch (err) {
+          setLoginError([err], "ambiguousSource");
         }
       } else if (authCtx.isLoggedIn) {
         authCtx.logout();
@@ -176,7 +196,7 @@ const App = () => {
       // Notification permission granted.
       await saveMessagingDeviceToken();
     } else {
-      console.log("Unable to get permission to notify.");
+      console.error("Unable to get permission to notify.");
     }
   }
 

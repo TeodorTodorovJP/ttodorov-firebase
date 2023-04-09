@@ -7,8 +7,6 @@ import React, {
   ReactNode,
 } from "react";
 
-import { getAuth, signOut } from "firebase/auth";
-
 let logoutTimer: ReturnType<typeof setTimeout> = setTimeout(() => "", 1000);
 
 type AuthContent = {
@@ -86,18 +84,13 @@ export const AuthContextProvider = (props: { children: ReactNode }) => {
   if (tokenData) {
     initialToken = tokenData.token;
   }
-
+  //console.log("tokenData: ", tokenData);
   const [token, setToken] = useState(initialToken);
-
-  const userIsLoggedIn = !!token;
 
   const logoutHandler = useCallback(() => {
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("expirationTime");
-
-    // Firebase
-    signOut(getAuth());
 
     if (logoutTimer) {
       clearTimeout(logoutTimer);
@@ -123,7 +116,7 @@ export const AuthContextProvider = (props: { children: ReactNode }) => {
 
   const contextValue = {
     token: token,
-    isLoggedIn: userIsLoggedIn,
+    isLoggedIn: !!token,
     login: loginHandler,
     logout: logoutHandler,
   };

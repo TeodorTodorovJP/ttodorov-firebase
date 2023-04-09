@@ -13,7 +13,7 @@ export interface UserState {
 }
 
 const initialState: UserState = {
-  userData: { id: "", names: "Anonymous", profilePic: "" },
+  userData: { id: "", names: "", profilePic: "" },
 };
 
 export const userSlice = createSlice({
@@ -32,5 +32,6 @@ export const userSlice = createSlice({
 export const { setUserData, clearUserData } = userSlice.actions;
 
 export const selectUserData = (state: RootState) => state.user.userData;
+export const userHasData = (state: RootState) => state.user.userData.id.length > 1;
 
 export default userSlice.reducer;
