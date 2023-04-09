@@ -1,7 +1,7 @@
-import { FirebaseError } from "firebase/app";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { Modal, selectLang, setModal } from "../Navigation/navigationSlice";
+import { useAppSelector } from "../../app/hooks";
+import { stringifyJSON } from "../../app/utils";
+import { selectLang } from "../Navigation/navigationSlice";
 import ErrorTexts, { ErrorsType } from "./ErrorTexts";
 
 interface Langs {
@@ -10,29 +10,55 @@ interface Langs {
 }
 // The type has to be either a string or a falsy value for easier check for error in the UI
 type ErrorMessage = string | null | 0;
-type errorObjSet = any | null;
+type ErrorObjSet = any | null;
+interface PrepareFn {
+  (error: any, type?: "ambiguousSource"): void;
+}
 
 const useError = () => {
   const currentLang = useAppSelector(selectLang);
 
-  const [errorObj, setError] = useState<errorObjSet>(null);
+  const [errorObj, setError] = useState<ErrorObjSet>(null);
+
+  const prepareError: PrepareFn = (error: any, type?: "ambiguousSource") => {
+    let currentError = error;
+    if (type && type === "ambiguousSource") {
+      error.forEach((e: any) => {
+        if (e && (e.constructor === Object || e.constructor === Array)) currentError = e;
+      });
+    }
+    setError((prev: ErrorObjSet) => {
+      if (currentError === null) return prev;
+      if (currentError.constructor.name === "String") {
+        return { message: currentError };
+      } else {
+        return stringifyJSON(currentError);
+      }
+    });
+  };
 
   let errorMessage: ErrorMessage = null;
-
+  //console.log("errorObj", errorObj);
   if (errorObj !== null) {
     const FireErrors = ErrorTexts[currentLang as keyof Langs];
 
-    const errorSource = errorObj.code ? errorObj.code : errorObj.message;
+    const errorSource = typeof errorObj === "string" ? JSON.parse(errorObj) : errorObj;
+    const errorData = errorSource.code
+      ? errorSource.code
+      : errorSource.message
+      ? errorSource.message
+      : errorSource.error;
 
-    const error = errorSource.toLowerCase().replace("auth/", "").replace("_", "-");
+    const error = errorData.toLowerCase().replace("auth/", "").replace("_", "-");
 
     errorMessage = FireErrors[error as keyof ErrorsType];
     if (!errorMessage) {
-      errorMessage = 0;
+      // Default error if no error description is found
+      errorMessage = errorData ? errorData : "Error";
     }
   }
 
-  const returnArr = [errorMessage, setError] as [ErrorMessage, errorObjSet];
+  const returnArr = [errorMessage, prepareError] as [ErrorMessage, PrepareFn];
 
   return returnArr;
 };

@@ -24,11 +24,13 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useAddUserAsFriendMutation } from "./components/Chat/chatApi";
+import useError from "./components/CustomHooks/useError";
 
 // import useAuthContext from "./app/auth-context";
 
 const App = () => {
   const dispatch = useAppDispatch();
+  const [friendsError, setFriendsError] = useError();
 
   // Context
   const authCtx = useAuthContext();
@@ -39,7 +41,20 @@ const App = () => {
   // const autoLogin = true;
   let localHost = false;
 
-  const [addUserToFriends, { isLoading: isSendingPost }] = useAddUserAsFriendMutation();
+  const [addUserToFriends, { data: friendsData, isLoading: isSendingPost, isError, error }] =
+    useAddUserAsFriendMutation();
+
+  useEffect(() => {
+    if (((isError && error) || (friendsData && friendsData.error)) && !friendsError) {
+      setFriendsError([isError, error, friendsData], "ambiguousSource");
+    }
+  }, [isError, error, friendsData]);
+
+  useEffect(() => {
+    if (friendsError) {
+      dispatch(setModal({ message: friendsError }));
+    }
+  }, [friendsError]);
 
   useEffect(() => {
     if (document.location.hostname === "localhost") {
@@ -87,7 +102,7 @@ const App = () => {
 
           let userObj: UserData = { id, names };
 
-          if (!user.isAnonymous) {
+          if (!user.isAnonymous && !authCtx.isLoggedIn) {
             userObj.names = user.displayName ? user.displayName : user.email;
             userObj.email = user.email ? user.email : "No Email";
             userObj.profilePic = user.photoURL && !localHost ? user.photoURL : null; // Got 403 for too many requests of the image
@@ -119,7 +134,7 @@ const App = () => {
   // Saves the messaging device token to Cloud Firestore.
   async function saveMessagingDeviceToken() {
     try {
-      console.log("before reg");
+      //console.log("before reg");
       // const registration = await navigator.serviceWorker.register("../firebase-messaging-sw.js", {
       //   type: "module",
       // });
@@ -127,7 +142,7 @@ const App = () => {
         vapidKey: VAPID_KEY,
         // serviceWorkerRegistration: registration,
       });
-      console.log(currentToken);
+      //console.log(currentToken);
       if (currentToken) {
         //console.log("Got FCM device token:", currentToken);
         // Saving the Device Token to Cloud Firestore.
@@ -139,7 +154,7 @@ const App = () => {
           // This will fire when a message is received while the app is in the foreground.
           // When the app is in the background, firebase-messaging-sw.js will receive the message instead.
           onMessage(messaging, (message: any) => {
-            console.log("New foreground notification from Firebase Messaging!");
+            //console.log("New foreground notification from Firebase Messaging!");
           });
         }
       } else {
@@ -164,30 +179,6 @@ const App = () => {
       console.log("Unable to get permission to notify.");
     }
   }
-
-  // const addUserToFriends = async (userData: UserData) => {
-  //   try {
-  //     const friendRef = doc(fireStore, "friends", userData.id);
-  //     const friendSnap = await getDoc(friendRef);
-
-  //     if (!friendSnap.exists()) {
-  //       const timestamp = serverTimestamp();
-  //       await setDoc(friendRef, { timestamp, ...userData });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error creating new friend to Firebase Database", error);
-  //   }
-  // };
-
-  // Make these like helper functions
-  // const accessibility = accessibilityProvider('div', 'label', 'customMessage');
-  // const accessibility = {
-  //   div: {
-  //     role: "myRole", // if you want to make div into a button
-  //     "aria-label": "aria-label-text", // for name
-  //     "aria-expanded": "true", // in this case, this is the value
-  //   },
-  // };
 
   return (
     <div className={classes.app}>

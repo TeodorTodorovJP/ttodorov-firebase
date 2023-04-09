@@ -14,7 +14,6 @@ import { Langs } from "./ChatTexts";
 
 import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnapshot } from "firebase/firestore";
 import { fireStore } from "../../firebase-config";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 
 export interface FriendsContent {
   id: string;
@@ -51,6 +50,21 @@ export interface ChatState {
   status: string;
   showRooms: boolean;
 }
+
+type FirebaseTimeStamp = {
+  seconds: number;
+  nanoseconds: number;
+};
+
+export interface MessageData {
+  userId: string;
+  name: string;
+  text: string;
+  profilePicUrl: string;
+  timestamp: FirebaseTimeStamp;
+}
+
+export type MessageDataArr = MessageData[] | [];
 
 // use createDraftSafeSelector for getting data from other reducers
 const friendsAdapter = createEntityAdapter<FriendsContent>({
@@ -97,25 +111,6 @@ export const chatSlice = createSlice({
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    setUserRooms: (state, action: PayloadAction<ChatRoomsContent[]>) => {
-      state.userRooms = action.payload;
-    },
-    // setUserRooms: {
-    //   reducer(state, action: PayloadAction<ChatRoomsContent[]>) {
-    //     state.push(action.payload)
-    //   },
-    //   // the point of 'prepare is to do any sync and not predictable work like nanoid() and then pass it to the reducer'
-    //   prepare(title, content, userId) {
-    //     return {
-    //       payload: {
-    //         id: nanoid(),
-    //         title,
-    //         content,
-    //         user: userId
-    //       }
-    //     }
-    //   }
-    // },
     openNewRoom: (state, action: PayloadAction<OpenRoomProps>) => {
       const { userId, userNames, otherUserId, otherUserNames } = action.payload;
 
@@ -230,7 +225,7 @@ export const chatSlice = createSlice({
   // },
 });
 
-export const { setUserRooms, addFriends, openNewRoom, closeRoom, setShowRooms } = chatSlice.actions;
+export const { addFriends, openNewRoom, closeRoom, setShowRooms } = chatSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of

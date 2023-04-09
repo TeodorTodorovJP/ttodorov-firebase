@@ -1,146 +1,135 @@
 import { getAuth } from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  DocumentData,
-  serverTimestamp,
-  query,
-  orderBy,
-  limit,
-  doc,
-  getDoc,
-  setDoc,
-  FieldValue,
-  FirestoreError,
-  QuerySnapshot,
-} from "firebase/firestore";
 import { FormEvent, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { fireStore } from "../../../firebase-config";
-import { selectUserData } from "../../Auth/userSlice";
+import { selectUserData, UserData } from "../../Auth/userSlice";
 import ChatMessage from "../ChatMessage/ChatMessage";
-import { ChatRoomsContent, closeRoom, selectFriends } from "../chatSlice";
+import { ChatRoomsContent, closeRoom, FriendsContent } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
 import { ReactComponent as SendSVG } from "./sendSVG.svg";
 import { ReactComponent as CloseSVG } from "../closeSVG.svg";
-import { useGetFriendsQuery } from "../chatApi";
+import {
+  useGetFriendsQuery,
+  useGetMessagesQuery,
+  useSaveMessageMutation,
+  useSendNewRoomDataMutation,
+} from "../chatApi";
+import useError from "../../CustomHooks/useError";
+import { setModal } from "../../Navigation/navigationSlice";
 
 type ReactArr = React.ReactElement[];
 const initReactElArr: ReactArr = [];
 
-export interface MessageData {
-  userId: string;
-  name: string;
-  text: string;
-  profilePicUrl: string;
-  timestamp: {
-    nanoseconds: number;
-    seconds: number;
-  };
-}
-
-type MessageDataArr = MessageData[] | [];
-
-type Error = FirestoreError | undefined;
-type Snapshot = QuerySnapshot<DocumentData> | undefined;
-
 const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const dispatch = useAppDispatch();
   const userData = useAppSelector(selectUserData);
-  // const chatFriends = useAppSelector(selectFriends);
-
-  const {
-    data: chatFriends, // The latest returned result regardless of hook arg, if present.
-    isSuccess, // When true, indicates that the query has data from a successful request.
-    isError, // When true, indicates that the query is in an error state.
-    error: friendsError, // The error result if present.
-  } = useGetFriendsQuery();
 
   // Local state
   const [message, setMessage] = useState("");
+  const [otherUser, setOtherUser] = useState<FriendsContent | null>(null);
+  const [messages, setMessages] = useState(initReactElArr);
+
+  const [friendsError, setFriendsError] = useError();
+  const [messagesError, setMessagesError] = useError();
+  const [sendRoomDataError, setSendRoomDataError] = useError();
+  const [saveMsgsError, setSaveMsgsError] = useError();
+
 
   const { creator, roomId, otherUserId } = props.room;
 
-  // console.log("ChatRoom");
-
-  if (!isSuccess) {
-    return null;
-  }
-
-  if (isError) {
-    return <p>{friendsError}</p>;
-  }
-
-  const otherUser = chatFriends.filter((user) => user.id == otherUserId)[0];
-
-  // Returns true if a user is signed-in.
-  function isUserSignedIn() {
-    return !!getAuth().currentUser;
-  }
-
-  const recentMessagesQuery = query(
-    collection(fireStore, "allChatRooms", roomId, "messages"),
-    orderBy("timestamp"),
-    limit(12)
-  );
-
-  const [roomMessages, loading, error] = useCollectionData(recentMessagesQuery) as [
-    MessageDataArr,
-    boolean,
-    Error,
-    Snapshot
-  ];
-  const [messages, setMessages] = useState(initReactElArr);
+  const {
+    data: chatFriends, // The latest returned result regardless of hook arg, if present.
+    isError: isErrorFr, // When true, indicates that the query is in an error state.
+    error: errorFr, // The error result if present.
+    //isSuccess, // When true, indicates that the query has data from a successful request.
+  } = useGetFriendsQuery();
 
   useEffect(() => {
-    if (roomMessages) {
-      const chatMessagesEl = roomMessages.map((messageObj) => {
-        const key: React.Key = messageObj.timestamp ? messageObj.timestamp.seconds : "new";
+    if (((isErrorFr && errorFr) || (chatFriends && chatFriends.error)) && !friendsError) {
+      setFriendsError([isErrorFr, errorFr, chatFriends], "ambiguousSource");
+    } else if (chatFriends && chatFriends.data) {
+      const other = chatFriends.data.filter((user) => user.id == otherUserId)[0];
+      if (other) setOtherUser(other);
+    }
+  }, [isErrorFr, errorFr, chatFriends]);
+
+  useEffect(() => {
+    if (friendsError) {
+      dispatch(setModal({ message: friendsError }));
+    }
+  }, [friendsError]);
+
+  // Returns true if a user is signed-in.
+  const isUserSignedIn = () => !!getAuth().currentUser;
+
+  const {
+    data: roomMessages,
+    isError: isErrorMsgs,
+    error: errorMsgs,
+  } = useGetMessagesQuery(roomId, { refetchOnReconnect: true });
+
+  useEffect(() => {
+    if (((isErrorMsgs && errorMsgs) || (roomMessages && roomMessages.error)) && !messagesError) {
+      setMessagesError([isErrorMsgs, errorMsgs, roomMessages], "ambiguousSource");
+    }
+  }, [isErrorMsgs, errorMsgs, roomMessages]);
+
+  useEffect(() => {
+    if (messagesError) {
+      dispatch(setModal({ message: messagesError }));
+    }
+  }, [messagesError]);
+
+  useEffect(() => {
+    if (roomMessages && otherUser) {
+      const chatMessagesEl = roomMessages.data.map((messageObj) => {
+        const timeStamp = JSON.parse(JSON.stringify(messageObj.timestamp));
+        const key: React.Key = timeStamp.seconds;
         return <ChatMessage key={key} data={messageObj} otherUser={otherUser} />;
       });
       setMessages(chatMessagesEl);
     }
-  }, [roomMessages]);
+  }, [roomMessages, otherUser]);
 
-  // called with saveMessage
-  const sendNewRoomData = async (roomId: string) => {
-    try {
-      console.log("Check for room in db");
-      const roomRef = doc(fireStore, "allChatRooms", roomId);
-      const roomSnap = await getDoc(roomRef);
+  const [
+    updateRoomData, // This is the mutation trigger
+    { data: dataSRD, isLoading: isUpdating, isError: isErrorSRD, error: errorSRD }, // This is the destructured mutation result
+  ] = useSendNewRoomDataMutation();
 
-      if (!roomSnap.exists()) {
-        const timestamp = serverTimestamp();
-        await setDoc(roomRef, {
-          timestamp,
-          userNames: userData.names ? userData.names : userData.email ? userData.email : "Anonymous",
-          creator: userData.id,
-          otherUserId: otherUserId,
-          otherUserNames: otherUser.names,
-          roomId,
-        });
-        console.log("room added to db");
-      }
-    } catch (error) {
-      console.error("Error adding data room in Firebase Database", error);
+  useEffect(() => {
+    if (((isErrorSRD && errorSRD) || (dataSRD && dataSRD.error)) && !sendRoomDataError) {
+      setSendRoomDataError([isErrorSRD, errorSRD, dataSRD], "ambiguousSource");
     }
-  };
+  }, [isErrorSRD, errorSRD, dataSRD]);
+  
+  useEffect(() => {
+    if (sendRoomDataError) {
+      dispatch(setModal({ message: sendRoomDataError }));
+    }
+  }, [sendRoomDataError]);
+  
+  const [saveMessageToDB, {data: dataSMsgs, isLoading: sendingMessage, isError: isErrorSMsgs, error: errorSMsgs }] = useSaveMessageMutation();
+
+  useEffect(() => {
+    if (((isErrorSMsgs && errorSMsgs) || (dataSMsgs && dataSMsgs.error)) && !saveMsgsError) {
+      setSaveMsgsError([isErrorSMsgs, errorSMsgs, dataSMsgs], "ambiguousSource");
+    }
+  }, [isErrorSMsgs, errorSMsgs, dataSMsgs]);
+  
+  useEffect(() => {
+    if (saveMsgsError) {
+      dispatch(setModal({ message: saveMsgsError }));
+    }
+  }, [saveMsgsError]);
 
   // Saves a new message to Cloud Firestore.
-  const saveMessage = async (messageText: string, usersRoom: string) => {
+  const saveMessage = async (messageText: string, roomId: string) => {
     // Add a new message entry to the Firebase database.
+    if (otherUser === null) return;
     try {
       if (messages.length === 0) {
-        await sendNewRoomData(usersRoom);
+        await updateRoomData({ roomId, userData, otherUser });
       }
-      await addDoc(collection(fireStore, "allChatRooms", usersRoom, "messages"), {
-        userId: userData.id,
-        name: userData.names,
-        text: messageText,
-        profilePicUrl: userData.profilePic ? userData.profilePic : "",
-        timestamp: serverTimestamp(),
-      });
+      await saveMessageToDB({ roomId, userData, otherUser, messageText });
     } catch (error) {
       console.error("Error writing new message to Firebase Database", error);
     }
@@ -150,7 +139,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   function onMessageFormSubmit(event: FormEvent) {
     event.preventDefault();
     // Check that the user entered a message and is signed in.
-    if (message.length > 0 && isUserSignedIn()) {
+    if (message.length > 0 && isUserSignedIn() && otherUser !== null) {
       saveMessage(message, roomId)
         .then(function () {
           // Clear message text field and re-enable the SEND button.
@@ -173,7 +162,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   return (
     <div className={classes.ChatRoom}>
       <div className={classes.Header}>
-        <h2>{otherUser.names}</h2>
+        {otherUser && <h2>{otherUser.names}</h2>}
         <button type="button" className={classes.closeBtn} onClick={() => handleCloseRoom()}>
           <CloseSVG />
         </button>
