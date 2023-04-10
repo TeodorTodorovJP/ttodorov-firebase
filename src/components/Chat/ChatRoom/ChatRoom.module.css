@@ -53,3 +53,13 @@
     gap: 1rem;
     margin-top: 2rem;
 }
+
+.error {
+    color: #cf0a0a;
+    position: absolute;
+    bottom: 5rem;
+    background-color: #ffffff63;
+    margin-left: 6rem;
+    border-radius: 50px;
+    padding: 0.3rem;
+}

@@ -10,7 +10,6 @@ import {
 } from "@reduxjs/toolkit";
 import { RootState, AppThunk, AppDispatch } from "../../app/store";
 // import { fetchChat } from "./chatApi";
-import { Langs } from "./ChatTexts";
 
 import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnapshot } from "firebase/firestore";
 import { fireStore } from "../../firebase-config";

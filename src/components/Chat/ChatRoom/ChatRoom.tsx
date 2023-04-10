@@ -5,6 +5,7 @@ import { selectUserData, UserData } from "../../Auth/userSlice";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { ChatRoomsContent, closeRoom, FriendsContent } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
+import { langs, Langs } from "../ChatTexts";
 import { ReactComponent as SendSVG } from "./sendSVG.svg";
 import { ReactComponent as CloseSVG } from "../closeSVG.svg";
 import {
@@ -14,13 +15,15 @@ import {
   useSendNewRoomDataMutation,
 } from "../chatApi";
 import useError from "../../CustomHooks/useError";
-import { setModal } from "../../Navigation/navigationSlice";
+import { selectLang, setModal } from "../../Navigation/navigationSlice";
+import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus";
 
 type ReactArr = React.ReactElement[];
 const initReactElArr: ReactArr = [];
 
 const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const dispatch = useAppDispatch();
+  const currentLang = useAppSelector(selectLang);
   const userData = useAppSelector(selectUserData);
 
   // Local state
@@ -33,8 +36,10 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const [sendRoomDataError, setSendRoomDataError] = useError();
   const [saveMsgsError, setSaveMsgsError] = useError();
 
+  const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus();
 
   const { creator, roomId, otherUserId } = props.room;
+  const { main } = langs[currentLang as keyof Langs];
 
   const {
     data: chatFriends, // The latest returned result regardless of hook arg, if present.
@@ -65,6 +70,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
     data: roomMessages,
     isError: isErrorMsgs,
     error: errorMsgs,
+    refetch: refetchMessages,
   } = useGetMessagesQuery(roomId, { refetchOnReconnect: true });
 
   useEffect(() => {
@@ -78,6 +84,13 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
       dispatch(setModal({ message: messagesError }));
     }
   }, [messagesError]);
+
+  useEffect(() => {
+    if (isOnline && wasOffline) {
+      refetchMessages();
+      resetOnlineStatus();
+    }
+  }, [isOnline]);
 
   useEffect(() => {
     if (roomMessages && otherUser) {
@@ -100,21 +113,22 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
       setSendRoomDataError([isErrorSRD, errorSRD, dataSRD], "ambiguousSource");
     }
   }, [isErrorSRD, errorSRD, dataSRD]);
-  
+
   useEffect(() => {
     if (sendRoomDataError) {
       dispatch(setModal({ message: sendRoomDataError }));
     }
   }, [sendRoomDataError]);
-  
-  const [saveMessageToDB, {data: dataSMsgs, isLoading: sendingMessage, isError: isErrorSMsgs, error: errorSMsgs }] = useSaveMessageMutation();
+
+  const [saveMessageToDB, { data: dataSMsgs, isLoading: sendingMessage, isError: isErrorSMsgs, error: errorSMsgs }] =
+    useSaveMessageMutation();
 
   useEffect(() => {
     if (((isErrorSMsgs && errorSMsgs) || (dataSMsgs && dataSMsgs.error)) && !saveMsgsError) {
       setSaveMsgsError([isErrorSMsgs, errorSMsgs, dataSMsgs], "ambiguousSource");
     }
   }, [isErrorSMsgs, errorSMsgs, dataSMsgs]);
-  
+
   useEffect(() => {
     if (saveMsgsError) {
       dispatch(setModal({ message: saveMsgsError }));
@@ -168,6 +182,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
         </button>
       </div>
       <div className={classes.chatMessages}>{messages}</div>
+      {!isOnline && <p className={classes.error}>{main.offline}</p>}
       <form onSubmit={onMessageFormSubmit} className={classes.form}>
         <input
           type="text"
@@ -177,7 +192,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
           }}
           className={classes.formInput}
         />
-        <button id="submit" type="submit" className={classes.formBtn} disabled={!message.length}>
+        <button id="submit" type="submit" className={classes.formBtn} disabled={!message.length || !isOnline}>
           <SendSVG />
         </button>
       </form>

@@ -5,6 +5,8 @@ import Navigation from "./components/Navigation/Navigation";
 import { Outlet } from "react-router-dom";
 import Background from "./components/UI/Background/Background";
 import Modal from "./components/Modal/Modal";
+import Notif from "./components/Notif/Notif";
+
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import {
   selectModal,
@@ -25,6 +27,8 @@ import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useAddUserAsFriendMutation } from "./components/Chat/chatApi";
 import useError from "./components/CustomHooks/useError";
+import { setNotif } from "./components/Notif/NotifSlice";
+import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -34,6 +38,7 @@ const App = () => {
 
   const [friendsError, setFriendsError] = useError();
   const [loginError, setLoginError] = useError();
+  const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus();
 
   // const autoLogin = true;
   const [localHost, setLocalHost] = useState(false);
@@ -146,6 +151,15 @@ const App = () => {
     });
   }, [onAuthStateChanged]);
 
+  useEffect(() => {
+    if (isOnline && wasOffline) {
+      dispatch(setNotif({ notifType: "topBar", contentType: "online" }));
+      resetOnlineStatus();
+    } else if (!isOnline) {
+      dispatch(setNotif({ notifType: "topBar", contentType: "offline" }));
+    }
+  }, [isOnline]);
+
   // if ("serviceWorker" in navigator) {
   //   navigator.serviceWorker
   //     .register("./firebase-messaging-sw.js")
@@ -203,6 +217,7 @@ const App = () => {
   return (
     <div className={classes.app}>
       <Modal />
+      <Notif />
       <Background />
       <Navigation />
       <div className={classes.outlet}>

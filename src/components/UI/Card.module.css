@@ -120,7 +120,6 @@
   display: none;
 }
 
-
 /* Mobile view */
 @media (max-width: 430px) {
   .card.app {
