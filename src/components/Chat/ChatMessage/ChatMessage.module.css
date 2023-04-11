@@ -11,3 +11,13 @@
 .rightSide {
     align-self: flex-end;
 }
+
+.text {
+
+}
+
+.image {
+    max-width: 35vw;
+    max-height: 30vh;
+    border-radius: 10px;
+}

@@ -10,10 +10,11 @@ import {
   limit,
   addDoc,
 } from "firebase/firestore";
+import { getBlob, getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { apiSlice } from "../../app/apiSlice";
 import { RootState } from "../../app/store";
 import { getError } from "../../app/utils";
-import { fireStore } from "../../firebase-config";
+import { fileStorage, fileStorageRef, fireStore } from "../../firebase-config";
 import { selectUserData, UserData } from "../Auth/userSlice";
 import { FriendsContent, MessageData, MessageDataArr } from "./chatSlice";
 
@@ -27,17 +28,20 @@ interface GetMessages {
   error: any;
 }
 
-interface AddFriends {
-  data: [];
+interface SendImage {
+  data: {
+    imageUrl: string;
+    storageUri: string;
+  } | null;
   error: any;
 }
 
-interface SendNewRoomData {
-  data: [];
+interface FetchImage {
+  data: Blob | null;
   error: any;
 }
 
-interface SaveMessageData {
+interface DefaultQueryFnType {
   data: [];
   error: any;
 }
@@ -46,7 +50,7 @@ export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     //
     //
-    addUserAsFriend: builder.mutation<AddFriends, UserData>({
+    addUserAsFriend: builder.mutation<DefaultQueryFnType, UserData>({
       // The query is not relevant here as the data will be provided via streaming updates.
       // A queryFn returning an empty array is used, with contents being populated via
       // streaming updates below as they are received.
@@ -177,7 +181,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     }),
     //                            ResultType            QueryArg
     //                                  v                 v
-    sendNewRoomData: builder.mutation<SendNewRoomData, { roomId: string; userData: UserData; otherUser: UserData }>({
+    sendNewRoomData: builder.mutation<DefaultQueryFnType, { roomId: string; userData: UserData; otherUser: UserData }>({
       // inferred as the type from the `QueryArg` type
       //                 v
       queryFn: async (args, { signal, dispatch, getState }, extraOptions, baseQuery) => {
@@ -208,16 +212,17 @@ export const extendedApi = apiSlice.injectEndpoints({
     //
     //
     saveMessage: builder.mutation<
-      SaveMessageData,
-      { roomId: string; userData: UserData; otherUser: UserData; messageText: string }
+      DefaultQueryFnType,
+      { roomId: string; userData: UserData; otherUser: UserData; messageText?: string; imageUrl?: string }
     >({
       queryFn: async (args) => {
         try {
           await addDoc(collection(fireStore, "allChatRooms", args.roomId, "messages"), {
             userId: args.userData.id,
             name: args.userData.names,
-            text: args.messageText,
+            text: args.messageText ? args.messageText : "",
             profilePicUrl: args.userData.profilePic ? args.userData.profilePic : "",
+            imageUrl: args.imageUrl ? args.imageUrl : "",
             timestamp: serverTimestamp(),
           });
         } catch (err: any) {
@@ -228,6 +233,35 @@ export const extendedApi = apiSlice.injectEndpoints({
     }),
     //
     //
+    saveImage: builder.mutation<SendImage, { roomId: string; userId: string; file: File }>({
+      queryFn: async (args) => {
+        try {
+          // 1 - Upload the image to Cloud Storage.
+          // forbidden symbols in fileName - #, [, ], *, or ?
+          // remove all symbols that are not letters
+          const fileName = args.file.name.replace(/[^\w]/gi, "");
+          const timestampId = serverTimestamp(); // as message id
+
+          const filePath = `${args.roomId}/${args.userId}/${fileName}/${timestampId}`;
+
+          const newImageRef = ref(fileStorageRef, filePath);
+          const fileSnapshot = await uploadBytesResumable(newImageRef, args.file);
+
+          // 3 - Generate a public URL for the file.
+          const publicImageUrl = await getDownloadURL(newImageRef);
+
+          // response, that will be send to messages
+          const data = {
+            imageUrl: publicImageUrl,
+            storageUri: fileSnapshot.metadata.fullPath,
+          };
+
+          return { data: { data: data, error: null } };
+        } catch (err) {
+          return { data: { data: null, error: getError(err) } };
+        }
+      },
+    }),
   }),
 });
 
@@ -237,4 +271,5 @@ export const {
   useGetMessagesQuery,
   useSendNewRoomDataMutation,
   useSaveMessageMutation,
+  useSaveImageMutation,
 } = extendedApi;

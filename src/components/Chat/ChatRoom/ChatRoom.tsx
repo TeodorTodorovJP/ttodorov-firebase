@@ -1,5 +1,5 @@
 import { getAuth } from "firebase/auth";
-import { FormEvent, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
+import { FormEvent, ChangeEvent, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { selectUserData, UserData } from "../../Auth/userSlice";
 import ChatMessage from "../ChatMessage/ChatMessage";
@@ -7,10 +7,12 @@ import { ChatRoomsContent, closeRoom, FriendsContent } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
 import { langs, Langs } from "../ChatTexts";
 import { ReactComponent as SendSVG } from "./sendSVG.svg";
+import { ReactComponent as ImageSVG } from "./imageSVG.svg";
 import { ReactComponent as CloseSVG } from "../closeSVG.svg";
 import {
   useGetFriendsQuery,
   useGetMessagesQuery,
+  useSaveImageMutation,
   useSaveMessageMutation,
   useSendNewRoomDataMutation,
 } from "../chatApi";
@@ -30,11 +32,13 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const [message, setMessage] = useState("");
   const [otherUser, setOtherUser] = useState<FriendsContent | null>(null);
   const [messages, setMessages] = useState(initReactElArr);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [friendsError, setFriendsError] = useError();
   const [messagesError, setMessagesError] = useError();
   const [sendRoomDataError, setSendRoomDataError] = useError();
   const [saveMsgsError, setSaveMsgsError] = useError();
+  const [saveImagesError, setSaveImagesError] = useError();
 
   const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus();
 
@@ -135,6 +139,30 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
     }
   }, [saveMsgsError]);
 
+  const [
+    saveImageToDB,
+    { data: dataSaveImg, isLoading: sendingSaveImg, isError: isErrorSaveImg, error: errorSaveImg },
+  ] = useSaveImageMutation();
+
+  useEffect(() => {
+    if (((isErrorSaveImg && errorSaveImg) || (dataSaveImg && dataSaveImg.error)) && !saveImagesError) {
+      setSaveImagesError([isErrorSaveImg, errorSaveImg, dataSaveImg], "ambiguousSource");
+    }
+  }, [isErrorSaveImg, errorSaveImg, dataSaveImg]);
+
+  useEffect(() => {
+    if (saveImagesError) {
+      dispatch(setModal({ message: saveImagesError }));
+    }
+  }, [saveImagesError]);
+
+  ///////////////////////////
+  // Saves a new image message to Cloud Firestore.
+  const saveImgMessage = (imageUrl: string, roomId: string) => {
+    if (otherUser === null) return;
+    saveMessageToDB({ roomId, userData, otherUser, imageUrl });
+  };
+
   // Saves a new message to Cloud Firestore.
   const saveMessage = async (messageText: string, roomId: string) => {
     // Add a new message entry to the Firebase database.
@@ -150,12 +178,12 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   };
 
   // Triggered when the send new message form is submitted.
-  function onMessageFormSubmit(event: FormEvent) {
+  const onMessageFormSubmit = (event: FormEvent) => {
     event.preventDefault();
     // Check that the user entered a message and is signed in.
     if (message.length > 0 && isUserSignedIn() && otherUser !== null) {
       saveMessage(message, roomId)
-        .then(function () {
+        .then(() => {
           // Clear message text field and re-enable the SEND button.
           setMessage("");
         })
@@ -163,10 +191,39 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
           console.log(e);
         });
     }
-  }
+  };
 
   const handleCloseRoom = () => {
     dispatch(closeRoom({ roomId }));
+  };
+
+  const triggerInput = () => {
+    if (imageInputRef) {
+      imageInputRef.current?.click();
+    }
+  };
+
+  const handleImageBtn = async (event: React.FormEvent<HTMLInputElement>) => {
+    if (!isUserSignedIn || !event.currentTarget.files) {
+      return;
+    }
+    const file = event.currentTarget.files[0];
+
+    // Check if the file is an image.
+    if (!file.type.match("image.*")) {
+      dispatch(setModal({ message: main.onlyImages }));
+      return;
+    }
+    //imageName: string; roomId: string; file: File
+    saveImageToDB({ roomId, userId: creator, file: file })
+      .unwrap()
+      .then((res) => {
+        if (res.data) {
+          saveImgMessage(res.data?.imageUrl, roomId);
+        } else if (res.error) {
+          // todo - after I re-do the error handling
+        }
+      });
   };
 
   // if (props.imageUrl) {
@@ -194,6 +251,19 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
         />
         <button id="submit" type="submit" className={classes.formBtn} disabled={!message.length || !isOnline}>
           <SendSVG />
+        </button>
+
+        <input
+          id="myFile"
+          type="file"
+          style={{display: "none"}}
+          ref={imageInputRef}
+          className={classes.formBtn}
+          disabled={!isOnline}
+          onChange={(e) => handleImageBtn(e)}
+        />
+        <button id="submitImage" onClick={() => triggerInput()} className={classes.formBtn} disabled={!isOnline}>
+          <ImageSVG />
         </button>
       </form>
     </div>

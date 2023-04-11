@@ -39,8 +39,8 @@ const Chat = () => {
     isSuccess, // When true, indicates that the query has data from a successful request.
     isError, // When true, indicates that the query is in an error state.
     error, // The error result if present.
+    isLoading: isLoadingFriends, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
     //currentData, // The latest returned result for the current hook arg, if present.
-    //isLoading, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
     //isFetching, // When true, indicates that the query is currently fetching, but might have data from an earlier request. This will be true for both the first request fired off, as well as subsequent requests.
     //isUninitialized, // When true, indicates that the query has not started yet.
     //refetch, // A function to force refetch the query

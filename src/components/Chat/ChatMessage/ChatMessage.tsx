@@ -1,14 +1,47 @@
-import { ReactElement, ReactNode, useRef } from "react";
-import { FriendsContent, MessageData } from "../chatSlice";
+import { memo, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { getBlobUrl } from "../../../app/utils";
+import { addImageBlobUrl, FriendsContent, MessageData, selectImageBlobUrl } from "../chatSlice";
 import classes from "./ChatMessage.module.css";
 
 const ChatMessage = (props: { data: MessageData; otherUser: FriendsContent }) => {
-  const textRef = useRef<HTMLElement>(null);
-
-  const { name, userId, text, timestamp, profilePicUrl } = props.data;
+  const { name, userId, text, timestamp, profilePicUrl, imageUrl } = props.data;
   const { id: otherUserId, names: otherNames, email: otherEmail, profilePic: otherPic } = props.otherUser;
 
-  // { text?: string; picUrl?: string; imageUrl?: string }
+  const images = useAppSelector(selectImageBlobUrl);
+  const dispatch = useAppDispatch();
+
+  const imageData = images(imageUrl)[0];
+
+  useEffect(() => {
+    let revoke: Function | null;
+    if (imageUrl) {
+      if (!imageData) {
+        const getData = async () => {
+          const { blobUrl, revokeUrl } = await getBlobUrl(imageUrl);
+          revoke = revokeUrl;
+          dispatch(addImageBlobUrl({ imageUrl, blobUrl }));
+        };
+        getData();
+      }
+    }
+
+    return () => (revoke ? revoke(imageUrl) : null);
+  }, [imageUrl]);
+
+  // useEffect(() => {
+  //   if (imageData) return;
+  //   const getBlobTest = async () => {
+  //     const blob = await getBlob(ref(fileStorage, imageUrl));
+  //     const urlCreator = window.URL || window.webkitURL;
+  //     const imageUrlFromBlob = urlCreator.createObjectURL(blob);
+  //     setImageData(imageUrlFromBlob);
+  //   };
+  //   getBlobTest();
+  //   return () => {
+  //     URL.revokeObjectURL(imageUrl);
+  //   };
+  // }, [imageUrl]);
 
   // Adds a size to Google Profile pics URLs.
   const addSizeToGoogleProfilePic = (url: string) => {
@@ -18,44 +51,24 @@ const ChatMessage = (props: { data: MessageData; otherUser: FriendsContent }) =>
     return url;
   };
 
-  // if (imageUrl) {
-  //     //If the message is an image.
-  //     var image = document.createElement("img");
-  //     image.addEventListener("load", function () {
-  //         messageListElement.scrollTop = messageListElement.scrollHeight;
-  //     });
-
-  //     image.src = imageUrl + "&" + new Date().getTime();
-  //     messageElement.innerHTML = "";
-  //     messageElement.appendChild(image);
-  //     }
-  //     //Show the card fading-in and scroll to view the new message.
-  //     setTimeout(function () {
-  //     div.classList.add("visible");
-  //     }, 1);
-  //     messageListElement.scrollTop = messageListElement.scrollHeight;
-  //     messageInputElement.focus();
-
-  let content = <p></p>;
-  let contentText = <p></p>;
+  let messageContent = <p></p>;
   const isOther = userId === otherUserId;
 
   const sideClass = isOther ? classes.leftSide : classes.rightSide;
 
-  if (text) {
-    contentText = <p>{text}</p>;
-  }
   if (profilePicUrl) {
     let backgroundImage = "url(" + addSizeToGoogleProfilePic(profilePicUrl) + ")";
-    content = <p style={{ backgroundImage: backgroundImage }}>{text}</p>;
+    messageContent = <p style={{ backgroundImage: backgroundImage }}>{text}</p>;
   }
-
   // if (props.imageUrl) {
   //     content = <img src={props.imageUrl + "&" + new Date().getTime()} alt="Girl in a jacket" width="500" height="600"/>
   // }
+  console.log("imageData", imageData);
   return (
     <div className={sideClass}>
-      <p>{text}</p>
+      {text && <p className={classes.text}>{text}</p>}
+      {/* {imageData && imageData.data && <img className={classes.image} src={imageData.data} alt="image can't load" />} */}
+      {imageData && <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />}
     </div>
   );
 

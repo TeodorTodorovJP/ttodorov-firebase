@@ -1,4 +1,6 @@
+import { getBlob, ref } from "firebase/storage";
 import { RefObject } from "react";
+import { fileStorage } from "../firebase-config";
 
 export const singleClick = (element: { ref?: RefObject<HTMLElement>; dom?: HTMLElement }, onSingleClick: Function) => {
   const htmlElement = element.ref ? element.ref.current : element.dom;
@@ -95,7 +97,7 @@ export const getDateFromEGN = (egn: string) => {
 };
 
 // export const getGenderFromEgn = (egn: string | number) => {
-  // not working properly
+// not working properly
 //   return +String(egn).substring(8, 1) % 2 == 0 ? 1 : 0;
 // };
 
@@ -104,8 +106,8 @@ export const capitalizeFirstLetter = (word: string) => {
 };
 
 /**
-* @return Array of strings - each string is the name of the browser - should be only 1
-*/
+ * @return Array of strings - each string is the name of the browser - should be only 1
+ */
 export const checkBrowser = () => {
   let isOpera;
   try {
@@ -179,11 +181,10 @@ export const checkBrowser = () => {
     isBlink,
   };
 
-  const browser = Object.keys(browsers)
-    .filter((b) => {
-      // @ts-ignore
-      if (!!browsers[b]) return b;
-    });
+  const browser = Object.keys(browsers).filter((b) => {
+    // @ts-ignore
+    if (!!browsers[b]) return b;
+  });
 
   return browser;
 };
@@ -234,4 +235,11 @@ export const getError = (err: any) => {
     ? err.error
     : Object.values(err).join(",");
   return errorValue;
+};
+
+export const getBlobUrl = async (imageUrl: string) => {
+  const blob = await getBlob(ref(fileStorage, imageUrl));
+  const urlCreator = window.URL || window.webkitURL;
+  const imageUrlBlob = urlCreator.createObjectURL(blob);
+  return { blobUrl: imageUrlBlob, revokeUrl: urlCreator.revokeObjectURL };
 };
