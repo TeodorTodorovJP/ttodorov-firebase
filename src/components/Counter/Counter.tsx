@@ -19,10 +19,10 @@ export function Counter() {
     const errorText = JSON.stringify(error);
     const time = new Date().toString();
     try {
-      const friendRef = doc(fireStore, "errors", time);
+      const userRef = doc(fireStore, "errors", time);
 
       const timestamp = serverTimestamp();
-      await setDoc(friendRef, { timestamp, errorText });
+      await setDoc(userRef, { timestamp, errorText });
     } catch (error) {
       console.error("Error writing Error to Firebase Database", error);
     }

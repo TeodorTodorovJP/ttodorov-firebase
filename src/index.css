@@ -4,7 +4,7 @@
 
   --clr-text: #3d3d3d;
 
-  --transition-delay-menu: visibility 0.15s, max-height 0.15s, box-shadow 0.15s, overflow 0.15s, opacity 0.15s ease-in-out;
+  /* --transition-delay-menu: visibility 0.15s, max-height 0.15s, box-shadow 0.15s, overflow 0.15s, opacity 0.15s ease-in-out; */
 
 
   --theme-red-el-l: rgb(237, 95, 25);
@@ -184,7 +184,7 @@ img {
 }
 
 
-.hover {
+/* .hover {
   transform: scale(1);
   transition: transform 0.1s ease-in-out;
 }
@@ -194,4 +194,31 @@ img {
     transform: scale(1.1);
     transition: transform 0.1s ease-in-out;
   }
+} */
+
+.hover {
+  animation: 100ms linear 0s alternate forwards shrink-button;
+}
+
+@media (hover: hover) {
+  .hover:hover {
+    animation: 100ms linear 0s alternate forwards expand-button;
+  }
+}
+
+@keyframes expand-button {
+  from {
+      transform: scale(1);
+  }
+  to {
+      transform: scale(1.1);
+  }
+}
+@keyframes shrink-button {
+  from {
+      transform: scale(1.1);
+    }
+    to {
+      transform: scale(1);
+    }
 }

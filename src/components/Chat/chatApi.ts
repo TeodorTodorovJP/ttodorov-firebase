@@ -10,18 +10,12 @@ import {
   limit,
   addDoc,
 } from "firebase/firestore";
-import { getBlob, getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { apiSlice } from "../../app/apiSlice";
-import { RootState } from "../../app/store";
 import { getError } from "../../app/utils";
-import { fileStorage, fileStorageRef, fireStore } from "../../firebase-config";
-import { selectUserData, UserData } from "../Auth/userSlice";
-import { FriendsContent, MessageData, MessageDataArr } from "./chatSlice";
-
-interface GetFriends {
-  data: FriendsContent[];
-  error: any;
-}
+import { fileStorageRef, fireStore } from "../../firebase-config";
+import { UserData } from "../Auth/userSlice";
+import { MessageData, MessageDataArr } from "./chatSlice";
 
 interface GetMessages {
   data: MessageDataArr;
@@ -36,11 +30,6 @@ interface SendImage {
   error: any;
 }
 
-interface FetchImage {
-  data: Blob | null;
-  error: any;
-}
-
 interface DefaultQueryFnType {
   data: [];
   error: any;
@@ -48,86 +37,6 @@ interface DefaultQueryFnType {
 
 export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    //
-    //
-    addUserAsFriend: builder.mutation<DefaultQueryFnType, UserData>({
-      // The query is not relevant here as the data will be provided via streaming updates.
-      // A queryFn returning an empty array is used, with contents being populated via
-      // streaming updates below as they are received.
-      queryFn: async (userData: UserData) => {
-        try {
-          const friendRef = doc(fireStore, "friends", userData.id);
-          const friendSnap = await getDoc(friendRef);
-
-          if (!friendSnap.exists()) {
-            const timestamp = serverTimestamp();
-            await setDoc(friendRef, { timestamp, ...userData });
-          }
-        } catch (err: any) {
-          return { data: { data: [], error: getError(err) } };
-        }
-        return { data: { data: [], error: null } };
-      },
-    }),
-    //
-    //
-    getFriends: builder.query<GetFriends, void>({
-      // The query is not relevant here as the data will be provided via streaming updates.
-      // A queryFn returning an empty array is used, with contents being populated via
-      // streaming updates below as they are received.
-      queryFn: (uselessParam: void) => ({ data: { data: [], error: null } }),
-      keepUnusedDataFor: 60 * 60 * 24, // one day
-      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
-        // create a websocket connection when the cache subscription starts
-
-        // no-op in case `cacheEntryRemoved` resolves before `cacheDataLoaded`,
-        // in which case `cacheDataLoaded` will throw
-        await cacheDataLoaded;
-        // when data is received from the socket connection to the server,
-        // if it is a message and for the appropriate channel,
-        // update our query result with the received message
-        let unsubscribe;
-        try {
-          const friendsCollectionQuery = query(collection(fireStore, "friends"));
-          unsubscribe = onSnapshot(friendsCollectionQuery, (querySnapshot) => {
-            try {
-              let prepareFriends: FriendsContent[] = [];
-              // This will trigger when a new room is added
-              querySnapshot.docChanges().forEach((change) => {
-                // types: "added", "modified", "removed"
-                const changeData = change.doc.data() as FriendsContent;
-                if (!changeData.timestamp) return;
-                changeData.timestamp = JSON.stringify(changeData.timestamp);
-                prepareFriends.push(changeData);
-              });
-              updateCachedData((draft) => {
-                draft.data = [...draft.data, ...prepareFriends];
-                draft.error = null;
-                return draft;
-              });
-            } catch (err: any) {
-              updateCachedData((draft) => {
-                draft.error = getError(err);
-                return draft;
-              });
-            }
-          });
-        } catch (err: any) {
-          updateCachedData((draft) => {
-            draft.error = getError(err);
-            return draft;
-          });
-        }
-        // cacheEntryRemoved will resolve when the cache subscription is no longer active
-        await cacheEntryRemoved;
-        // perform cleanup steps once the `cacheEntryRemoved` promise resolves
-        if (unsubscribe) {
-          unsubscribe();
-        }
-      },
-      // providesTags: (result, error, arg) =>
-      //   result ? [...result.map(({ id }) => ({ type: "Friends" as const, id })), "Friends"] : ["Friends"],
-    }),
     //
     //
     getMessages: builder.query<GetMessages, string>({
@@ -233,7 +142,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     }),
     //
     //
-    saveImage: builder.mutation<SendImage, { roomId: string; userId: string; file: File }>({
+    saveImage: builder.mutation<SendImage, { userId: string; file: File }>({
       queryFn: async (args) => {
         try {
           // 1 - Upload the image to Cloud Storage.
@@ -242,7 +151,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           const fileName = args.file.name.replace(/[^\w]/gi, "");
           const timestampId = serverTimestamp(); // as message id
 
-          const filePath = `${args.roomId}/${args.userId}/${fileName}/${timestampId}`;
+          const filePath = `${args.userId}/${timestampId}/${fileName}`;
 
           const newImageRef = ref(fileStorageRef, filePath);
           const fileSnapshot = await uploadBytesResumable(newImageRef, args.file);
@@ -262,14 +171,10 @@ export const extendedApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    //
+    //
   }),
 });
 
-export const {
-  useAddUserAsFriendMutation,
-  useGetFriendsQuery,
-  useGetMessagesQuery,
-  useSendNewRoomDataMutation,
-  useSaveMessageMutation,
-  useSaveImageMutation,
-} = extendedApi;
+export const { useGetMessagesQuery, useSendNewRoomDataMutation, useSaveMessageMutation, useSaveImageMutation } =
+  extendedApi;

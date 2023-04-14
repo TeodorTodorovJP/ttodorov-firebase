@@ -1,7 +1,7 @@
 
 
 
-.chatFriends {
+.chatUsers {
     height: fit-content;
     padding: 1rem;
     border-radius: 50%;
@@ -10,21 +10,30 @@
     gap: 0.5rem;
 }
 
-.chatFriend {
+.chatUser {
     border: solid black 1px;
     width: 5rem;
     height: 5rem;
     border-radius: 50%;
+    display: flex;
+    flex-direction: row-reverse;
 }
 
 .image {
     border-radius: 50%;
 }
 
+.popUp {
+    min-width: 10rem;
+    text-align: center;
+    padding: 0.4rem;
+    color: #e9e2e2;
+}
+
 
 /* Web view */
 @media (min-width: 430px) {
-    .chatFriend {
+    .chatUser {
         width: 6vh;
         height: 6vh;
     }

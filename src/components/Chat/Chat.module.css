@@ -16,7 +16,7 @@
     bottom: 30vh;
 }
 
-.chatFriends {
+.chatUsers {
     display: flex;
     flex-direction: column;
     padding: 1rem;

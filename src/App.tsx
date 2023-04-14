@@ -25,10 +25,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { useAddUserAsFriendMutation } from "./components/Chat/chatApi";
+import { useAddUserDataMutation } from "./components/Auth/userApi";
 import useError from "./components/CustomHooks/useError";
 import { setNotif } from "./components/Notif/NotifSlice";
 import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus";
+import { getError } from "./app/utils";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -36,7 +37,7 @@ const App = () => {
   const dispatch = useAppDispatch();
   const userHasDataR = useAppSelector(userHasData);
 
-  const [friendsError, setFriendsError] = useError();
+  const [usersError, setUsersError] = useError();
   const [loginError, setLoginError] = useError();
   const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus();
 
@@ -49,20 +50,21 @@ const App = () => {
   // Router
   const navigate = useNavigate();
 
-  const [addUserToFriends, { data: friendsData, isLoading: isSendingPost, isError, error }] =
-    useAddUserAsFriendMutation();
+  // Add user to firebase hook
+  const [addUserData, { data: usersData, isLoading: isSendingPost, isError, error }] = useAddUserDataMutation();
+
+  // Handle useAddUserDataMutation errors
+  useEffect(() => {
+    if (((isError && error) || (usersData && usersData.error)) && !usersError) {
+      setUsersError([isError, error, usersData], "ambiguousSource");
+    }
+  }, [isError, error, usersData]);
 
   useEffect(() => {
-    if (((isError && error) || (friendsData && friendsData.error)) && !friendsError) {
-      setFriendsError([isError, error, friendsData], "ambiguousSource");
+    if (usersError) {
+      dispatch(setModal({ message: usersError }));
     }
-  }, [isError, error, friendsData]);
-
-  useEffect(() => {
-    if (friendsError) {
-      dispatch(setModal({ message: friendsError }));
-    }
-  }, [friendsError]);
+  }, [usersError]);
 
   useEffect(() => {
     if (loginError) {
@@ -75,9 +77,9 @@ const App = () => {
       document.title = "TTodorov DEV";
       setLocalHost(true);
 
-      if (!authCtx.isLoggedIn) {
-        anonymousSignIn();
-      }
+      // if (!authCtx.isLoggedIn) {
+      //   anonymousSignIn();
+      // }
     } else {
       document.title = "TTodorov";
       if (!authCtx.isLoggedIn) {
@@ -112,7 +114,7 @@ const App = () => {
           const getIdTokenResult = await user.getIdTokenResult();
           if (getIdTokenResult) {
             if (!user.isAnonymous && !userHasDataR) {
-              const userObj: UserData = {
+              let userObj: UserData = {
                 id: user.uid,
                 names: user.displayName ? user.displayName : user.email ? user.email : "Anonymous",
                 email: user.email ? user.email : "No Email",
@@ -120,7 +122,14 @@ const App = () => {
               };
 
               // Add user to firebase
-              addUserToFriends(userObj);
+              const checkUser = await addUserData(userObj).unwrap();
+              // If we have userData, the user may have saved data in db
+              if (checkUser.userData) {
+                userObj = { ...userObj, ...checkUser.userData };
+              } else if (checkUser.error) {
+                dispatch(setModal({ message: getError(checkUser.error) }));
+              }
+
               // Add user to context
               authCtx.login(getIdTokenResult.token, getIdTokenResult.expirationTime);
               // Add user to store
@@ -145,7 +154,7 @@ const App = () => {
         }
       } else if (authCtx.isLoggedIn) {
         authCtx.logout();
-        dispatch(setUserData({ id: "", names: "" }));
+        dispatch(clearUserData());
         console.log("Signed out");
       }
     });

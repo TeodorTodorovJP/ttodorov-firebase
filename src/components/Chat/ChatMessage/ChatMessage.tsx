@@ -1,10 +1,11 @@
 import { memo, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { getBlobUrl } from "../../../app/utils";
-import { addImageBlobUrl, FriendsContent, MessageData, selectImageBlobUrl } from "../chatSlice";
+import { addImageBlobUrl, selectImageBlobUrl, UserData } from "../../Auth/userSlice";
+import { MessageData } from "../chatSlice";
 import classes from "./ChatMessage.module.css";
 
-const ChatMessage = (props: { data: MessageData; otherUser: FriendsContent }) => {
+const ChatMessage = (props: { data: MessageData; otherUser: UserData }) => {
   const { name, userId, text, timestamp, profilePicUrl, imageUrl } = props.data;
   const { id: otherUserId, names: otherNames, email: otherEmail, profilePic: otherPic } = props.otherUser;
 
@@ -29,20 +30,6 @@ const ChatMessage = (props: { data: MessageData; otherUser: FriendsContent }) =>
     return () => (revoke ? revoke(imageUrl) : null);
   }, [imageUrl]);
 
-  // useEffect(() => {
-  //   if (imageData) return;
-  //   const getBlobTest = async () => {
-  //     const blob = await getBlob(ref(fileStorage, imageUrl));
-  //     const urlCreator = window.URL || window.webkitURL;
-  //     const imageUrlFromBlob = urlCreator.createObjectURL(blob);
-  //     setImageData(imageUrlFromBlob);
-  //   };
-  //   getBlobTest();
-  //   return () => {
-  //     URL.revokeObjectURL(imageUrl);
-  //   };
-  // }, [imageUrl]);
-
   // Adds a size to Google Profile pics URLs.
   const addSizeToGoogleProfilePic = (url: string) => {
     if (url.indexOf("googleusercontent.com") !== -1 && url.indexOf("?") === -1) {
@@ -63,11 +50,9 @@ const ChatMessage = (props: { data: MessageData; otherUser: FriendsContent }) =>
   // if (props.imageUrl) {
   //     content = <img src={props.imageUrl + "&" + new Date().getTime()} alt="Girl in a jacket" width="500" height="600"/>
   // }
-  console.log("imageData", imageData);
   return (
     <div className={sideClass}>
       {text && <p className={classes.text}>{text}</p>}
-      {/* {imageData && imageData.data && <img className={classes.image} src={imageData.data} alt="image can't load" />} */}
       {imageData && <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />}
     </div>
   );

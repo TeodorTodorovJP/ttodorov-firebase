@@ -40,6 +40,27 @@ const ChatRooms = () => {
     changeRoom(activeRoomId);
   }, [rooms]);
 
+  // if ((profilePicStored && !imageData) || (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)) {
+  //   const foundImage = images(profilePicStored)[0];
+  //   if (foundImage) setImageData(foundImage);
+  // }
+
+  // useEffect(() => {
+  //   let revoke: Function | null;
+  //   if (
+  //     (profilePicStored && !imageData) ||
+  //     (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)
+  //   ) {
+  //     const getData = async () => {
+  //       const { blobUrl, revokeUrl } = await getBlobUrl(profilePicStored);
+  //       revoke = revokeUrl;
+  //       dispatch(addImageBlobUrl({ imageUrl: profilePicStored, blobUrl }));
+  //     };
+  //     getData();
+  //   }
+  //   return () => (revoke ? revoke(profilePicStored) : null);
+  // }, [profilePicStored, imageData]);
+
   const changeRoom = (roomId: string) => {
     const activateRoom = rooms.filter((room) => room.roomId == roomId)[0];
     setActiveRoom(activateRoom);
@@ -56,29 +77,6 @@ const ChatRooms = () => {
   const handleHideRooms = () => {
     dispatch(setShowRooms({ showRooms: false }));
   };
-
-  // if (props.imageUrl) {
-  //     content = <img src={props.imageUrl + "&" + new Date().getTime()} alt="Girl in a jacket" width="500" height="600"/>
-  // }
-
-  // useEffect(() => {
-  //   let image;
-  //   if (profilePic) {
-  //     image = (
-  //       <img
-  //         className={classes.image}
-  //         onError={({ currentTarget }) => {
-  //           currentTarget.onerror = null; // prevents looping
-  //           setProfileImage(<AccountSVG />);
-  //         }}
-  //         src={profilePic}
-  //       ></img>
-  //     );
-  //   } else {
-  //     image = <AccountSVG />;
-  //   }
-  //   setProfileImage(image);
-  // }, []);
 
   const toggleTabs = () => {
     setShowTabs(!showTabs);
@@ -102,7 +100,11 @@ const ChatRooms = () => {
                 className={`${room.tabClass} ${showTabs ? classes.showTabs : ""}`}
                 onClick={() => changeRoom(room.roomId)}
               >
-                <GenerateProfilePic names={room.otherUserNames} />
+                {room.otherUserImage ? (
+                  <img className={classes.profileImage} src={room.otherUserImage} alt="image can't load" />
+                ) : (
+                  <GenerateProfilePic names={room.otherUserNames} />
+                )}
               </div>
             );
           })}

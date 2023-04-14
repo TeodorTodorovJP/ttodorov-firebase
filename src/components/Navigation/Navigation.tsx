@@ -22,14 +22,15 @@ import { ReactComponent as HomeSVG } from "./icons/home.svg";
 import { ReactComponent as LoginSVG } from "./icons/login.svg";
 import { ReactComponent as CounterSVG } from "./icons/counter.svg";
 import { ReactComponent as ChatSVG } from "./icons/chat.svg";
-
 import Logo from "../UI/SVG/logo.svg";
-
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
 import { langs, Langs } from "./NavigationTexts";
 import { clearUserData, selectUserData, setUserData } from "../Auth/userSlice";
 import { getAuth, signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
+import { getBlobUrl } from "../../app/utils";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -40,9 +41,32 @@ const Navigation = () => {
   const lang = useAppSelector(selectLang);
   const { theme: userTheme } = useAppSelector(selectUser);
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
-  const { profilePic } = useAppSelector(selectUserData);
+  const { profilePic, profilePicStored } = useAppSelector(selectUserData);
+  const images = useAppSelector(selectImageBlobUrl);
 
   const dispatch = useAppDispatch();
+  const [imageData, setImageData] = useState<Image | null>(null);
+
+  if ((profilePicStored && !imageData) || (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)) {
+    const foundImage = images(profilePicStored)[0];
+    if (foundImage) setImageData(foundImage);
+  }
+
+  useEffect(() => {
+    let revoke: Function | null;
+    if (
+      (profilePicStored && !imageData) ||
+      (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)
+    ) {
+      const getData = async () => {
+        const { blobUrl, revokeUrl } = await getBlobUrl(profilePicStored);
+        revoke = revokeUrl;
+        dispatch(addImageBlobUrl({ imageUrl: profilePicStored, blobUrl }));
+      };
+      getData();
+    }
+    return () => (revoke ? revoke(profilePicStored) : null);
+  }, [profilePicStored, imageData]);
 
   // Texts
   const { main, themeModal } = langs[lang as keyof Langs];
@@ -70,6 +94,8 @@ const Navigation = () => {
     signOut(getAuth());
     // Store
     dispatch(clearUserData());
+    // Clear local state
+    setImageData(null);
   };
 
   let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide;
@@ -144,9 +170,15 @@ const Navigation = () => {
 
         <div className={classes.rightSide}>
           <button type="button" onClick={navRightClickHandle} className={`${classes.rightMenuBtn} ${theme.svg}`}>
-            {profilePic ? <img className={classes.profilePic} src={profilePic}></img> : <AccountSVG />}
+            {imageData ? (
+              <img className={classes.profilePic} src={imageData.blobUrl}></img>
+            ) : profilePic ? (
+              <img className={classes.profilePic} src={profilePic}></img>
+            ) : (
+              <AccountSVG />
+            )}
           </button>
-          <nav className={navRightShowClass}>
+          <div className={navRightShowClass}>
             <Card additionalClass="navRightItems">
               <div className={classes.navRightItems}>
                 {isLoggedIn && (
@@ -204,7 +236,7 @@ const Navigation = () => {
                 </div>
               </Card>
             </div>
-          </nav>
+          </div>
         </div>
       </header>
     </>

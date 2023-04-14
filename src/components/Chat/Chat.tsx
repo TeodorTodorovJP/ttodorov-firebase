@@ -6,8 +6,8 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { selectUserData } from "../Auth/userSlice";
 import { selectShowRooms, selectUserRooms } from "./chatSlice";
 import ChatRooms from "./ChatRooms/ChatRooms";
-import ChatFriends from "./ChatFriends/ChatFriends";
-import { useGetFriendsQuery } from "./chatApi";
+import ChatUsers from "./ChatUsers/ChatUsers";
+import { useGetUserDataQuery } from "../Auth/userApi";
 import useError from "../CustomHooks/useError";
 import { setModal } from "../Navigation/navigationSlice";
 import { useEffect } from "react";
@@ -18,9 +18,9 @@ const Chat = () => {
   const dispatch = useAppDispatch();
   const rooms = useAppSelector(selectUserRooms);
   const showRooms = useAppSelector(selectShowRooms);
-  const [friendsError, setFriendsError] = useError();
+  const [usersError, setUsersError] = useError();
 
-  // const { data, error, status } = useGetFriendsQuery(name, {
+  // const { data, error, status } = useGetUserDataQuery(name, {
   //   skip: true, // if skip is true, it will skip loading the data, if set to false, it will load the data
   //   refetchOnMountOrArgChange: 30 // refetch the data every 30 seconds
   //   selectFromResult: ({ data, error, isLoading }) => ({ // filter the fetched data, or modify it
@@ -35,41 +35,41 @@ const Chat = () => {
 
   const uselessParam: void = undefined;
   const {
-    data: chatFriends, // The latest returned result regardless of hook arg, if present.
+    data: chatUsers, // The latest returned result regardless of hook arg, if present.
     isSuccess, // When true, indicates that the query has data from a successful request.
     isError, // When true, indicates that the query is in an error state.
     error, // The error result if present.
-    isLoading: isLoadingFriends, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
+    isLoading: isLoadingUsers, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
     //currentData, // The latest returned result for the current hook arg, if present.
     //isFetching, // When true, indicates that the query is currently fetching, but might have data from an earlier request. This will be true for both the first request fired off, as well as subsequent requests.
     //isUninitialized, // When true, indicates that the query has not started yet.
     //refetch, // A function to force refetch the query
-    //endpointName, // from useGetFriendsQuery -> getFriends
+    //endpointName,
     //originalArgs, // the hook parameter
     //requestId, // unique id
     //fulfilledTimeStamp,
     //startedTimeStamp,
-  } = useGetFriendsQuery(uselessParam, { refetchOnReconnect: true });
+  } = useGetUserDataQuery(uselessParam, { refetchOnReconnect: true });
 
   useEffect(() => {
-    if (((isError && error) || (chatFriends && chatFriends.error)) && !friendsError) {
-      setFriendsError([isError, error, chatFriends], "ambiguousSource");
+    if (((isError && error) || (chatUsers && chatUsers.error)) && !usersError) {
+      setUsersError([isError, error, chatUsers], "ambiguousSource");
     }
-  }, [isError, error, chatFriends]);
+  }, [isError, error, chatUsers]);
 
   useEffect(() => {
-    if (friendsError) {
-      dispatch(setModal({ message: friendsError }));
+    if (usersError) {
+      dispatch(setModal({ message: usersError }));
     }
-  }, [friendsError]);
+  }, [usersError]);
 
   return (
     <div className={classes.chat}>
       {rooms && showRooms && (
         <Card additionalClass="chatRooms">{rooms.length > 0 ? <ChatRooms /> : <p>No rooms</p>}</Card>
       )}
-      <Card additionalClass={`${showRooms ? "chatFriendsHide" : "chatFriends"}`}>
-        {isSuccess && !chatFriends.error && chatFriends.data.length > 0 ? <ChatFriends /> : <p>No friends</p>}
+      <Card additionalClass={`${showRooms ? "chatUsersHide" : "chatUsers"}`}>
+        {isSuccess && !chatUsers.error && chatUsers.data.length > 0 ? <ChatUsers /> : <p>No Users</p>}
       </Card>
     </div>
   );

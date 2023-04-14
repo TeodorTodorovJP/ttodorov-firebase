@@ -39,6 +39,8 @@
   margin-top: 1rem;
   margin-right: 0.5rem;
   background-color: rgba(0,0,0,.2);
+  position: relative;
+  overflow: hidden;
 }
 
 
@@ -81,7 +83,7 @@
   position: relative;
 }
 
-.card.chatFriends {
+.card.chatUsers {
   background-color: rgba(0,0,0,.2);
 
   position: fixed;
@@ -116,8 +118,16 @@
   z-index: 100000;
 }
 
-.card.chatFriendsHide {
+.card.chatUsersHide {
   display: none;
+}
+
+.userPopUp {
+  border-radius: 1rem;
+  background-color: rgba(0,0,0,.2);
+  padding: 0.4rem;
+  position: absolute;
+  right: 6vh;
 }
 
 /* Mobile view */

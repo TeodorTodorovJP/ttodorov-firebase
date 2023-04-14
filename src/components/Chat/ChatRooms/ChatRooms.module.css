@@ -32,6 +32,7 @@
 }
 
 .tab{
+    display: flex;
     border-radius: 50px;
     border: 2px solid;
     padding: 0;
@@ -92,6 +93,11 @@
     height: 3vh;
 }
 
+.profileImage {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50px;
+}
 
 
 /* Web view */

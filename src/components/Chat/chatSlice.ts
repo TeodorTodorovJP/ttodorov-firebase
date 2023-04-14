@@ -13,20 +13,9 @@ import { RootState, AppThunk, AppDispatch } from "../../app/store";
 
 import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnapshot } from "firebase/firestore";
 import { fireStore } from "../../firebase-config";
+import { UserData } from "../Auth/userSlice";
 
-export interface FriendsContent {
-  id: string;
-  names: string;
-  timestamp: string;
-  email?: string;
-  profilePic?: string;
-}
-type FriendsArr = FriendsContent[] | [];
-
-interface Image {
-  imageUrl: string;
-  blobUrl: string;
-}
+type UsersArr = UserData[] | [];
 
 export interface ChatRoomsContent {
   creator: string;
@@ -35,6 +24,7 @@ export interface ChatRoomsContent {
   timestamp: Date | string;
   otherUserNames: string;
   otherUserId: string;
+  otherUserImage: string;
   isOpened: boolean;
   active: boolean;
   tabClass: string;
@@ -45,15 +35,15 @@ interface OpenRoomProps {
   userId: string;
   userNames: string;
   otherUserId: string;
+  otherUserImage: string;
   otherUserNames: string;
 }
 
 export interface ChatState {
   userRooms: UserRoomsArr;
-  friends: EntityState<FriendsContent>;
+  users: EntityState<UserData>;
   status: string;
   showRooms: boolean;
-  images: Image[];
 }
 
 type FirebaseTimeStamp = {
@@ -73,17 +63,16 @@ export interface MessageData {
 export type MessageDataArr = MessageData[] | [];
 
 // use createDraftSafeSelector for getting data from other reducers
-const friendsAdapter = createEntityAdapter<FriendsContent>({
-  //selectId: (friend) => friend.id, // example, not needed
-  sortComparer: (a, b) => b.timestamp.localeCompare(a.timestamp),
+const usersAdapter = createEntityAdapter<UserData>({
+  //selectId: (user) => user.id, // example, not needed
+  // sortComparer: (a, b) => b.timestamp.localeCompare(a.timestamp),
 });
 
 const initialState: ChatState = {
   userRooms: [],
-  friends: friendsAdapter.getInitialState(),
+  users: usersAdapter.getInitialState(),
   status: "idle",
   showRooms: false,
-  images: [],
 };
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -93,11 +82,11 @@ const initialState: ChatState = {
 // typically used to make async requests.
 // export const fetchUserRooms = createAsyncThunk("chat/fetchRooms", async (userId: string) => {});
 
-export const fetchFriends = (): AppThunk => async (dispatch) => {
+export const fetchUsers = (): AppThunk => async (dispatch) => {
   try {
-    const friendsCollectionQuery = query(collection(fireStore, "friends"));
+    const usersCollectionQuery = query(collection(fireStore, "users"));
     console.log("listenToNotifications");
-    const unsubscribe = onSnapshot(friendsCollectionQuery, (querySnapshot) => {
+    const unsubscribe = onSnapshot(usersCollectionQuery, (querySnapshot) => {
       // This will trigger when a new room is added
       querySnapshot.docChanges().forEach((change) => {
         // types: "added", "modified", "removed"
@@ -119,7 +108,7 @@ export const chatSlice = createSlice({
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     openNewRoom: (state, action: PayloadAction<OpenRoomProps>) => {
-      const { userId, userNames, otherUserId, otherUserNames } = action.payload;
+      const { userId, userNames, otherUserId, otherUserImage, otherUserNames } = action.payload;
 
       const newRoomId = "room" + [userId, otherUserId].sort().join("");
 
@@ -150,6 +139,7 @@ export const chatSlice = createSlice({
           timestamp: timeStamp,
           otherUserNames,
           otherUserId,
+          otherUserImage,
           isOpened: true,
           active: true,
           tabClass: "",
@@ -185,73 +175,68 @@ export const chatSlice = createSlice({
 
       state.showRooms = showRooms;
     },
-    addFriends: {
+    addUsers: {
       // Left here only as an example.
-      // It's replaced by rtkq - useGetFriendsQuery
-      reducer(state, action: PayloadAction<FriendsArr>) {
-        friendsAdapter.upsertMany(state.friends, action.payload);
+      // It's replaced by rtkq - useGetUsersQuery
+      reducer(state, action: PayloadAction<UsersArr>) {
+        usersAdapter.upsertMany(state.users, action.payload);
 
-        // const updatedState = { ...state.friends.entities };
-        // let newFriend = false;
-        // action.payload.forEach((friend) => {
-        //   if (!state.friends.entities[friend.id]) {
-        //     newFriend = true;
-        //     updatedState[friend.id] = friend;
-        //     return friend;
+        // const updatedState = { ...state.users.entities };
+        // let newUser = false;
+        // action.payload.forEach((user) => {
+        //   if (!state.users.entities[user.id]) {
+        //     newUser = true;
+        //     updatedState[user.id] = user;
+        //     return user;
         //   }
         // });
-        // if (newFriend) state.friends.entities = updatedState;
+        // if (newUser) state.users.entities = updatedState;
       },
       // Used this method only to demonstrate it, otherwise it is redundant to iterate the same object twice:
       // once when filling the date from the response and again here
-      prepare(payload: FriendsContent[]) {
-        const preparedPayload = payload.map((friend) => {
-          friend.timestamp = JSON.stringify(friend.timestamp);
-          return friend;
+      prepare(payload: UserData[]) {
+        const preparedPayload = payload.map((user) => {
+          user.timestamp = JSON.stringify(user.timestamp);
+          return user;
         });
         return {
           payload: preparedPayload,
         };
       },
     },
-    addImageBlobUrl: (state, action: PayloadAction<{ imageUrl: string; blobUrl: string }>) => {
-      state.images.push(action.payload);
-    },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,
   // including actions generated by createAsyncThunk or in other slices.
   // extraReducers: (builder) => {
   //   builder
-  //     .addCase(fetchFriends.pending, (state) => {
+  //     .addCase(fetchUsers.pending, (state) => {
   //       state.status = "loading";
   //     })
-  //     .addCase(fetchFriends.fulfilled, (state, action) => {
+  //     .addCase(fetchUsers.fulfilled, (state, action) => {
   //       state.status = "idle";
   //       //state.value += action.payload;
   //     })
-  //     .addCase(fetchFriends.rejected, (state) => {
+  //     .addCase(fetchUsers.rejected, (state) => {
   //       state.status = "failed";
   //     });
   // },
 });
 
-export const { addFriends, openNewRoom, closeRoom, setShowRooms, addImageBlobUrl } = chatSlice.actions;
+export const { addUsers, openNewRoom, closeRoom, setShowRooms } = chatSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectUserRooms = (state: RootState) => state.chat.userRooms;
 export const selectShowRooms = (state: RootState) => state.chat.showRooms;
-export const selectImageBlobUrl = (state: RootState) => (imageUrl: string) =>
-  state.chat.images.filter((i) => i.imageUrl === imageUrl);
 
-// export const selectFriends = (state: RootState) => Object.values(state.chat.friends.entities);
+// export const selectUsers = (state: RootState) => Object.values(state.chat.users.entities);
 
 // Export the customized selectors for this adapter using `getSelectors`
 export const {
-  selectAll: selectFriends,
+  selectAll: selectUsers,
   // Pass in a selector that returns the posts slice of state
-} = friendsAdapter.getSelectors((state: RootState) => state.chat.friends);
+} = usersAdapter.getSelectors((state: RootState) => state.chat.users);
 
 // https://redux.js.org/tutorials/essentials/part-6-performance-normalization#memoizing-selector-functions
 // https://redux.js.org/usage/deriving-data-selectors

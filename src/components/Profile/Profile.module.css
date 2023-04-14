@@ -19,6 +19,20 @@
 
 .rightSide {
     width: fit-content;
+    max-width: 10rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.uploadImage {
+    display: flex;
+    flex-direction: column;
+}
+
+.uploadImage > p {
+    font-size: 1rem;
+    margin-top: -1rem;
 }
 
 .rightSide > img {
@@ -29,6 +43,19 @@
     display: block;
     width: 10vh;
     height: 10vh;
+}
+
+.saveImageBtn {
+    width: fit-content;
+    height: fit-content;
+    border: none;
+    background-color: transparent;
+    align-self: center;
+}
+
+.saveImageBtn > svg {
+    width: 7vh;
+    height: 7vh;
 }
 
 

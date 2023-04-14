@@ -243,3 +243,58 @@ export const getBlobUrl = async (imageUrl: string) => {
   const imageUrlBlob = urlCreator.createObjectURL(blob);
   return { blobUrl: imageUrlBlob, revokeUrl: urlCreator.revokeObjectURL };
 };
+
+export const loadXHR = (url: string) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", url);
+      xhr.responseType = "blob";
+      xhr.onerror = () => reject("Network error.");
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(xhr.response);
+        } else {
+          reject("Loading error:" + xhr.statusText);
+        }
+      };
+      xhr.send();
+    } catch (err) {
+      reject(getError(err));
+    }
+  });
+};
+
+export const getDateDataInUTC = (date?: string | number | Date) => {
+  let useDate;
+  if (date) {
+    useDate = new Date(date);
+  } else {
+    useDate = new Date();
+  }
+
+  const year = +useDate.getUTCFullYear().toString().substring(2);
+  const fullYear = +useDate.getUTCFullYear();
+  const month = useDate.getUTCMonth();
+  const day = useDate.getUTCDate();
+  const hours = useDate.getUTCHours();
+  const minutes = useDate.getUTCMinutes();
+  const seconds = useDate.getUTCSeconds();
+
+  const utcMilliseconds = Date.UTC(fullYear, month, day, hours, minutes, seconds);
+
+  const utcDate = new Date(utcMilliseconds).toUTCString();
+
+  const utcDifference = new Date().getTimezoneOffset() / 60; // to get hours
+
+  return {
+    year,
+    month,
+    day,
+    hours,
+    minutes,
+    seconds,
+    utcDate: utcDate,
+    utcDifference: utcDifference,
+  };
+};

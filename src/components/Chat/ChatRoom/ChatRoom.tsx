@@ -1,16 +1,15 @@
 import { getAuth } from "firebase/auth";
-import { FormEvent, ChangeEvent, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { selectUserData, UserData } from "../../Auth/userSlice";
 import ChatMessage from "../ChatMessage/ChatMessage";
-import { ChatRoomsContent, closeRoom, FriendsContent } from "../chatSlice";
+import { ChatRoomsContent, closeRoom } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
 import { langs, Langs } from "../ChatTexts";
 import { ReactComponent as SendSVG } from "./sendSVG.svg";
-import { ReactComponent as ImageSVG } from "./imageSVG.svg";
+import { ReactComponent as ImageSVG } from "../../UI/SVG/imageSVG.svg";
 import { ReactComponent as CloseSVG } from "../closeSVG.svg";
 import {
-  useGetFriendsQuery,
   useGetMessagesQuery,
   useSaveImageMutation,
   useSaveMessageMutation,
@@ -19,6 +18,8 @@ import {
 import useError from "../../CustomHooks/useError";
 import { selectLang, setModal } from "../../Navigation/navigationSlice";
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus";
+import { getError } from "../../../app/utils";
+import { useGetUserDataQuery } from "../../Auth/userApi";
 
 type ReactArr = React.ReactElement[];
 const initReactElArr: ReactArr = [];
@@ -30,46 +31,47 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
 
   // Local state
   const [message, setMessage] = useState("");
-  const [otherUser, setOtherUser] = useState<FriendsContent | null>(null);
+  const [otherUser, setOtherUser] = useState<UserData | null>(null);
   const [messages, setMessages] = useState(initReactElArr);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const [friendsError, setFriendsError] = useError();
+  const [usersError, setUsersError] = useError();
   const [messagesError, setMessagesError] = useError();
   const [sendRoomDataError, setSendRoomDataError] = useError();
   const [saveMsgsError, setSaveMsgsError] = useError();
   const [saveImagesError, setSaveImagesError] = useError();
 
-  const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus();
+  const { isOnline } = useOnlineStatus();
 
   const { creator, roomId, otherUserId } = props.room;
   const { main } = langs[currentLang as keyof Langs];
 
-  const {
-    data: chatFriends, // The latest returned result regardless of hook arg, if present.
-    isError: isErrorFr, // When true, indicates that the query is in an error state.
-    error: errorFr, // The error result if present.
-    //isSuccess, // When true, indicates that the query has data from a successful request.
-  } = useGetFriendsQuery();
-
-  useEffect(() => {
-    if (((isErrorFr && errorFr) || (chatFriends && chatFriends.error)) && !friendsError) {
-      setFriendsError([isErrorFr, errorFr, chatFriends], "ambiguousSource");
-    } else if (chatFriends && chatFriends.data) {
-      const other = chatFriends.data.filter((user) => user.id == otherUserId)[0];
-      if (other) setOtherUser(other);
-    }
-  }, [isErrorFr, errorFr, chatFriends]);
-
-  useEffect(() => {
-    if (friendsError) {
-      dispatch(setModal({ message: friendsError }));
-    }
-  }, [friendsError]);
-
   // Returns true if a user is signed-in.
   const isUserSignedIn = () => !!getAuth().currentUser;
 
+  // Get users from firebase hook
+  const {
+    data: chatUsers, // The latest returned result regardless of hook arg, if present.
+    isError: isErrorFr, // When true, indicates that the query is in an error state.
+    error: errorFr, // The error result if present.
+    //isSuccess, // When true, indicates that the query has data from a successful request.
+  } = useGetUserDataQuery();
+
+  // Handle useGetUserDataQuery errors
+  useEffect(() => {
+    if (((isErrorFr && errorFr) || (chatUsers && chatUsers.error)) && !usersError) {
+      setUsersError([isErrorFr, errorFr, chatUsers], "ambiguousSource");
+    } else if (chatUsers && chatUsers.data) {
+      const other = chatUsers.data.filter((user) => user.id == otherUserId)[0];
+      if (other) setOtherUser(other);
+    }
+  }, [isErrorFr, errorFr, chatUsers]);
+
+  useEffect(() => {
+    if (usersError) dispatch(setModal({ message: usersError }));
+  }, [usersError]);
+
+  // Get messages from firebase hook
   const {
     data: roomMessages,
     isError: isErrorMsgs,
@@ -77,6 +79,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
     refetch: refetchMessages,
   } = useGetMessagesQuery(roomId, { refetchOnReconnect: true });
 
+  // Handle useGetMessagesQuery errors
   useEffect(() => {
     if (((isErrorMsgs && errorMsgs) || (roomMessages && roomMessages.error)) && !messagesError) {
       setMessagesError([isErrorMsgs, errorMsgs, roomMessages], "ambiguousSource");
@@ -84,18 +87,10 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   }, [isErrorMsgs, errorMsgs, roomMessages]);
 
   useEffect(() => {
-    if (messagesError) {
-      dispatch(setModal({ message: messagesError }));
-    }
+    if (messagesError) dispatch(setModal({ message: messagesError }));
   }, [messagesError]);
 
-  useEffect(() => {
-    if (isOnline && wasOffline) {
-      refetchMessages();
-      resetOnlineStatus();
-    }
-  }, [isOnline]);
-
+  // Prepare data ass react components
   useEffect(() => {
     if (roomMessages && otherUser) {
       const chatMessagesEl = roomMessages.data.map((messageObj) => {
@@ -107,11 +102,11 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
     }
   }, [roomMessages, otherUser]);
 
-  const [
-    updateRoomData, // This is the mutation trigger
-    { data: dataSRD, isLoading: isUpdating, isError: isErrorSRD, error: errorSRD }, // This is the destructured mutation result
-  ] = useSendNewRoomDataMutation();
+  // Send room data to firebase hook
+  const [updateRoomData, { data: dataSRD, isLoading: isUpdating, isError: isErrorSRD, error: errorSRD }] =
+    useSendNewRoomDataMutation();
 
+  // Handle useSendNewRoomDataMutation errors
   useEffect(() => {
     if (((isErrorSRD && errorSRD) || (dataSRD && dataSRD.error)) && !sendRoomDataError) {
       setSendRoomDataError([isErrorSRD, errorSRD, dataSRD], "ambiguousSource");
@@ -119,14 +114,14 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   }, [isErrorSRD, errorSRD, dataSRD]);
 
   useEffect(() => {
-    if (sendRoomDataError) {
-      dispatch(setModal({ message: sendRoomDataError }));
-    }
+    if (sendRoomDataError) dispatch(setModal({ message: sendRoomDataError }));
   }, [sendRoomDataError]);
 
+  // Save message to firebase hook
   const [saveMessageToDB, { data: dataSMsgs, isLoading: sendingMessage, isError: isErrorSMsgs, error: errorSMsgs }] =
     useSaveMessageMutation();
 
+  // Handle useSaveMessageMutation errors
   useEffect(() => {
     if (((isErrorSMsgs && errorSMsgs) || (dataSMsgs && dataSMsgs.error)) && !saveMsgsError) {
       setSaveMsgsError([isErrorSMsgs, errorSMsgs, dataSMsgs], "ambiguousSource");
@@ -134,16 +129,16 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   }, [isErrorSMsgs, errorSMsgs, dataSMsgs]);
 
   useEffect(() => {
-    if (saveMsgsError) {
-      dispatch(setModal({ message: saveMsgsError }));
-    }
+    if (saveMsgsError) dispatch(setModal({ message: saveMsgsError }));
   }, [saveMsgsError]);
 
+  // Save image to firebase hook
   const [
     saveImageToDB,
     { data: dataSaveImg, isLoading: sendingSaveImg, isError: isErrorSaveImg, error: errorSaveImg },
   ] = useSaveImageMutation();
 
+  // Handle useSaveImageMutation errors
   useEffect(() => {
     if (((isErrorSaveImg && errorSaveImg) || (dataSaveImg && dataSaveImg.error)) && !saveImagesError) {
       setSaveImagesError([isErrorSaveImg, errorSaveImg, dataSaveImg], "ambiguousSource");
@@ -151,12 +146,9 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   }, [isErrorSaveImg, errorSaveImg, dataSaveImg]);
 
   useEffect(() => {
-    if (saveImagesError) {
-      dispatch(setModal({ message: saveImagesError }));
-    }
+    if (saveImagesError) dispatch(setModal({ message: saveImagesError }));
   }, [saveImagesError]);
 
-  ///////////////////////////
   // Saves a new image message to Cloud Firestore.
   const saveImgMessage = (imageUrl: string, roomId: string) => {
     if (otherUser === null) return;
@@ -165,15 +157,17 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
 
   // Saves a new message to Cloud Firestore.
   const saveMessage = async (messageText: string, roomId: string) => {
-    // Add a new message entry to the Firebase database.
     if (otherUser === null) return;
     try {
       if (messages.length === 0) {
+        // If the room has no messages, it is a new room
+        // Create the room in firebase
         await updateRoomData({ roomId, userData, otherUser });
       }
+      // After creation, fill the message inside
       await saveMessageToDB({ roomId, userData, otherUser, messageText });
     } catch (error) {
-      console.error("Error writing new message to Firebase Database", error);
+      dispatch(setModal({ message: getError(error) }));
     }
   };
 
@@ -203,7 +197,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
     }
   };
 
-  const handleImageBtn = async (event: React.FormEvent<HTMLInputElement>) => {
+  const handleSaveImageBtn = async (event: React.FormEvent<HTMLInputElement>) => {
     if (!isUserSignedIn || !event.currentTarget.files) {
       return;
     }
@@ -215,7 +209,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
       return;
     }
     //imageName: string; roomId: string; file: File
-    saveImageToDB({ roomId, userId: creator, file: file })
+    saveImageToDB({ userId: creator, file: file })
       .unwrap()
       .then((res) => {
         if (res.data) {
@@ -253,15 +247,7 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
           <SendSVG />
         </button>
 
-        <input
-          id="myFile"
-          type="file"
-          style={{display: "none"}}
-          ref={imageInputRef}
-          className={classes.formBtn}
-          disabled={!isOnline}
-          onChange={(e) => handleImageBtn(e)}
-        />
+        <input type="file" style={{ display: "none" }} ref={imageInputRef} onChange={(e) => handleSaveImageBtn(e)} />
         <button id="submitImage" onClick={() => triggerInput()} className={classes.formBtn} disabled={!isOnline}>
           <ImageSVG />
         </button>

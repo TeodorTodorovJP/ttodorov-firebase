@@ -6,6 +6,7 @@ import React, {
   useContext,
   ReactNode,
 } from "react";
+import { getDateDataInUTC } from "./utils";
 
 let logoutTimer: ReturnType<typeof setTimeout> = setTimeout(() => "", 1000);
 
@@ -22,28 +23,6 @@ const AuthContext = createContext<AuthContent>({
   login: (token) => {},
   logout: () => {},
 });
-
-const getDateDataInUTC = (date?: string | number | Date) => {
-  let useDate;
-  if (date) {
-    useDate = new Date(date);
-  } else {
-    useDate = new Date();
-  }
-
-  const year = +useDate.getUTCFullYear().toString().substring(2);
-  const month = useDate.getUTCMonth();
-  const day = useDate.getUTCDate();
-  const hours = useDate.getUTCHours();
-  const minutes = useDate.getUTCMinutes();
-  return {
-    year,
-    month,
-    day,
-    hours,
-    minutes,
-  };
-};
 
 const calculateRemainingTime = (expirationDate: string | number | Date) => {
   // Don't use getTime, it get's the current timezone's milliseconds
