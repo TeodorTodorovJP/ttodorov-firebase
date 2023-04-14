@@ -3,7 +3,7 @@
   user-select: none; /* you can't select the background */
   touch-action: manipulation; /* you can't zoom the background */
 
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;

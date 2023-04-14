@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, onSnapshot, query, serverTimestamp, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, setDoc } from "firebase/firestore";
 import { apiSlice } from "../../app/apiSlice";
 import { getDateDataInUTC, getError } from "../../app/utils";
 import { fireStore } from "../../firebase-config";
@@ -14,17 +14,8 @@ interface AddUser {
   error: any | null;
 }
 
-export interface UserContent {
-  id: string;
-  names: string;
-  timestamp: string;
-  email?: string;
-  profilePic?: string;
-  profilePicStored?: string;
-}
-
 interface GetUsers {
-  data: UserContent[];
+  data: UserData[];
   error: any;
 }
 
@@ -55,22 +46,14 @@ export const extendedApi = apiSlice.injectEndpoints({
         try {
           const usersRef = doc(fireStore, "users", userData.id);
           const userSnap = await getDoc(usersRef);
-          let user: UserContent;
+          let user: UserData;
           // .exists() doesn't work as expected
           if (!userSnap.data()) {
-            const timestamp = serverTimestamp();
+            const { utcDate: timestamp } = getDateDataInUTC();
             await setDoc(usersRef, { timestamp, ...userData });
-            const newUserSnap = await getDoc(usersRef);
-            const newUserData = newUserSnap.data();
-            let timeFromServer: string | Date = "";
-            if (newUserData && newUserData.timestamp.seconds) {
-              timeFromServer = new Date(newUserData.timestamp.seconds * 1000);
-            }
-            const { utcDate } = getDateDataInUTC(timeFromServer);
-            user = { ...userData, timestamp: JSON.stringify(utcDate) };
+            user = { ...userData, timestamp };
           } else {
-            user = userSnap.data() as UserContent;
-            user.timestamp = JSON.stringify(user.timestamp);
+            user = userSnap.data() as UserData;
           }
           return { data: { userData: user, error: null } };
         } catch (err: any) {
@@ -100,13 +83,14 @@ export const extendedApi = apiSlice.injectEndpoints({
           const usersCollectionQuery = query(collection(fireStore, "users"));
           unsubscribe = onSnapshot(usersCollectionQuery, (querySnapshot) => {
             try {
-              let prepareUsers: UserContent[] = [];
+              let prepareUsers: UserData[] = [];
               // This will trigger when a new room is added
               querySnapshot.docChanges().forEach((change) => {
                 // types: "added", "modified", "removed"
-                const changeData = change.doc.data() as UserContent;
+                const changeData = change.doc.data() as UserData;
                 if (!changeData.timestamp) return;
-                changeData.timestamp = JSON.stringify(changeData.timestamp);
+                // Firebase may return their bad timestamp
+                // changeData.timestamp = JSON.stringify(changeData.timestamp);
                 prepareUsers.push(changeData);
               });
               updateCachedData((draft) => {

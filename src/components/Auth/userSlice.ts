@@ -20,10 +20,14 @@ export interface UserState {
   images: Image[];
 }
 
-const initialState: UserState = {
-  userData: { id: "", names: "", profilePic: "" },
-  images: [],
+const getMainInitialState = () => {
+  const newState: UserState = {
+    userData: { id: "", names: "", profilePic: "" },
+    images: [],
+  };
+  return newState;
 };
+const initialState = getMainInitialState();
 
 export const userSlice = createSlice({
   name: "user",
@@ -32,10 +36,7 @@ export const userSlice = createSlice({
     setUserData: (state, action: PayloadAction<UserData>) => {
       state.userData = action.payload;
     },
-    clearUserData: (state) => {
-      state.userData = initialState.userData;
-      state.images = initialState.images;
-    },
+    clearUserData: (state) => getMainInitialState(),
     addImageBlobUrl: (state, action: PayloadAction<{ imageUrl: string; blobUrl: string }>) => {
       state.images.push(action.payload);
     },

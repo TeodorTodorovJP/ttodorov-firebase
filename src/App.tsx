@@ -16,6 +16,7 @@ import {
   defaultTheme,
   defaultLang,
   setModal,
+  clearNavData,
 } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
@@ -24,12 +25,13 @@ import { clearUserData, setUserData, UserData, userHasData } from "./components/
 import { useNavigate, useLocation } from "react-router-dom";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { useAddUserDataMutation } from "./components/Auth/userApi";
 import useError from "./components/CustomHooks/useError";
 import { setNotif } from "./components/Notif/NotifSlice";
 import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus";
 import { getError } from "./app/utils";
+import { clearChatData } from "./components/Chat/chatSlice";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -145,6 +147,8 @@ const App = () => {
               authCtx.logout();
               // Store
               dispatch(clearUserData());
+              dispatch(clearNavData());
+              dispatch(clearChatData());
             }
             dispatch(setModal({ useModal: false }));
             saveMessagingDeviceToken();
@@ -154,7 +158,11 @@ const App = () => {
         }
       } else if (authCtx.isLoggedIn) {
         authCtx.logout();
+        // Store
         dispatch(clearUserData());
+        dispatch(clearNavData());
+        dispatch(clearChatData());
+
         console.log("Signed out");
       }
     });

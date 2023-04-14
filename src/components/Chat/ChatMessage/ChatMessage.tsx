@@ -5,14 +5,19 @@ import { addImageBlobUrl, selectImageBlobUrl, UserData } from "../../Auth/userSl
 import { MessageData } from "../chatSlice";
 import classes from "./ChatMessage.module.css";
 
-const ChatMessage = (props: { data: MessageData; otherUser: UserData }) => {
+const ChatMessage = (props: { isLast: boolean; data: MessageData; otherUser: UserData }) => {
   const { name, userId, text, timestamp, profilePicUrl, imageUrl } = props.data;
   const { id: otherUserId, names: otherNames, email: otherEmail, profilePic: otherPic } = props.otherUser;
 
   const images = useAppSelector(selectImageBlobUrl);
   const dispatch = useAppDispatch();
+  const messageRef = useRef<HTMLDivElement>(null);
 
   const imageData = images(imageUrl)[0];
+
+  useEffect(() => {
+    if (props.isLast) messageRef.current?.focus();
+  }, [messageRef]);
 
   useEffect(() => {
     let revoke: Function | null;
@@ -51,7 +56,7 @@ const ChatMessage = (props: { data: MessageData; otherUser: UserData }) => {
   //     content = <img src={props.imageUrl + "&" + new Date().getTime()} alt="Girl in a jacket" width="500" height="600"/>
   // }
   return (
-    <div className={sideClass}>
+    <div className={sideClass} ref={messageRef}>
       {text && <p className={classes.text}>{text}</p>}
       {imageData && <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />}
     </div>

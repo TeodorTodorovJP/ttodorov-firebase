@@ -11,6 +11,7 @@ import {
   setIsOpenToTrue,
   setLang,
   selectLang,
+  clearNavData,
 } from "./navigationSlice";
 
 import NavElement from "../UI/NavElement";
@@ -31,6 +32,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
 import { getBlobUrl } from "../../app/utils";
+import { clearChatData } from "../Chat/chatSlice";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -94,6 +96,8 @@ const Navigation = () => {
     signOut(getAuth());
     // Store
     dispatch(clearUserData());
+    dispatch(clearNavData());
+    dispatch(clearChatData());
     // Clear local state
     setImageData(null);
   };

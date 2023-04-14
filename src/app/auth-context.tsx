@@ -27,13 +27,10 @@ const AuthContext = createContext<AuthContent>({
 const calculateRemainingTime = (expirationDate: string | number | Date) => {
   // Don't use getTime, it get's the current timezone's milliseconds
   // If both dates come from different timezones, comparison would be inaccurate
-  const c = getDateDataInUTC();
-  const currentTimeUTCms = Date.UTC(c.year, c.month, c.day, c.hours, c.minutes);
+  const { utcMilliseconds: currentMs } = getDateDataInUTC();
+  const { utcMilliseconds: expTimeUTCms } = getDateDataInUTC(expirationDate);
 
-  const exp = getDateDataInUTC(expirationDate);
-  const expTimeUTCms = Date.UTC(exp.year, exp.month, exp.day, exp.hours, exp.minutes);
-
-  const remainingDuration = expTimeUTCms - currentTimeUTCms;
+  const remainingDuration = expTimeUTCms - currentMs;
 
   return remainingDuration;
 };
@@ -80,9 +77,7 @@ export const AuthContextProvider = (props: { children: ReactNode }) => {
     setToken(token);
     localStorage.setItem("token", token);
     localStorage.setItem("expirationTime", expirationTime);
-
     const remainingTime = calculateRemainingTime(expirationTime);
-
     logoutTimer = setTimeout(logoutHandler, remainingTime);
   };
 

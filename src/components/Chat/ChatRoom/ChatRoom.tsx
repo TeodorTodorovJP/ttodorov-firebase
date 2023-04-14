@@ -18,7 +18,7 @@ import {
 import useError from "../../CustomHooks/useError";
 import { selectLang, setModal } from "../../Navigation/navigationSlice";
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus";
-import { getError } from "../../../app/utils";
+import { getDateDataInUTC, getError } from "../../../app/utils";
 import { useGetUserDataQuery } from "../../Auth/userApi";
 
 type ReactArr = React.ReactElement[];
@@ -93,10 +93,12 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   // Prepare data ass react components
   useEffect(() => {
     if (roomMessages && otherUser) {
-      const chatMessagesEl = roomMessages.data.map((messageObj) => {
-        const timeStamp = JSON.parse(JSON.stringify(messageObj.timestamp));
-        const key: React.Key = timeStamp.seconds;
-        return <ChatMessage key={key} data={messageObj} otherUser={otherUser} />;
+      const lastIndex = roomMessages.data.length - 1;
+      const chatMessagesEl = roomMessages.data.map((messageObj, index) => {
+        const { utcMilliseconds } = getDateDataInUTC(messageObj.timestamp);
+        const key: React.Key = utcMilliseconds;
+
+        return <ChatMessage key={key} isLast={+lastIndex === +index} data={messageObj} otherUser={otherUser} />;
       });
       setMessages(chatMessagesEl);
     }

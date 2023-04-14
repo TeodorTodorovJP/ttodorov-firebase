@@ -4,15 +4,15 @@ import {
   onSnapshot,
   doc,
   getDoc,
-  serverTimestamp,
   setDoc,
   orderBy,
   limit,
   addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { apiSlice } from "../../app/apiSlice";
-import { getError } from "../../app/utils";
+import { getDateDataInUTC, getError } from "../../app/utils";
 import { fileStorageRef, fireStore } from "../../firebase-config";
 import { UserData } from "../Auth/userSlice";
 import { MessageData, MessageDataArr } from "./chatSlice";
@@ -48,24 +48,36 @@ export const extendedApi = apiSlice.injectEndpoints({
         try {
           const recentMessagesQuery = query(
             collection(fireStore, "allChatRooms", roomId, "messages"),
-            orderBy("timestamp"),
+            orderBy("serverTime", "desc"),
             limit(12)
           );
           unsubscribe = onSnapshot(recentMessagesQuery, (querySnapshot) => {
             try {
-              let prepareMessages: MessageData[] = [];
+              let prepareMessages: Record<string, MessageData> = {};
               // This will trigger when a new room is added
               querySnapshot.docChanges().forEach((change) => {
                 // types: "added", "modified", "removed"
                 const changeData = change.doc.data() as MessageData;
-                if (!changeData.timestamp) return;
-
-                // converts the firebase response's timestamp type from deserialized(date) to serialized(object with properties)
-                changeData.timestamp = { ...changeData.timestamp };
-                prepareMessages.push(changeData);
+                if (changeData.serverTime) {
+                  delete changeData.serverTime;
+                }
+                if (!prepareMessages[changeData.timestamp]) {
+                  prepareMessages[changeData.timestamp] = changeData;
+                }
               });
               updateCachedData((draft) => {
-                draft.data = [...draft.data, ...prepareMessages];
+                // @ts-ignore
+                const oldMessagesMap = draft.data.reduce((acc, cv: MessageData) => {
+                  acc[cv.timestamp] = cv;
+                  return acc;
+                }, {});
+
+                const mergedMap = { ...prepareMessages, ...oldMessagesMap };
+                // @ts-ignore
+                const sortedMessages = Object.values(mergedMap).sort((a, b) => +a.timestamp - +b.timestamp);
+
+                draft.data = sortedMessages as MessageData[];
+
                 draft.error = null;
                 return draft;
               });
@@ -100,7 +112,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           const roomSnap = await getDoc(roomRef);
 
           if (!roomSnap.exists()) {
-            const timestamp = serverTimestamp();
+            const { utcDate: timestamp } = getDateDataInUTC();
 
             await setDoc(roomRef, {
               timestamp,
@@ -126,13 +138,17 @@ export const extendedApi = apiSlice.injectEndpoints({
     >({
       queryFn: async (args) => {
         try {
+          const { utcMilliseconds: timestamp } = getDateDataInUTC();
+          const serverTime = serverTimestamp();
+
           await addDoc(collection(fireStore, "allChatRooms", args.roomId, "messages"), {
             userId: args.userData.id,
             name: args.userData.names,
             text: args.messageText ? args.messageText : "",
             profilePicUrl: args.userData.profilePic ? args.userData.profilePic : "",
             imageUrl: args.imageUrl ? args.imageUrl : "",
-            timestamp: serverTimestamp(),
+            timestamp: timestamp,
+            serverTime: serverTime,
           });
         } catch (err: any) {
           return { data: { data: [], error: getError(err) } };
@@ -149,7 +165,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // forbidden symbols in fileName - #, [, ], *, or ?
           // remove all symbols that are not letters
           const fileName = args.file.name.replace(/[^\w]/gi, "");
-          const timestampId = serverTimestamp(); // as message id
+          const { utcDate: timestampId } = getDateDataInUTC(); // as message id
 
           const filePath = `${args.userId}/${timestampId}/${fileName}`;
 

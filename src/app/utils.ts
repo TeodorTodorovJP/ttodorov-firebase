@@ -267,6 +267,7 @@ export const loadXHR = (url: string) => {
 
 export const getDateDataInUTC = (date?: string | number | Date) => {
   let useDate;
+  // @ts-ignore
   if (date) {
     useDate = new Date(date);
   } else {
@@ -294,6 +295,7 @@ export const getDateDataInUTC = (date?: string | number | Date) => {
     hours,
     minutes,
     seconds,
+    utcMilliseconds,
     utcDate: utcDate,
     utcDifference: utcDifference,
   };

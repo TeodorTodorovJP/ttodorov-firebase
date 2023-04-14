@@ -1,7 +1,9 @@
 
 
 .ChatRoom {
-
+    display: flex;
+    flex-direction: column;
+    min-height: 75vh;
 }
 
 .Header {
@@ -12,11 +14,10 @@
 
 .form {
     display: flex;
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    width: 95%;
+    position: relative;
+    bottom: 4rem;
     justify-content: flex-end;
+    margin-top: auto;
 }
 
 .formInput {
@@ -62,4 +63,16 @@
     margin-left: 6rem;
     border-radius: 50px;
     padding: 0.3rem;
+}
+
+
+/* Web view */
+@media (min-width: 430px) {
+    .form {
+        display: flex;
+        position: relative;
+        bottom: -1rem;
+        right: -1rem;
+        justify-content: flex-end;
+    }
 }

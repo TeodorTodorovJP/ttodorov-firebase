@@ -5,7 +5,8 @@ import { decrement, increment, incrementByAmount, incrementAsync, incrementIfOdd
 import classes from "./Counter.module.css";
 import Card from "../UI/Card";
 import { fireStore } from "../../firebase-config";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { getDateDataInUTC } from "../../app/utils";
 
 export function Counter() {
   const count = useAppSelector(selectCount);
@@ -21,7 +22,7 @@ export function Counter() {
     try {
       const userRef = doc(fireStore, "errors", time);
 
-      const timestamp = serverTimestamp();
+      const { utcDate: timestamp } = getDateDataInUTC();
       await setDoc(userRef, { timestamp, errorText });
     } catch (error) {
       console.error("Error writing Error to Firebase Database", error);

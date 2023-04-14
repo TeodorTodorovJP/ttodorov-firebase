@@ -111,7 +111,6 @@ const Profile = () => {
   const isUserSignedIn = () => !!getAuth().currentUser;
 
   const triggerInput = () => {
-    updateUserDataDb({ userData });
     if (imageInputRef) {
       imageInputRef.current?.click();
     }
