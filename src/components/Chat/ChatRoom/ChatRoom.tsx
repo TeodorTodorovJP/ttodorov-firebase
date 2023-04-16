@@ -16,7 +16,7 @@ import {
   useSendNewRoomDataMutation,
 } from "../chatApi";
 import useError from "../../CustomHooks/useError";
-import { selectLang, setModal } from "../../Navigation/navigationSlice";
+import { selectLang, selectTheme, setModal } from "../../Navigation/navigationSlice";
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus";
 import { getDateDataInUTC, getError } from "../../../app/utils";
 import { useGetUserDataQuery } from "../../Auth/userApi";
@@ -28,12 +28,14 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const dispatch = useAppDispatch();
   const currentLang = useAppSelector(selectLang);
   const userData = useAppSelector(selectUserData);
+  const theme = useAppSelector(selectTheme);
 
   // Local state
   const [message, setMessage] = useState("");
   const [otherUser, setOtherUser] = useState<UserData | null>(null);
   const [messages, setMessages] = useState(initReactElArr);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   const [usersError, setUsersError] = useError();
   const [messagesError, setMessagesError] = useError();
@@ -48,6 +50,13 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
 
   // Returns true if a user is signed-in.
   const isUserSignedIn = () => !!getAuth().currentUser;
+
+  // For mobile, to focus on element, after the keyboard appears
+  const handleTouch = () => {
+    setTimeout(() => {
+      messageInputRef.current?.focus();
+    }, 500);
+  };
 
   // Get users from firebase hook
   const {
@@ -234,11 +243,13 @@ const ChatRoom = (props: { room: ChatRoomsContent }) => {
           <CloseSVG />
         </button>
       </div>
-      <div className={classes.chatMessages}>{messages}</div>
+      <div className={`${classes.chatMessages} ${classes.scrollbar} ${theme.scrollbar}`}>{messages}</div>
       {!isOnline && <p className={classes.error}>{main.offline}</p>}
       <form onSubmit={onMessageFormSubmit} className={classes.form}>
         <input
           type="text"
+          ref={messageInputRef}
+          onTouchStart={handleTouch}
           value={message}
           onChange={(e) => {
             setMessage(e.target.value);

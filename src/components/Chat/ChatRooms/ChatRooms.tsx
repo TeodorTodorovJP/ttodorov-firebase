@@ -109,7 +109,7 @@ const ChatRooms = () => {
             );
           })}
       </div>
-      <div>{activeRoom && <ChatRoom key={activeRoom.roomId} room={activeRoom} />}</div>
+      {activeRoom && <ChatRoom key={activeRoom.roomId} room={activeRoom} />}
     </div>
   );
 

@@ -12,6 +12,7 @@ export const ALL_THEMES = {
   red: "red",
   green: "green",
   blue: "blue",
+  svg: "svg",
 };
 
 type Main = "red" | "green" | "blue";
@@ -25,6 +26,7 @@ type Button =
   | `${typeof buttonStyling} button-blue`;
 type SVG = "svg-red" | "svg-green" | "svg-blue";
 type Decoration = "decoration-red" | "decoration-green" | "decoration-blue";
+type Scrollbar = "scrollbar-red" | "scrollbar-green" | "scrollbar-blue";
 type Loader = "loader loader-red" | "loader loader-green" | "loader loader-blue";
 
 interface Theme {
@@ -35,6 +37,7 @@ interface Theme {
   button: Button;
   svg: SVG;
   decoration: Decoration;
+  scrollbar: Scrollbar;
   loader: Loader;
 }
 
@@ -79,6 +82,7 @@ const getMainInitialState = () => {
       button: `${buttonStyling} button-${defaultTheme}`,
       svg: `svg-${defaultTheme}`,
       decoration: `decoration-${defaultTheme}`,
+      scrollbar: `scrollbar-${defaultTheme}`,
       loader: `loader loader-${defaultTheme}`,
     },
     status: "idle",
@@ -117,6 +121,7 @@ export const navigationSlice = createSlice({
         button: `${buttonStyling} button-${theme}`,
         svg: `svg-${theme}`,
         decoration: `decoration-${theme}`,
+        scrollbar: `scrollbar-${theme}`,
         loader: `loader loader-${theme}`,
       };
 

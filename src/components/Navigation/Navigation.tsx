@@ -33,6 +33,7 @@ import { useEffect, useState } from "react";
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
 import { getBlobUrl } from "../../app/utils";
 import { clearChatData } from "../Chat/chatSlice";
+import { toggleSVG } from "../UI/Background/backgroundSlice";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -116,9 +117,12 @@ const Navigation = () => {
   const changeThemeHandle = (toTheme: string) => {
     if (toTheme === theme.main) return;
 
-    let changeTheme: MainObj = { main: toTheme } as MainObj;
-
-    dispatch(setTheme(changeTheme));
+    if (toTheme === "svg") {
+      dispatch(toggleSVG());
+    } else {
+      let changeTheme: MainObj = { main: toTheme } as MainObj;
+      dispatch(setTheme(changeTheme));
+    }
   };
 
   const saveThemeHandle = () => {
@@ -233,6 +237,13 @@ const Navigation = () => {
                     onClick={() => changeThemeHandle(ALL_THEMES.blue)}
                   >
                     B
+                  </button>
+                  <button
+                    type="button"
+                    className={`${classes.themeBtn} hover ${classes.blue}`}
+                    onClick={() => changeThemeHandle(ALL_THEMES.svg)}
+                  >
+                    <p style={{ fontSize: "0.8rem" }}>SVG</p>
                   </button>
                   <button type="button" className={`${classes.saveSVG} hover`} onClick={() => saveThemeHandle()}>
                     <SaveSVG />

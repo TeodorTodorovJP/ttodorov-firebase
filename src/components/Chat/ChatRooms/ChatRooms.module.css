@@ -2,7 +2,7 @@
 
 .chatRooms {
     padding: 1.5rem;
-    min-height: 73vh;
+    max-height: 78vh;
     height: fit-content;
     width: 92vw;
     display: flex;
@@ -104,7 +104,9 @@
 /* Web view */
 @media (min-width: 430px) {
     .chatRooms {
-        min-height: 75vh;
+        min-height: 84vh;
+        max-height: 84vh;
+        height: 84vh;
         width: 45vw;
     }
 

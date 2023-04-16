@@ -300,3 +300,8 @@ export const getDateDataInUTC = (date?: string | number | Date) => {
     utcDifference: utcDifference,
   };
 };
+
+export const isMobile = () => {
+  const test = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  return test;
+};

@@ -1,98 +1,34 @@
-
 .background {
-  user-select: none; /* you can't select the background */
-  touch-action: manipulation; /* you can't zoom the background */
-
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100svh;
-
-  background-color: white;
+    user-select: none; /* you can't select the background */
+    touch-action: manipulation; /* you can't zoom the background */
+  
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+  
+    background-color: white;
 }
 
-.backgroundSvgElements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100svh;
-}
-
-/* filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4)); */
-
-
-  /* Red colors */
-.polygon-light.red {
-  fill-opacity: 0.1;
-  fill: var(--theme-red-el-l);
-}
-
-.polygon-medium.red {
-  fill-opacity: 0.2;
-  fill: var(--theme-red-el-m);
-}
-
-.polygon-hard.red {
-  fill-opacity: 0.2;
-  fill: var(--theme-red-el-h);
-}
 
 .background.red {
-  background: var(--theme-red-bg);
-}
-
-  /* Green colors */
-.polygon-light.green {
-  fill-opacity: 0.1;
-  fill: var(--theme-green-el-l);
-}
-
-.polygon-medium.green {
-  fill-opacity: 0.2;
-  fill: var(--theme-green-el-m);
-}
-
-.polygon-hard.green {
-  fill-opacity: 0.2;
-  fill: var(--theme-green-el-h);
+    background: var(--theme-red-bg);
 }
 
 .background.green {
-  background: var(--theme-green-bg);
+    background: var(--theme-green-bg);
 }
-
-  /* Blue colors */
-.polygon-light.blue {
-  fill-opacity: 0.4;
-  fill: var(--theme-blue-el-l);
-}
-
-.polygon-medium.blue {
-  fill-opacity: 0.3;
-  fill: var(--theme-blue-el-m);
-}
-
-.polygon-hard.blue {
-  fill-opacity: 0.2;
-  fill: var(--theme-blue-el-h);
-}
-
-.background.blue {
-  background: var(--theme-blue-bg);
-}
-
-
-/* Mobile view */
-@media (max-width: 430px) {
-  .background {
-    height: 110svh; /*+10 is to help with window resize when address bar is hidden*/
-  }
   
-  .backgroundSvgElements {
-    height: 110svh; /*+10 is to help with window resize when address bar is hidden*/
-  }
-
+.background.blue {
+    background: var(--theme-blue-bg);
 }
+  
 
+/* Web view */
+@media (min-width: 430px) {
+    .app {
+      height: 100vh;
+      min-height: 100vh;
+    }
+  }

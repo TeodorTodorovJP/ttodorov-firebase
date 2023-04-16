@@ -5,6 +5,7 @@ import notifReducer from "../components/Notif/NotifSlice";
 
 import chatReducer from "../components/Chat/chatSlice";
 import userReducer from "../components/Auth/userSlice";
+import backgroundReducer from "../components/UI/Background/backgroundSlice";
 
 import { apiSlice } from "./apiSlice";
 import { setupListeners } from "@reduxjs/toolkit/query/react";
@@ -16,6 +17,7 @@ export const store = configureStore({
     notif: notifReducer,
     chat: chatReducer,
     user: userReducer,
+    background: backgroundReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),

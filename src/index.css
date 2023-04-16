@@ -34,8 +34,7 @@ html {
   color: var(--clr-text);
   /* Make the font as big as 16px again */
   font-size: 1.6rem;
-  height: 100vh; /*For mobile get's the screen size without address bar*/
-  height: 100svh; /*For mobile fixes the top address bar eating space*/
+  height: 100%;
 }
 
 *,
@@ -51,6 +50,17 @@ body {
   /* Make the font as big as 16px again */
   font-size: 1.6rem;
   color: antiquewhite;
+
+  height: 100%;
+}
+
+/* Web view */
+@media (min-width: 430px) {
+  html, body {
+    height: 100vh;
+    height: 100svh;
+    min-height: 100vh;
+  }
 }
 
 /* The margin: 0 from body, doesn't effect it's children */
@@ -221,4 +231,22 @@ img {
     to {
       transform: scale(1);
     }
+}
+
+.scrollbar-red::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+  background-color: var(--theme-red-el-h);
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+  background-color: var(--theme-blue-decoration);
+}
+
+.scrollbar-green::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+  background-color: var(--theme-green-el-h);
 }

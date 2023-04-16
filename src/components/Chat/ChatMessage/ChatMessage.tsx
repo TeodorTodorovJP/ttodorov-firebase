@@ -16,8 +16,8 @@ const ChatMessage = (props: { isLast: boolean; data: MessageData; otherUser: Use
   const imageData = images(imageUrl)[0];
 
   useEffect(() => {
-    if (props.isLast) messageRef.current?.focus();
-  }, [messageRef]);
+    messageRef.current?.scrollIntoView();
+  }, []);
 
   useEffect(() => {
     let revoke: Function | null;
