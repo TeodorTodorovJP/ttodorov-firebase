@@ -8,20 +8,11 @@ import Modal from "./components/Modal/Modal";
 import Notif from "./components/Notif/Notif";
 
 import { useAppDispatch, useAppSelector } from "./app/hooks";
-import {
-  selectModal,
-  setTheme,
-  setUser,
-  MainObj,
-  defaultTheme,
-  defaultLang,
-  setModal,
-  clearNavData,
-} from "./components/Navigation/navigationSlice";
+import { defaultLang, setModal, clearNavData } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/NavigationTexts";
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
-import { clearUserData, setUserData, UserData, userHasData } from "./components/Auth/userSlice";
+import { clearUserData, setUserData, setUserPreferences, UserData, userHasData } from "./components/Auth/userSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { fireStore, VAPID_KEY, messaging } from "./firebase-config";
@@ -32,6 +23,7 @@ import { setNotif } from "./components/Notif/NotifSlice";
 import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus";
 import { getError } from "./app/utils";
 import { clearChatData } from "./components/Chat/chatSlice";
+import { defaultTheme, MainObj, MainThemes, setTheme } from "./components/Navigation/themeSlice";
 
 // import useAuthContext from "./app/auth-context";
 
@@ -89,13 +81,13 @@ const App = () => {
       }
     }
 
-    let userDefaultTheme = localStorage.getItem("theme");
+    let userDefaultTheme = localStorage.getItem("theme") as MainThemes | null;
     userDefaultTheme = userDefaultTheme ? userDefaultTheme : defaultTheme;
 
     let userDefaultLang = localStorage.getItem("lang");
     userDefaultLang = userDefaultLang ? userDefaultLang : defaultLang;
 
-    dispatch(setUser({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }));
+    dispatch(setUserPreferences({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }));
 
     let changeTheme: MainObj = { main: userDefaultTheme } as MainObj;
     dispatch(setTheme(changeTheme));

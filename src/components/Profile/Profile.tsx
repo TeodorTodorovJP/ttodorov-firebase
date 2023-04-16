@@ -1,10 +1,10 @@
 import classes from "./Profile.module.css";
 import Card from "../UI/Card";
-import { selectUserData, setUserData } from "../Auth/userSlice";
+import { selectUserData, selectUserPreferences, setUserData } from "../Auth/userSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { ReactComponent as AccountSVG } from "../UI/SVG/account.svg";
-import { selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { setModal } from "../Navigation/navigationSlice";
 import { ReactComponent as ImageSVG } from "../UI/SVG/imageSVG.svg";
 import { useOnlineStatus } from "../CustomHooks/useOnlineStatus";
 import { getAuth } from "firebase/auth";
@@ -14,6 +14,7 @@ import useError from "../CustomHooks/useError";
 import { useUpdateUserDataMutation } from "../Auth/userApi";
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
 import { getBlobUrl } from "../../app/utils";
+import { selectTheme } from "../Navigation/themeSlice";
 
 const Profile = () => {
   const dispatch = useAppDispatch();
@@ -21,7 +22,7 @@ const Profile = () => {
   const images = useAppSelector(selectImageBlobUrl);
   const { id: userId, names, email, profilePic, profilePicStored } = userData;
   const theme = useAppSelector(selectTheme);
-  const currentLang = useAppSelector(selectLang);
+  const { lang: currentLang } = useAppSelector(selectUserPreferences);
 
   const { isOnline } = useOnlineStatus();
   const imageInputRef = useRef<HTMLInputElement>(null);

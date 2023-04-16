@@ -6,12 +6,11 @@ import Card from "../UI/Card";
 import classes from "./AuthForm.module.css";
 
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { Modal, selectLang, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { setModal } from "../Navigation/navigationSlice";
 import { langs, Langs } from "./AuthTexts";
 import useError from "../CustomHooks/useError";
-import ErrorTexts, { ErrorsType } from "../CustomHooks/ErrorTexts";
 
-import { selectUserData, setUserData, UserData, clearUserData } from "./userSlice";
+import { selectUserData, selectUserPreferences } from "./userSlice";
 
 import {
   getAuth,
@@ -28,11 +27,12 @@ import { fireStore } from "../../firebase-config";
 import { FirebaseError } from "firebase/app";
 import { ReactComponent as Eye } from "./SVG/eye.svg";
 import { ReactComponent as EyeOff } from "./SVG/eyeOff.svg";
+import { selectTheme } from "../Navigation/themeSlice";
 
 const AuthForm = () => {
   // store
   const { button } = useAppSelector(selectTheme);
-  const currentLang = useAppSelector(selectLang);
+  const { lang: currentLang } = useAppSelector(selectUserPreferences);
   const userData = useAppSelector(selectUserData);
   const dispatch = useAppDispatch();
 

@@ -1,6 +1,7 @@
 import { configureStore, ThunkAction, Action, createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import counterReducer from "../components/Counter/counterSlice";
 import navigationReducer from "../components/Navigation/navigationSlice";
+import themeReducer from "../components/Navigation/themeSlice";
 import notifReducer from "../components/Notif/NotifSlice";
 
 import chatReducer from "../components/Chat/chatSlice";
@@ -14,6 +15,7 @@ export const store = configureStore({
   reducer: {
     counter: counterReducer,
     navigation: navigationReducer,
+    theme: themeReducer,
     notif: notifReducer,
     chat: chatReducer,
     user: userReducer,

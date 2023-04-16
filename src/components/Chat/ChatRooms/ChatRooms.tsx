@@ -7,8 +7,8 @@ import { ReactComponent as CloseSVG } from "../closeSVG.svg";
 import { ChatRoomsContent, selectShowRooms, selectUserRooms, setShowRooms } from "../chatSlice";
 import { ReactComponent as AccountSVG } from "../../UI/SVG/account.svg";
 import GenerateProfilePic from "../../UI/generateImages/GenerateProfilePic";
-import { selectTheme } from "../../Navigation/navigationSlice";
 import { ReactComponent as ChatSVG } from "../../Navigation/icons/chat.svg";
+import { selectTheme } from "../../Navigation/themeSlice";
 
 const ChatRooms = () => {
   const dispatch = useAppDispatch();

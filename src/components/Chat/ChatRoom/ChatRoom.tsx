@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { selectUserData, UserData } from "../../Auth/userSlice";
+import { selectUserData, selectUserPreferences, UserData } from "../../Auth/userSlice";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { ChatRoomsContent, closeRoom } from "../chatSlice";
 import classes from "./ChatRoom.module.css";
@@ -16,17 +16,18 @@ import {
   useSendNewRoomDataMutation,
 } from "../chatApi";
 import useError from "../../CustomHooks/useError";
-import { selectLang, selectTheme, setModal } from "../../Navigation/navigationSlice";
+import { setModal } from "../../Navigation/navigationSlice";
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus";
 import { getDateDataInUTC, getError } from "../../../app/utils";
 import { useGetUserDataQuery } from "../../Auth/userApi";
+import { selectTheme } from "../../Navigation/themeSlice";
 
 type ReactArr = React.ReactElement[];
 const initReactElArr: ReactArr = [];
 
 const ChatRoom = (props: { room: ChatRoomsContent }) => {
   const dispatch = useAppDispatch();
-  const currentLang = useAppSelector(selectLang);
+  const { lang: currentLang } = useAppSelector(selectUserPreferences);
   const userData = useAppSelector(selectUserData);
   const theme = useAppSelector(selectTheme);
 

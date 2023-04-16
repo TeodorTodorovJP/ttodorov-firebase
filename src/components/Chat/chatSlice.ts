@@ -255,14 +255,4 @@ export const {
 //   (posts, userId) => posts.filter(post => post.user === userId)
 // )
 
-// We can also write thunks by hand, which may contain both sync and async logic.
-// Here's an example of conditionally dispatching actions based on current state.
-// export const assignTheme =
-//   (): AppThunk =>
-//   (dispatch, getState) => {
-//     const currentValue = selectTheme(getState());
-
-//     dispatch(setTheme({main: 'red'}));
-//   };
-
 export default chatSlice.reducer;

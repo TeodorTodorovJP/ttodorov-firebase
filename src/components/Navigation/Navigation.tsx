@@ -1,17 +1,13 @@
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import {
-  selectTheme,
-  selectUser,
-  ALL_THEMES,
-  setTheme,
-  MainObj,
   Modal,
   setModal,
   selectIsOpen,
   setIsOpenToTrue,
-  setLang,
-  selectLang,
   clearNavData,
+  selectModal,
+  selectWaitingActions,
+  removeWaitingAction,
 } from "./navigationSlice";
 
 import NavElement from "../UI/NavElement";
@@ -27,13 +23,21 @@ import Logo from "../UI/SVG/logo.svg";
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
 import { langs, Langs } from "./NavigationTexts";
-import { clearUserData, selectUserData, setUserData } from "../Auth/userSlice";
+import {
+  clearUserData,
+  saveLangToLocalStorage,
+  selectUserData,
+  selectUserPreferences,
+  setUserData,
+  setUserPreferences,
+} from "../Auth/userSlice";
 import { getAuth, signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
 import { getBlobUrl } from "../../app/utils";
 import { clearChatData } from "../Chat/chatSlice";
 import { toggleSVG } from "../UI/Background/backgroundSlice";
+import { ALL_THEMES, MainObj, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice";
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -41,10 +45,11 @@ import { toggleSVG } from "../UI/Background/backgroundSlice";
 const Navigation = () => {
   // Store
   const theme = useAppSelector(selectTheme);
-  const lang = useAppSelector(selectLang);
-  const { theme: userTheme } = useAppSelector(selectUser);
+  const { lang } = useAppSelector(selectUserPreferences);
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
   const { profilePic, profilePicStored } = useAppSelector(selectUserData);
+  const waitingActions = useAppSelector(selectWaitingActions);
+
   const images = useAppSelector(selectImageBlobUrl);
 
   const dispatch = useAppDispatch();
@@ -54,6 +59,15 @@ const Navigation = () => {
     const foundImage = images(profilePicStored)[0];
     if (foundImage) setImageData(foundImage);
   }
+
+  useEffect(() => {
+    if (waitingActions.length > 0) {
+      if (waitingActions.includes("changeDefaultTheme")) {
+        dispatch(saveThemeToLocalStorage());
+        dispatch(removeWaitingAction({ waitingAction: "changeDefaultTheme" }));
+      }
+    }
+  }, [waitingActions]);
 
   useEffect(() => {
     let revoke: Function | null;
@@ -136,7 +150,8 @@ const Navigation = () => {
       deny: themeModal.deny,
     };
 
-    if (theme.main === userTheme) {
+    const currentTheme = localStorage.getItem("theme");
+    if (theme.main === currentTheme) {
       modalObj.message = themeModal.messageDone;
       modalObj.agree = themeModal.agreeDone;
       modalObj.deny = null;
@@ -151,7 +166,9 @@ const Navigation = () => {
   };
 
   const handleToggleLanguage = () => {
-    dispatch(setLang({ lang: lang == "bg" ? "en" : "bg" }));
+    const setLang = lang == "bg" ? "en" : "bg";
+    dispatch(setUserPreferences({ lang: setLang }));
+    dispatch(saveLangToLocalStorage());
   };
 
   return (

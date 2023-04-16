@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { getError, stringifyJSON } from "../../app/utils";
-import { selectLang } from "../Navigation/navigationSlice";
+import { selectUserPreferences } from "../Auth/userSlice";
 import ErrorTexts, { ErrorsType } from "./ErrorTexts";
 
 interface Langs {
@@ -16,7 +16,7 @@ interface PrepareFn {
 }
 
 const useError = () => {
-  const currentLang = useAppSelector(selectLang);
+  const { lang: currentLang } = useAppSelector(selectUserPreferences);
 
   const [errorObj, setError] = useState<ErrorObjSet>(null);
 

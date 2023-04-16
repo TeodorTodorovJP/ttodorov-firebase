@@ -1,10 +1,11 @@
 import "./Background.css";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { selectTheme, setAllOpenToFalse } from "../../Navigation/navigationSlice";
+import { setAllOpenToFalse } from "../../Navigation/navigationSlice";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { singleClick } from "../../../app/utils";
 import SVGBackground from "./SVGBackground";
 import { isSVG } from "./backgroundSlice";
+import { selectTheme } from "../../Navigation/themeSlice";
 
 const Background = () => {
   const { main: theme } = useAppSelector(selectTheme);

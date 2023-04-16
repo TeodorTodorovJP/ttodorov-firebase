@@ -5,12 +5,13 @@ import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import Card from "../UI/Card";
 import { langs, Langs } from "./NotifTexts";
 import { selectNotif, Notif as NotifType, setNotif } from "./NotifSlice";
-import { selectLang, selectTheme } from "../Navigation/navigationSlice";
+import { selectTheme } from "../Navigation/themeSlice";
+import { selectUserPreferences } from "../Auth/userSlice";
 
 const Notif = () => {
   // Store
   const notifStore = useAppSelector(selectNotif);
-  const currentLang = useAppSelector(selectLang);
+  const { lang: currentLang } = useAppSelector(selectUserPreferences);
   const theme = useAppSelector(selectTheme);
 
   const dispatch = useAppDispatch();

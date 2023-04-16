@@ -2,15 +2,17 @@ import { ReactElement, useEffect, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import classes from "./Modal.module.css";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { Modal as ModalType, selectLang, selectModal, selectTheme, setModal } from "../Navigation/navigationSlice";
+import { Modal as ModalType, selectModal, setModal } from "../Navigation/navigationSlice";
 import Card from "../UI/Card";
 import { langs, Langs } from "./ModalTexts";
+import { selectTheme } from "../Navigation/themeSlice";
+import { selectUserPreferences } from "../Auth/userSlice";
 
 const Modal = () => {
   // Store
   const modalStore = useAppSelector(selectModal);
   const theme = useAppSelector(selectTheme);
-  const currentLang = useAppSelector(selectLang);
+  const { lang: currentLang } = useAppSelector(selectUserPreferences);
 
   const dispatch = useAppDispatch();
 

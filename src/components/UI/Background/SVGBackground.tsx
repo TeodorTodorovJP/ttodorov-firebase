@@ -1,8 +1,8 @@
 import "./SVGBackground.css";
 import { useAppSelector } from "../../../app/hooks";
-import { selectTheme } from "../../Navigation/navigationSlice";
 import { useEffect, useMemo, useState } from "react";
 import { isMobile } from "../../../app/utils";
+import { selectTheme } from "../../Navigation/themeSlice";
 
 const SVGBackground = () => {
   const { main: theme } = useAppSelector(selectTheme);
