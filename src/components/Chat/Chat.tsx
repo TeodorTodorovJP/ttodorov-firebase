@@ -63,16 +63,18 @@ const Chat = () => {
     }
   }, [usersError]);
 
+  const setOpacity = showRooms ? "100" : "0"
+
   return (
     <div className={classes.chat}>
-      {rooms && showRooms && (
-        <Card additionalClass="chatRooms">{rooms.length > 0 ? <ChatRooms /> : <p>No rooms</p>}</Card>
-      )}
+      <div style={{ opacity: setOpacity }}>
+        {rooms && <Card additionalClass="chatRooms">{rooms.length > 0 ? <ChatRooms /> : <p>No rooms</p>}</Card>}
+      </div>
       <Card additionalClass={`${showRooms ? "chatUsersHide" : "chatUsers"}`}>
         {isSuccess && !chatUsers.error && chatUsers.data.length > 0 ? <ChatUsers /> : <p>No Users</p>}
       </Card>
     </div>
-  );
+  )
 };
 
 export default Chat;

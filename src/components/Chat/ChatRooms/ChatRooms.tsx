@@ -22,72 +22,76 @@ const ChatRooms = () => {
   // console.log("ChatRooms");
 
   // Local state
-  const [activeRoom, setActiveRoom] = useState<ChatRoomsContent>(rooms[0]);
-  const [roomTabs, setRoomTabs] = useState<ChatRoomsContent[]>([]);
-  const [showTabs, setShowTabs] = useState(false);
+  const [activeRoom, setActiveRoom] = useState<string>(rooms[0].roomId)
+  const [roomTabs, setRoomTabs] = useState<ChatRoomsContent[]>([])
+  const [showTabs, setShowTabs] = useState(false)
+
+  interface UnreadRoomMessages {
+    [key: string]: number
+  }
+  const [unreadMessages, setUnreadMessages] = useState<UnreadRoomMessages>({})
 
   useEffect(() => {
-    let activeRoomId = "";
+    let activeRoomId = ""
     const currentTabs = rooms
       .filter((room) => room.isOpened)
       .map((currentRoom) => {
-        let room = { ...currentRoom };
-        if (room.active) activeRoomId = room.roomId;
-        room.tabClass = `${classes.tab} ${room.active ? classes.activeTab : ""}`;
-        return room;
-      });
-    setRoomTabs(currentTabs);
-    changeRoom(activeRoomId);
-  }, [rooms]);
-
-  // if ((profilePicStored && !imageData) || (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)) {
-  //   const foundImage = images(profilePicStored)[0];
-  //   if (foundImage) setImageData(foundImage);
-  // }
-
-  // useEffect(() => {
-  //   let revoke: Function | null;
-  //   if (
-  //     (profilePicStored && !imageData) ||
-  //     (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)
-  //   ) {
-  //     const getData = async () => {
-  //       const { blobUrl, revokeUrl } = await getBlobUrl(profilePicStored);
-  //       revoke = revokeUrl;
-  //       dispatch(addImageBlobUrl({ imageUrl: profilePicStored, blobUrl }));
-  //     };
-  //     getData();
-  //   }
-  //   return () => (revoke ? revoke(profilePicStored) : null);
-  // }, [profilePicStored, imageData]);
+        let room = { ...currentRoom }
+        if (room.active) activeRoomId = room.roomId
+        room.tabClass = `${classes.tab} ${room.active ? classes.activeTab : ""}`
+        return room
+      })
+    setRoomTabs(currentTabs)
+    changeRoom(activeRoomId)
+  }, [rooms])
 
   const changeRoom = (roomId: string) => {
-    const activateRoom = rooms.filter((room) => room.roomId == roomId)[0];
-    setActiveRoom(activateRoom);
+    // const activateRoom = rooms.filter((room) => room.roomId == roomId)[0];
+    setActiveRoom(roomId)
+    setUnreadMessages((prev) => {
+      const newObj = { ...prev }
+      delete newObj[roomId]
+      return newObj
+    })
     setRoomTabs((prev) => {
       const updatedClass = [...prev].map((currentTab) => {
-        let tab = { ...currentTab };
-        tab.tabClass = `${classes.tab} ${tab.roomId === roomId ? theme.decoration : ""}`;
-        return tab;
-      });
-      return updatedClass;
-    });
-  };
+        let tab = { ...currentTab }
+        tab.tabClass = `${classes.tab} ${tab.roomId === roomId ? theme.decoration : ""}`
+        return tab
+      })
+      return updatedClass
+    })
+  }
+
+  const listenForMessages = (activeRoomId: string) => {
+    return (roomId: string, numberOfNewMessages: number) => {
+      if (roomId !== activeRoomId) {
+        setUnreadMessages((prev) => {
+          const newObj = { ...prev }
+          if (newObj[roomId]) {
+            newObj[roomId] = newObj[roomId] + numberOfNewMessages
+          } else {
+            newObj[roomId] = numberOfNewMessages
+          }
+          return newObj
+        })
+      }
+    }
+  }
 
   const handleHideRooms = () => {
-    dispatch(setShowRooms({ showRooms: false }));
-  };
+    dispatch(setShowRooms({ showRooms: false }))
+  }
 
   const toggleTabs = () => {
-    setShowTabs(!showTabs);
-  };
+    setShowTabs(!showTabs)
+  }
 
   return (
     <div className={classes.chatRooms}>
       <button type="button" className={classes.goBackBtn} onClick={() => handleHideRooms()}>
         <CloseSVG />
       </button>
-
       <div className={`${classes.tabs}`}>
         <div className={`${classes.tabToggle} ${theme.svg}`} onClick={() => toggleTabs()}>
           <ChatSVG />
@@ -105,17 +109,22 @@ const ChatRooms = () => {
                 ) : (
                   <GenerateProfilePic names={room.otherUserNames} />
                 )}
+                {unreadMessages[room.roomId] && <div className={classes.notif}>{unreadMessages[room.roomId]}</div>}
               </div>
-            );
+            )
           })}
       </div>
-      {activeRoom && <ChatRoom key={activeRoom.roomId} room={activeRoom} />}
+      {rooms &&
+        rooms.map((room) => {
+          const setOpacity = room.roomId === activeRoom ? "100" : "0"
+          return (
+            <div key={room.roomId} style={{ opacity: setOpacity }}>
+              <ChatRoom key={room.roomId} room={room} notifyForMessages={listenForMessages(activeRoom)} />
+            </div>
+          )
+        })}
     </div>
-  );
-
-  // '<div class="spacing"><div class="pic"></div></div>' +
-  // '<div class="message"></div>' +
-  // '<div class="name"></div>' +
+  )
 };
 
 export default memo(ChatRooms);

@@ -213,6 +213,49 @@
     background: var(--theme-blue-el-btn);
 }
 
+.newMessages {
+    background: transparent;
+    fill: red;
+    border: none;
+    animation: 3000ms ease-in-out infinite 0s new-messages;
+}
+
+.newMessages > svg {
+    width: 3rem !important;
+    height: 3rem !important;
+}
+
+@keyframes new-messages {
+      0% {
+        transform: scale(1);
+        left: 0;
+      }
+      10% {
+        transform: scale(1);
+        left: 0;
+      }
+      30% {
+        transform: scale(1);
+        left: 0;
+      }
+      50% {
+        transform: scale(1.2);
+        left: 100%;
+      }
+      60% {
+        transform: scale(1);
+        left: 0;    
+      }
+      70% {
+        transform: scale(1);
+        left: 0;    
+      }
+      100% {
+        transform: scale(1);
+        left: 0;    
+      }
+}
+
 
 /* Web view */
 @media (min-width: 430px) {

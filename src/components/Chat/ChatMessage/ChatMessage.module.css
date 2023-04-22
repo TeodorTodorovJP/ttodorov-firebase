@@ -17,7 +17,14 @@
 }
 
 .image {
-    max-width: 35vw;
-    max-height: 30vh;
+    max-width: 60%;
     border-radius: 10px;
+    margin-left: 40%;
+}
+
+/* Mobile view */
+@media (max-width: 430px) {
+    .moveFront {
+        margin-right: 5rem;
+    }
 }

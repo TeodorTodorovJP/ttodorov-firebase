@@ -35,62 +35,68 @@ import { getAuth, signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
 import { getBlobUrl } from "../../app/utils";
-import { clearChatData } from "../Chat/chatSlice";
-import { toggleSVG } from "../UI/Background/backgroundSlice";
-import { ALL_THEMES, MainObj, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice";
+import { clearChatData, selectInbox, setInbox } from "../Chat/chatSlice"
+import { toggleSVG } from "../UI/Background/backgroundSlice"
+import { ALL_THEMES, MainObj, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice"
+import { useNavigate } from "react-router-dom"
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
 const Navigation = () => {
   // Store
-  const theme = useAppSelector(selectTheme);
-  const { lang } = useAppSelector(selectUserPreferences);
-  const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen);
-  const { profilePic, profilePicStored } = useAppSelector(selectUserData);
-  const waitingActions = useAppSelector(selectWaitingActions);
+  const theme = useAppSelector(selectTheme)
+  const { lang } = useAppSelector(selectUserPreferences)
+  const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen)
+  const { profilePic, profilePicStored } = useAppSelector(selectUserData)
+  const waitingActions = useAppSelector(selectWaitingActions)
+  const inboxData = useAppSelector(selectInbox)
 
-  const images = useAppSelector(selectImageBlobUrl);
+  const images = useAppSelector(selectImageBlobUrl)
 
-  const dispatch = useAppDispatch();
-  const [imageData, setImageData] = useState<Image | null>(null);
+  const dispatch = useAppDispatch()
+
+  // Router
+  const navigate = useNavigate()
+
+  const [imageData, setImageData] = useState<Image | null>(null)
 
   if ((profilePicStored && !imageData) || (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)) {
-    const foundImage = images(profilePicStored)[0];
-    if (foundImage) setImageData(foundImage);
+    const foundImage = images(profilePicStored)[0]
+    if (foundImage) setImageData(foundImage)
   }
 
   useEffect(() => {
     if (waitingActions.length > 0) {
       if (waitingActions.includes("changeDefaultTheme")) {
-        dispatch(saveThemeToLocalStorage());
-        dispatch(removeWaitingAction({ waitingAction: "changeDefaultTheme" }));
+        dispatch(saveThemeToLocalStorage())
+        dispatch(removeWaitingAction({ waitingAction: "changeDefaultTheme" }))
       }
     }
-  }, [waitingActions]);
+  }, [waitingActions])
 
   useEffect(() => {
-    let revoke: Function | null;
+    let revoke: Function | null
     if (
       (profilePicStored && !imageData) ||
       (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)
     ) {
       const getData = async () => {
-        const { blobUrl, revokeUrl } = await getBlobUrl(profilePicStored);
-        revoke = revokeUrl;
-        dispatch(addImageBlobUrl({ imageUrl: profilePicStored, blobUrl }));
-      };
-      getData();
+        const { blobUrl, revokeUrl } = await getBlobUrl(profilePicStored)
+        revoke = revokeUrl
+        dispatch(addImageBlobUrl({ imageUrl: profilePicStored, blobUrl }))
+      }
+      getData()
     }
-    return () => (revoke ? revoke(profilePicStored) : null);
-  }, [profilePicStored, imageData]);
+    return () => (revoke ? revoke(profilePicStored) : null)
+  }, [profilePicStored, imageData])
 
   // Texts
-  const { main, themeModal } = langs[lang as keyof Langs];
+  const { main, themeModal } = langs[lang as keyof Langs]
 
   // Context
-  const authCtx = useAuthContext();
-  const { isLoggedIn, logout } = authCtx;
+  const authCtx = useAuthContext()
+  const { isLoggedIn, logout } = authCtx
 
   const navLeftItems = [
     { path: "/", text: "Home", icon: <HomeSVG /> },
@@ -102,45 +108,45 @@ const Navigation = () => {
     <NavElement key={link.path} path={link.path} customStylingClass={theme.svg}>
       {link.icon}
     </NavElement>
-  ));
+  ))
 
   const logoutHandler = () => {
     // Context, local storage, state
-    logout();
+    logout()
     // Firebase
-    signOut(getAuth());
+    signOut(getAuth())
     // Store
-    dispatch(clearUserData());
-    dispatch(clearNavData());
-    dispatch(clearChatData());
+    dispatch(clearUserData())
+    dispatch(clearNavData())
+    dispatch(clearChatData())
     // Clear local state
-    setImageData(null);
-  };
+    setImageData(null)
+  }
 
-  let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide;
+  let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide
   const navLeftClickHandle = () => {
-    dispatch(setIsOpenToTrue({ item: "navLeftVisible", isOpen: !navLeftVisible }));
-  };
+    dispatch(setIsOpenToTrue({ item: "navLeftVisible", isOpen: !navLeftVisible }))
+  }
 
-  let navRightShowClass = navRightVisible ? classes.navRightItemsShow : classes.navRightItemsHide;
+  let navRightShowClass = navRightVisible ? classes.navRightItemsShow : classes.navRightItemsHide
   const navRightClickHandle = () => {
-    dispatch(setIsOpenToTrue({ item: "navRightVisible", isOpen: !navRightVisible }));
-    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: false }));
-  };
+    dispatch(setIsOpenToTrue({ item: "navRightVisible", isOpen: !navRightVisible }))
+    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: false }))
+  }
 
   const changeThemeHandle = (toTheme: string) => {
-    if (toTheme === theme.main) return;
+    if (toTheme === theme.main) return
 
     if (toTheme === "svg") {
-      dispatch(toggleSVG());
+      dispatch(toggleSVG())
     } else {
-      let changeTheme: MainObj = { main: toTheme } as MainObj;
-      dispatch(setTheme(changeTheme));
+      let changeTheme: MainObj = { main: toTheme } as MainObj
+      dispatch(setTheme(changeTheme))
     }
-  };
+  }
 
   const saveThemeHandle = () => {
-    const message = themeModal.message.replace("${}", theme.main);
+    const message = themeModal.message.replace("${}", theme.main)
 
     const modalObj: Modal = {
       action: "changeDefaultTheme",
@@ -148,28 +154,43 @@ const Navigation = () => {
       message: message,
       agree: themeModal.agree,
       deny: themeModal.deny,
-    };
-
-    const currentTheme = localStorage.getItem("theme");
-    if (theme.main === currentTheme) {
-      modalObj.message = themeModal.messageDone;
-      modalObj.agree = themeModal.agreeDone;
-      modalObj.deny = null;
     }
 
-    dispatch(setModal(modalObj));
-  };
+    const currentTheme = localStorage.getItem("theme")
+    if (theme.main === currentTheme) {
+      modalObj.message = themeModal.messageDone
+      modalObj.agree = themeModal.agreeDone
+      modalObj.deny = null
+    }
 
-  let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide;
+    dispatch(setModal(modalObj))
+  }
+
+  let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide
   const handleToggleTheme = () => {
-    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: !showThemes }));
-  };
+    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: !showThemes }))
+  }
 
   const handleToggleLanguage = () => {
-    const setLang = lang == "bg" ? "en" : "bg";
-    dispatch(setUserPreferences({ lang: setLang }));
-    dispatch(saveLangToLocalStorage());
-  };
+    const setLang = lang == "bg" ? "en" : "bg"
+    dispatch(setUserPreferences({ lang: setLang }))
+    dispatch(saveLangToLocalStorage())
+  }
+
+  const handleNewMessageNotif = () => {
+    if (inboxData) {
+      const updatedInbox = Object.values(inboxData)
+        .map((obj) => Object.values(obj))
+        .flat()
+        .map((message) => {
+          return { ...message, userClickedNotif: true }
+        })
+      dispatch(setInbox({ inboxData: updatedInbox }))
+    }
+    navigate("/chat")
+  }
+
+  const isInChat = window.location.pathname === "/chat"
 
   return (
     <>
@@ -184,6 +205,11 @@ const Navigation = () => {
             >
               <HamburgerMenu />
             </button>
+            {inboxData && !isInChat && (
+              <button onClick={() => handleNewMessageNotif()} className={classes.newMessages}>
+                <ChatSVG />
+              </button>
+            )}
           </div>
 
           <nav className={navLeftShowClass}>
@@ -272,7 +298,7 @@ const Navigation = () => {
         </div>
       </header>
     </>
-  );
-};
+  )
+}
 
 export default Navigation;

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import classes from "./GenerateProfilePic.module.css";
 
-const GenerateProfilePic = (props: { names: string }) => {
+const GenerateProfilePic = (props: { names: string; className?: string }) => {
   const names = props.names;
   const nameType = +names.indexOf(".") === -1 ? "name" : "email";
 
@@ -19,8 +19,10 @@ const GenerateProfilePic = (props: { names: string }) => {
   const firstLetter = firstName.charAt(0).toUpperCase();
   const secondLetter = secondName.charAt(0).toUpperCase();
 
+  const addClass = props.className ? props.className : "";
+
   return (
-    <div className={classes.profilePic}>
+    <div className={`${classes.profilePic} ${addClass}`}>
       <p>{firstLetter}</p>
       <p>{secondLetter}</p>
     </div>

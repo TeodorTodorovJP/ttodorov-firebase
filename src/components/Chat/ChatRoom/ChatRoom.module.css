@@ -2,10 +2,12 @@
 
 .ChatRoom {
     display: flex;
+    position: absolute;
     flex-direction: column;
     min-height: 74vh;
     max-height: 74vh;
     height: 74vh;
+    width: 92%;
 }
 
 .Header {
@@ -94,6 +96,7 @@ To fix that, this code hides it for the mobile first approach
         bottom: -1rem;
         right: -1rem;
         justify-content: flex-end;
+        width: 40vw;
     }
     .chatMessages {
         gap: 1rem;

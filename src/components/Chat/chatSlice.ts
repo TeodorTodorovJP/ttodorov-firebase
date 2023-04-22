@@ -15,55 +15,62 @@ import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnaps
 import { fireStore } from "../../firebase-config";
 import { UserData } from "../Auth/userSlice";
 import { getDateDataInUTC } from "../../app/utils";
+import { InboxMessage } from "./chatApi"
 
-type UsersArr = UserData[] | [];
+type UsersArr = UserData[] | []
 
 export interface ChatRoomsContent {
-  creator: string;
-  userNames: string;
-  roomId: string;
-  timestamp: Date | string;
-  otherUserNames: string;
-  otherUserId: string;
-  otherUserImage: string;
-  isOpened: boolean;
-  active: boolean;
-  tabClass: string;
+  creator: string
+  userNames: string
+  roomId: string
+  timestamp: Date | string
+  otherUserNames: string
+  otherUserId: string
+  otherUserImage: string
+  isOpened: boolean
+  active: boolean
+  tabClass: string
+  messages: []
 }
-export type UserRoomsArr = ChatRoomsContent[] | [];
+export type UserRoomsArr = ChatRoomsContent[] | []
 
 interface OpenRoomProps {
-  userId: string;
-  userNames: string;
-  otherUserId: string;
-  otherUserImage: string;
-  otherUserNames: string;
+  userId: string
+  userNames: string
+  otherUserId: string
+  otherUserImage: string
+  otherUserNames: string
 }
 
 export interface ChatState {
-  userRooms: UserRoomsArr;
-  users: EntityState<UserData>;
-  status: string;
-  showRooms: boolean;
+  userRooms: UserRoomsArr
+  users: EntityState<UserData>
+  status: string
+  showRooms: boolean
+  inbox: MessageDataObj | null
 }
 
 export interface MessageData {
-  userId: string;
-  name: string;
-  text: string;
-  imageUrl: string;
-  profilePicUrl: string;
-  timestamp: string;
-  serverTime?: any; // Times stamp from firebase server, don't use
+  userId: string
+  name: string
+  text: string
+  imageUrl: string
+  profilePicUrl: string
+  timestamp: string
+  serverTime?: any // Times stamp from firebase server, don't use
 }
 
-export type MessageDataArr = MessageData[] | [];
+export type MessageDataArr = MessageData[] | []
+
+export interface MessageDataObj {
+  [key: string]: Record<string, InboxMessage>
+}
 
 // use createDraftSafeSelector for getting data from other reducers
 const usersAdapter = createEntityAdapter<UserData>({
   //selectId: (user) => user.id, // example, not needed
   // sortComparer: (a, b) => b.timestamp.localeCompare(a.timestamp),
-});
+})
 
 const getMainInitialState = () => {
   const newState: ChatState = {
@@ -71,10 +78,11 @@ const getMainInitialState = () => {
     users: usersAdapter.getInitialState(),
     status: "idle",
     showRooms: false,
-  };
-  return newState;
-};
-const initialState = getMainInitialState();
+    inbox: null,
+  }
+  return newState
+}
+const initialState = getMainInitialState()
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This
@@ -85,23 +93,23 @@ const initialState = getMainInitialState();
 
 export const fetchUsers = (): AppThunk => async (dispatch) => {
   try {
-    const usersCollectionQuery = query(collection(fireStore, "users"));
-    console.log("listenToNotifications");
+    const usersCollectionQuery = query(collection(fireStore, "users"))
+    console.log("listenToNotifications")
     const unsubscribe = onSnapshot(usersCollectionQuery, (querySnapshot) => {
       // This will trigger when a new room is added
       querySnapshot.docChanges().forEach((change) => {
         // types: "added", "modified", "removed"
-        console.log("Type: ", change.type);
-        const changeData = change.doc.data();
-        console.log("changeData: ", changeData);
-      });
-    });
+        console.log("Type: ", change.type)
+        const changeData = change.doc.data()
+        console.log("changeData: ", changeData)
+      })
+    })
 
-    return unsubscribe;
+    return unsubscribe
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
-};
+}
 
 export const chatSlice = createSlice({
   name: "chat",
@@ -109,30 +117,30 @@ export const chatSlice = createSlice({
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     openNewRoom: (state, action: PayloadAction<OpenRoomProps>) => {
-      const { userId, userNames, otherUserId, otherUserImage, otherUserNames } = action.payload;
+      const { userId, userNames, otherUserId, otherUserImage, otherUserNames } = action.payload
 
-      const newRoomId = "room" + [userId, otherUserId].sort().join("");
+      const newRoomId = "room" + [userId, otherUserId].sort().join("")
 
-      const prev = state.userRooms;
-      let roomFound = false;
+      const prev = state.userRooms
+      let roomFound = false
       const updatedRooms = prev.map((currentRoom) => {
-        let room = { ...currentRoom };
+        let room = { ...currentRoom }
 
         if (room.roomId === newRoomId) {
-          room.otherUserNames = otherUserNames;
-          room.isOpened = true;
-          room.active = true;
-          room.tabClass = "";
-          roomFound = true;
+          room.otherUserNames = otherUserNames
+          room.isOpened = true
+          room.active = true
+          room.tabClass = ""
+          roomFound = true
         } else {
-          room.active = false;
+          room.active = false
         }
-        return room;
-      });
+        return room
+      })
 
       if (!roomFound) {
         // add room to local array
-        const { utcDate: timestamp } = getDateDataInUTC();
+        const { utcDate: timestamp } = getDateDataInUTC()
 
         updatedRooms.push({
           creator: userId,
@@ -145,43 +153,52 @@ export const chatSlice = createSlice({
           isOpened: true,
           active: true,
           tabClass: "",
-        });
+          messages: [],
+        })
       }
-      state.userRooms = updatedRooms;
-      state.showRooms = true;
+      state.userRooms = updatedRooms
+      state.showRooms = true
     },
     closeRoom: (state, action: PayloadAction<{ roomId: string }>) => {
-      const { roomId } = action.payload;
+      const { roomId } = action.payload
 
-      const prev = state.userRooms;
-      let assignedActive = false;
+      const prev = state.userRooms
+      let assignedActive = false
 
-      const updatedRooms = prev.map((room) => {
-        if (room.roomId === roomId) {
-          room.isOpened = false;
-          room.active = false;
-        } else if (room.isOpened && !assignedActive) {
-          assignedActive = true;
-          room.active = true;
-        }
-        return room;
-      });
-      state.userRooms = updatedRooms;
+      const updatedRooms = prev
+        .filter((room) => {
+          return room.roomId !== roomId
+        })
+        .map((room) => {
+          if (room.roomId === roomId) {
+            room.isOpened = false
+            room.active = false
+          } else if (room.isOpened && !assignedActive) {
+            assignedActive = true
+            room.active = true
+          }
+          return room
+        })
+      state.userRooms = updatedRooms
 
       if (!assignedActive) {
-        state.showRooms = false;
+        state.showRooms = false
       }
     },
     setShowRooms: (state, action: PayloadAction<{ showRooms: boolean }>) => {
-      const { showRooms } = action.payload;
+      const { showRooms } = action.payload
 
-      state.showRooms = showRooms;
+      state.showRooms = showRooms
+      state.userRooms = state.userRooms.map((room) => {
+        room.active = false
+        return room
+      })
     },
     addUsers: {
       // Left here only as an example.
       // It's replaced by rtkq - useGetUsersQuery
       reducer(state, action: PayloadAction<UsersArr>) {
-        usersAdapter.upsertMany(state.users, action.payload);
+        usersAdapter.upsertMany(state.users, action.payload)
 
         // const updatedState = { ...state.users.entities };
         // let newUser = false;
@@ -199,14 +216,45 @@ export const chatSlice = createSlice({
       prepare(payload: UserData[]) {
         const preparedPayload = payload.map((user) => {
           // user.timestamp = JSON.stringify(user.timestamp);
-          return user;
-        });
+          return user
+        })
         return {
           payload: preparedPayload,
-        };
+        }
       },
     },
     clearChatData: (state) => getMainInitialState(),
+    setInbox: (state, action: PayloadAction<{ inboxData: InboxMessage[] | null }>) => {
+      const { inboxData } = action.payload
+
+      if (inboxData === null) {
+        state.inbox = null
+      } else {
+        let uniqueMessages: MessageDataObj = {}
+
+        inboxData.forEach((msg) => {
+          if (uniqueMessages[msg.roomId]) {
+            if (!uniqueMessages[msg.roomId][msg.timestamp]) {
+              uniqueMessages[msg.roomId][msg.timestamp] = msg
+            }
+          } else {
+            uniqueMessages[msg.roomId] = {}
+            uniqueMessages[msg.roomId][msg.timestamp] = msg
+          }
+        })
+
+        state.inbox = uniqueMessages
+      }
+    },
+    deleteInboxMessages: (state, action: PayloadAction<{ roomId: string }>) => {
+      const { roomId } = action.payload
+      if (state.inbox) {
+        delete state.inbox[roomId]
+        if (Object.values(state.inbox).length === 0) {
+          state.inbox = null
+        }
+      }
+    },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,
   // including actions generated by createAsyncThunk or in other slices.
@@ -223,15 +271,18 @@ export const chatSlice = createSlice({
   //       state.status = "failed";
   //     });
   // },
-});
+})
 
-export const { addUsers, openNewRoom, closeRoom, setShowRooms, clearChatData } = chatSlice.actions;
+export const { addUsers, openNewRoom, closeRoom, setShowRooms, clearChatData, setInbox, deleteInboxMessages } =
+  chatSlice.actions
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
-export const selectUserRooms = (state: RootState) => state.chat.userRooms;
-export const selectShowRooms = (state: RootState) => state.chat.showRooms;
+export const selectUserRooms = (state: RootState) => state.chat.userRooms
+export const selectActiveRoom = (state: RootState) => state.chat.userRooms.filter((room) => room.active)[0]
+export const selectShowRooms = (state: RootState) => state.chat.showRooms
+export const selectInbox = (state: RootState) => state.chat.inbox
 
 // export const selectUsers = (state: RootState) => Object.values(state.chat.users.entities);
 

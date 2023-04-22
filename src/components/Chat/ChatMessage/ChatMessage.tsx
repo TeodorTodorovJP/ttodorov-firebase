@@ -5,7 +5,7 @@ import { addImageBlobUrl, selectImageBlobUrl, UserData } from "../../Auth/userSl
 import { MessageData } from "../chatSlice";
 import classes from "./ChatMessage.module.css";
 
-const ChatMessage = (props: { isLast: boolean; data: MessageData; otherUser: UserData }) => {
+const ChatMessage = (props: { isFront: boolean; data: MessageData; otherUser: UserData }) => {
   const { name, userId, text, timestamp, profilePicUrl, imageUrl } = props.data;
   const { id: otherUserId, names: otherNames, email: otherEmail, profilePic: otherPic } = props.otherUser;
 
@@ -35,36 +35,18 @@ const ChatMessage = (props: { isLast: boolean; data: MessageData; otherUser: Use
     return () => (revoke ? revoke(imageUrl) : null);
   }, [imageUrl]);
 
-  // Adds a size to Google Profile pics URLs.
-  const addSizeToGoogleProfilePic = (url: string) => {
-    if (url.indexOf("googleusercontent.com") !== -1 && url.indexOf("?") === -1) {
-      return url + "?sz=150";
-    }
-    return url;
-  };
-
-  let messageContent = <p></p>;
   const isOther = userId === otherUserId;
 
   const sideClass = isOther ? classes.leftSide : classes.rightSide;
 
-  if (profilePicUrl) {
-    let backgroundImage = "url(" + addSizeToGoogleProfilePic(profilePicUrl) + ")";
-    messageContent = <p style={{ backgroundImage: backgroundImage }}>{text}</p>;
-  }
-  // if (props.imageUrl) {
-  //     content = <img src={props.imageUrl + "&" + new Date().getTime()} alt="Girl in a jacket" width="500" height="600"/>
-  // }
+  const moveFront = props.isFront && !isOther ? classes.moveFront : "";
+
   return (
-    <div className={sideClass} ref={messageRef}>
+    <div className={`${sideClass} ${moveFront}`} ref={messageRef}>
       {text && <p className={classes.text}>{text}</p>}
       {imageData && <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />}
     </div>
   );
-
-  // '<div class="spacing"><div class="pic"></div></div>' +
-  // '<div class="message"></div>' +
-  // '<div class="name"></div>' +
 };
 
 export default ChatMessage;
