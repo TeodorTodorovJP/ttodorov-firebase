@@ -8,6 +8,16 @@ import "./index.css";
 import { AuthContextProvider } from "./app/auth-context";
 import RouterWrap from "./RouterWrap";
 
+/**
+ * This is the entry point of the application that renders the React component tree.
+ * It creates a root container element, attaches it to the DOM, and renders the App component inside it.
+ * The App component is wrapped with React.StrictMode to detect potential problems in the application.
+ * The AuthContextProvider component provides the authentication context to the app.
+ * The Provider component is used to provide the redux store to the app.
+ * The RouterWrap component is the top-level component for routing.
+ * @module - Root Rendering index
+*/
+
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 
@@ -21,7 +31,4 @@ root.render(
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// reportWebVitals();

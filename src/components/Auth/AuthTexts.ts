@@ -1,23 +1,26 @@
+/**
+ * Exports the translated texts needed for AuthForm in Bulgarian and English
+ */
 export interface Langs {
-  bg: Lang;
-  en: Lang;
+  bg: Lang
+  en: Lang
 }
 
 interface Lang {
-  main: Main;
+  main: Main
 }
 
 interface Main {
-  login: string;
-  email: string;
-  goBack: string;
-  options: string;
-  createAccount: string;
-  goToLogin: string;
-  yourEmail: string;
-  yourPassword: string;
-  googleSignIn: string;
-  anonymousSignIn: string;
+  login: string
+  email: string
+  goBack: string
+  options: string
+  createAccount: string
+  goToLogin: string
+  yourEmail: string
+  yourPassword: string
+  googleSignIn: string
+  anonymousSignIn: string
 }
 
 export const langs: Langs = {
@@ -49,4 +52,4 @@ export const langs: Langs = {
       anonymousSignIn: "Влезте като анонимен потребител",
     },
   },
-};
+}

@@ -2,6 +2,11 @@ import { initializeApp } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
 import { getStorage, ref } from "firebase/storage"
 
+/**
+ * @module
+ * @ignore
+ */
+
 const config = {
   apiKey: "AIzaSyB-oRc7j1XHEkdr4ZkEM3crAIU7Yrx-EBo",
   authDomain: "ttodorovnet.firebaseapp.com",

@@ -1,0 +1,4 @@
+
+> ttodorov-firebase@0.1.0 docgen
+> react-docgen --pretty --resolver=findAllComponentDefinitions src/components/Auth/**/*.tsx
+

@@ -1,7 +1,17 @@
 import { memo } from "react";
 import classes from "./GenerateProfilePic.module.css";
 
-const GenerateProfilePic = (props: { names: string; className?: string }) => {
+/**
+ * GenerateProfilePic Component
+ *
+ * A functional React component that generates profile picture initials based on a given name or email.
+ *
+ * Props - description of all props in this format.
+ * - names: A string input that accepts a name or email. The component splits the string and uses the initials for the profile picture.
+ * - className (optional): A string to apply custom CSS classes.
+ *
+ */
+export const GenerateProfilePic = (props: { names: string; className?: string }) => {
   const names = props.names;
   const nameType = +names.indexOf(".") === -1 ? "name" : "email";
 

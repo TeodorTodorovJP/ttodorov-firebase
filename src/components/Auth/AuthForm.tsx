@@ -1,83 +1,100 @@
-import { useState, useRef, FormEvent, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useRef, FormEvent, useEffect } from "react"
+import Card from "../UI/Card"
+import classes from "./authForm.module.css"
+import { useAppDispatch, useAppSelector } from "../../app/hooks"
+import { setModal } from "../Navigation/navigationSlice"
+import { langs, Langs } from "./authTexts"
+import useError from "../CustomHooks/useError"
+import { selectUserPreferences } from "./userSlice"
+import { ReactComponent as Eye } from "./SVG/eye.svg"
+import { ReactComponent as EyeOff } from "./SVG/eyeOff.svg"
+import { selectTheme } from "../Navigation/themeSlice"
 
-import useAuthContext from "../../app/auth-context";
-import Card from "../UI/Card";
-import classes from "./AuthForm.module.css";
-
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setModal } from "../Navigation/navigationSlice";
-import { langs, Langs } from "./AuthTexts";
-import useError from "../CustomHooks/useError";
-
-import { selectUserData, selectUserPreferences } from "./userSlice";
-
+import { addDoc, collection } from "firebase/firestore"
+import { fireStore } from "../../firebase-config"
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signInAnonymously,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updatePassword,
-} from "firebase/auth";
-import { addDoc, collection } from "firebase/firestore";
-import { fireStore } from "../../firebase-config";
-import { FirebaseError } from "firebase/app";
-import { ReactComponent as Eye } from "./SVG/eye.svg";
-import { ReactComponent as EyeOff } from "./SVG/eyeOff.svg";
-import { selectTheme } from "../Navigation/themeSlice";
+} from "firebase/auth"
 
-const AuthForm = () => {
-  // store
-  const { button } = useAppSelector(selectTheme);
-  const { lang: currentLang } = useAppSelector(selectUserPreferences);
-  const userData = useAppSelector(selectUserData);
-  const dispatch = useAppDispatch();
+/**
+ * AuthForm Component
+ *
+ * A component providing multiple authentication options for users, including Email and Google sign-in.
+ *
+ * Props - No props are used in this component.
+ *
+ * State -
+ * - authMethod: Maintains the current selected method of authentication.
+ * - isLogin: Maintains the status if the user is logging in or creating a new account.
+ * - passwordVisible: Maintains the visibility status of the password.
+ *
+ * Custom Hooks -
+ * - useAppDispatch: This hook is provided by Redux Toolkit to dispatch actions.
+ * - useAppSelector: This hook is provided by Redux Toolkit to select data from the Redux store.
+ * - useError: This is a custom hook that returns an array where the first element is the error and the second element is a function to set the error.
+ *
+ * Functions -
+ * - switchEmailAuthModeHandler: Switches between "Create an account" and "Login to an existing account" modes.
+ * - switchAuthMethodHandler: Switches login method between Email and Google.
+ * - saveError: Function to save any error to Firebase (Currently not in use).
+ * - anonymousSignIn: Initiates an anonymous sign-in process using Firebase authentication (Currently not in use).
+ * - googleSignIn: Initiates a Google sign-in process using Firebase authentication.
+ * - updateProfilePassword: Updates the password of the current user (Currently not in use).
+ * - togglePassword: Toggles the visibility of a password.
+ * - submitHandler: Handles form submission for user Email login, and provides appropriate error messages based on the type of error encountered.
+ */
+export const AuthForm = () => {
+  /** Access store */
+  const dispatch = useAppDispatch()
+  const { button } = useAppSelector(selectTheme)
+  const { lang: currentLang } = useAppSelector(selectUserPreferences)
 
-  // context
-  const authCtx = useAuthContext();
+  /** Local state */
+  type AuthMethod = "options" | "email" | "google" | "anonymous" | "changePassword"
+  const [authMethod, setAuthMethod] = useState<AuthMethod>("options")
+  const [isLogin, setIsLogin] = useState(true)
+  const [passwordVisible, setPasswordVisible] = useState(false)
 
-  // local state
-  const [isLogin, setIsLogin] = useState(true);
+  /** Error hooks */
+  const [emailError, setEmailError] = useError()
+  const [passwordError, setPasswordError] = useError()
+  const [generalError, setGeneralError] = useError()
 
-  type AuthMethod = "options" | "email" | "google" | "anonymous" | "changePassword";
-  const [authMethod, setAuthMethod] = useState<AuthMethod>("options");
+  const emailInputRef = useRef<HTMLInputElement>(null)
+  const passwordInputRef = useRef<HTMLInputElement>(null)
+  const newPasswordInputRef = useRef<HTMLInputElement>(null)
 
-  const [emailError, setEmailError] = useError();
-  const [passwordError, setPasswordError] = useError();
-  const [generalError, setGeneralError] = useError();
-
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const passwordInputRef = useRef<HTMLInputElement>(null);
-  const newPasswordInputRef = useRef<HTMLInputElement>(null);
-  const [passwordVisible, setPasswordVisible] = useState(false);
-
-  let provider = useRef<GoogleAuthProvider>();
+  /** Setup the GoogleAuthProvider for the googleSignIn method */
+  let provider = useRef<GoogleAuthProvider>()
   useEffect(() => {
     try {
-      provider.current = new GoogleAuthProvider();
+      provider.current = new GoogleAuthProvider()
     } catch (error) {
-      setGeneralError(error);
+      setGeneralError(error)
     }
-  }, []);
+  }, [])
 
+  /** Handle all hook errors */
   useEffect(() => {
     if (emailError === 0 || passwordError === 0 || generalError === 0) {
       // default error modal
-      console.log("default error");
-      dispatch(setModal({ modalType: "error" }));
-      setEmailError(null);
-      setPasswordError(null);
+      dispatch(setModal({ modalType: "error" }))
+      setEmailError(null)
+      setPasswordError(null)
     } else if (generalError) {
-      setGeneralError(null);
-      dispatch(setModal({ message: generalError }));
+      setGeneralError(null)
+      dispatch(setModal({ message: generalError }))
     }
-  }, [emailError, passwordError, generalError]);
+  }, [emailError, passwordError, generalError])
 
-  // Texts
-  const { main } = langs[currentLang as keyof Langs];
+  /** Access all text translations */
+  const { main } = langs[currentLang as keyof Langs]
 
   // const errorDelay = 1000;
   // let waitUserEmail: ReturnType<typeof setTimeout>;
@@ -95,54 +112,78 @@ const AuthForm = () => {
   //   }, errorDelay);
   // };
 
-  const switchAuthModeHandler = () => {
-    setIsLogin((prevState) => !prevState);
-  };
+  /**
+   * Applicable only for the Email login
+   * Switches between Create an account and Login to an existing account
+   */
+  const switchEmailAuthModeHandler = () => {
+    setIsLogin((prevState) => !prevState)
+  }
 
+  /**
+   * Switches login method between Email and Google
+   */
   const switchAuthMethodHandler = (method: AuthMethod) => {
-    setAuthMethod(method);
-  };
+    setAuthMethod(method)
+  }
 
-  // Saves error message to Cloud Firestore.
-  // Try to use anonymous way of credentials to avoid required auth errors
+  /**
+   * TODO: not working yet
+   * Saves and Error to Firebase.
+   * Intended for use only when logged in anonymously.
+   * When user generates errors, we can log them in Firebase with some form of credential.
+   */
   const saveError = async (error: object) => {
     // Add a new message entry to the Firebase database.
     try {
       await addDoc(collection(fireStore, "errors"), {
         error: JSON.stringify(error),
-      });
+      })
     } catch (error) {
-      console.error("Error writing new message to Firebase Database", error);
+      console.error("Error writing new message to Firebase Database", error)
     }
-  };
+  }
 
+  /**
+   * This function signs in a user anonymously.
+   * Removed from the options.
+   * Generated too many anonymous logins.
+   */
   const anonymousSignIn = () => {
-    dispatch(setModal({ modalType: "loader" }));
+    dispatch(setModal({ modalType: "loader" }))
     try {
-      signInAnonymously(getAuth());
+      signInAnonymously(getAuth())
     } catch (error: any) {}
-  };
+  }
 
+  /**
+   * This function initiates a Google sign-in process using Firebase authentication and displays a loader
+   * modal while waiting for the sign-in to complete.
+   */
   const googleSignIn = () => {
-    dispatch(setModal({ modalType: "loader" }));
+    dispatch(setModal({ modalType: "loader" }))
     if (provider.current) {
       // Sign in Firebase using popup auth and Google as the identity provider.
       signInWithPopup(getAuth(), provider.current).catch((error) => {
         if (error.message.includes("auth/popup-closed-by-user")) {
-          dispatch(setModal({ useModal: false }));
+          dispatch(setModal({ useModal: false }))
         } else {
-          setGeneralError(error);
+          setGeneralError(error)
         }
-      });
+      })
     }
-  };
+  }
 
+  /**
+   * TODO: not working yet
+   * This function updates the password of the current user.
+   */
   const updateProfilePassword = () => {
-    const auth = getAuth();
+    const auth = getAuth()
 
-    const newPassword = newPasswordInputRef.current?.value;
+    const newPassword = newPasswordInputRef.current?.value
     if (auth && newPassword) {
-      const user = auth.currentUser;
+      const user = auth.currentUser
       if (user) {
         updatePassword(user, newPassword)
           .then(() => {
@@ -151,40 +192,50 @@ const AuthForm = () => {
           .catch((error) => {
             // An error ocurred
             // ...
-          });
+          })
       }
     }
-  };
+  }
 
+  /**
+   * The function toggles the visibility of a password.
+   */
   const togglePassword = () => {
-    setPasswordVisible(!passwordVisible);
-  };
+    setPasswordVisible(!passwordVisible)
+  }
 
+  /**
+   * This function handles form submission for user Email login, displaying appropriate error messages
+   * based on the type of error encountered.
+   * @param {FormEvent} event - FormEvent is a type of event that is triggered when a form is submitted.
+   * It contains information about the form submission, such as the form data and the submit button that
+   * was clicked. In this code, the submitHandler function is called when the form is submitted, and the
+   * event parameter is used to
+   */
   const submitHandler = (event: FormEvent) => {
-    event.preventDefault();
-    setEmailError(null);
-    setPasswordError(null);
-    dispatch(setModal({ modalType: "loader" }));
-    const enteredEmail = emailInputRef.current?.value;
-    const enteredPassword = passwordInputRef.current?.value;
+    event.preventDefault()
+    setEmailError(null)
+    setPasswordError(null)
+    dispatch(setModal({ modalType: "loader" }))
+    const enteredEmail = emailInputRef.current?.value
+    const enteredPassword = passwordInputRef.current?.value
 
     if (enteredEmail && enteredPassword) {
-      const authRequest = isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
+      const authRequest = isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword
 
       authRequest(getAuth(), enteredEmail, enteredPassword).catch((error) => {
-        dispatch(setModal({ useModal: false }));
-        const errorCode = error.code;
+        dispatch(setModal({ useModal: false }))
+        const errorCode = error.code
         if (errorCode.includes("email")) {
-          setEmailError(error);
+          setEmailError(error)
         } else if (errorCode.includes("password")) {
-          setPasswordError(error);
+          setPasswordError(error)
         } else {
-          console.log("from submitHandler");
-          setGeneralError(error);
+          setGeneralError(error)
         }
-      });
+      })
     }
-  };
+  }
 
   return (
     <Card additionalClass="authForm">
@@ -236,7 +287,7 @@ const AuthForm = () => {
               <div className={classes.actions}>
                 <div className={classes.emailAuth}>
                   <button className={button}>{isLogin ? main.login : main.createAccount}</button>
-                  <button type="button" className={button} onClick={switchAuthModeHandler}>
+                  <button type="button" className={button} onClick={switchEmailAuthModeHandler}>
                     {isLogin ? main.createAccount : main.goToLogin}
                   </button>
                 </div>
@@ -246,7 +297,7 @@ const AuthForm = () => {
         )}
       </section>
     </Card>
-  );
-};
+  )
+}
 
-export default AuthForm;
+export default AuthForm

@@ -13,11 +13,12 @@ export const backgroundSlice = createSlice({
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
+    /** Shows/hides the SVG background. */
     toggleSVG: (state) => {
-      state.svg = !state.svg;
+      state.svg = !state.svg
     },
   },
-});
+})
 
 export const { toggleSVG } = backgroundSlice.actions;
 

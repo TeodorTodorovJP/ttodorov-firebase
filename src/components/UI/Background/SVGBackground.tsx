@@ -4,32 +4,44 @@ import { useEffect, useMemo, useState } from "react";
 import { isMobile } from "../../../app/utils";
 import { selectTheme } from "../../Navigation/themeSlice";
 
-const SVGBackground = () => {
-  const { main: theme } = useAppSelector(selectTheme);
+/**
+ * SVGBackground Component.
+ * 
+ * The component is not used, because it's not optimized. 
+ * The SVG elements take too long to load.
+ * 
+ * Uses the screen size to generate svg shapes and place them around the screen.
+*/
+export const SVGBackground = () => {
+  const { main: theme } = useAppSelector(selectTheme)
 
-  const [windowHeight, setWindowHeight] = useState<number>();
-  const [windowWidth, setWindowWidth] = useState<number>();
-  const [viewHeight, setViewHeight] = useState<number>();
+  const [windowHeight, setWindowHeight] = useState<number>()
+  const [windowWidth, setWindowWidth] = useState<number>()
+  const [viewHeight, setViewHeight] = useState<number>()
 
+  /**
+   * If the user is in web and resizes the window, wait for 500ms to apply the changes.
+   */
   useEffect(() => {
     // Set sizes on init
-    setSizes();
+    setSizes()
     if (!isMobile()) {
-      const delay = 500;
-      let waitUserResize: ReturnType<typeof setTimeout>;
+      const delay = 500
+      let waitUserResize: ReturnType<typeof setTimeout>
       window.addEventListener("resize", () => {
-        clearTimeout(waitUserResize);
+        clearTimeout(waitUserResize)
         waitUserResize = setTimeout(() => {
-          setSizes();
-        }, delay);
-      });
+          setSizes()
+        }, delay)
+      })
     }
-  }, []);
+  }, [])
 
+  /** Reads all possible screen parameters and set's the maximum size. */
   const setSizes = () => {
     // Find the size of the screen
-    const body = document.body;
-    const html = document.documentElement;
+    const body = document.body
+    const html = document.documentElement
 
     const windowMaxHeight: number = Math.max(
       body.scrollHeight,
@@ -37,15 +49,15 @@ const SVGBackground = () => {
       html.clientHeight,
       html.scrollHeight,
       html.offsetHeight
-    );
+    )
 
     /* This is to help with window resize when address bar is hidden*/
-    const addressBarHeight = window.innerHeight - document.documentElement.clientHeight;
-    const windowHeight = windowMaxHeight + addressBarHeight;
+    const addressBarHeight = window.innerHeight - document.documentElement.clientHeight
+    const windowHeight = windowMaxHeight + addressBarHeight
 
     /* This is to help with window resize when address bar is hidden*/
     // 100vh + addressBarVH
-    const vhFromPx = 100 + Math.trunc(addressBarHeight / windowMaxHeight);
+    const vhFromPx = 100 + Math.trunc(addressBarHeight / windowMaxHeight)
 
     const windowWidth: number = Math.max(
       body.scrollWidth,
@@ -53,17 +65,18 @@ const SVGBackground = () => {
       html.clientWidth,
       html.scrollWidth,
       html.offsetWidth
-    );
+    )
 
-    setWindowHeight(windowHeight);
-    setWindowWidth(windowWidth);
-    setViewHeight(vhFromPx);
-  };
+    setWindowHeight(windowHeight)
+    setWindowWidth(windowWidth)
+    setViewHeight(vhFromPx)
+  }
 
+  /** Prepares the svg shapes based on the screen sizes. */
   const getSvgShapes = () => {
     // const windowHeight: number = +window.innerHeight;
     // const windowWidth: number = +window.innerWidth;
-    if (windowHeight === undefined || windowWidth === undefined) return;
+    if (windowHeight === undefined || windowWidth === undefined) return
 
     const shapesDimensions = [
       // Width, Height of point
@@ -116,30 +129,31 @@ const SVGBackground = () => {
         bLeft: `0 ${windowHeight}`,
         bRight: `${windowWidth} ${windowHeight}`,
       },
-    ];
+    ]
 
     const svgShapes = shapesDimensions.map((shape, index) => {
       // Each of those is Width and Height of point in space
-      const points = `${shape.tLeft}, ${shape.tRight}, ${shape.bRight}, ${shape.bLeft}`;
+      const points = `${shape.tLeft}, ${shape.tRight}, ${shape.bRight}, ${shape.bLeft}`
 
       return {
         key: index,
         points: points,
         className: shape.class,
-      };
-    });
+      }
+    })
 
-    return svgShapes;
-  };
+    return svgShapes
+  }
 
-  const svgShapesWithoutTheme = useMemo(() => getSvgShapes(), [windowHeight, windowWidth]);
+  /** Get's the svg shapes only when screen size changes. */
+  const svgShapesWithoutTheme = useMemo(() => getSvgShapes(), [windowHeight, windowWidth])
 
-  // Assign the theme each time the theme changes
-  let svgShapes: JSX.Element[] = [];
+  /** Assign the theme each time the theme changes. */
+  let svgShapes: JSX.Element[] = []
   if (svgShapesWithoutTheme !== undefined) {
     svgShapes = svgShapesWithoutTheme.map((p) => {
-      return <polygon key={p.key} points={p.points} className={`${p.className} ${theme}`} />;
-    });
+      return <polygon key={p.key} points={p.points} className={`${p.className} ${theme}`} />
+    })
   }
 
   // const bgStyle = { height: "100svh" };
@@ -150,7 +164,7 @@ const SVGBackground = () => {
   //   bgSVGStyle.height = viewHeight + "svh";
   // }
 
-  return <svg className="backgroundSvgElements">{svgShapes}</svg>;
+  return <svg className="backgroundSvgElements">{svgShapes}</svg>
 };
 
 export default SVGBackground;

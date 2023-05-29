@@ -3,5 +3,8 @@
     "javascript": "javascriptreact"
   },
   "cSpell.words": ["Firestore", "вашият"],
-  "prettier.semi": false
+  "prettier.semi": false,
+  "docwriter.style": "JSDoc",
+  "docwriter.progress.trackFunctions": true,
+  "docwriter.progress.trackTypes": true
 }

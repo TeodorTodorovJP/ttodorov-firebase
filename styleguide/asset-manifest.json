@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.js": "/build/bundle.4a514fab.js",
+    "main.css": "/static/css/main.428ce4ec.css",
+    "static/media/logo.svg": "/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "static/media/counter.svg": "/static/media/counter.34c81c3125d5f864422b375b46ad2aa3.svg",
+    "static/media/eyeOff.svg": "/static/media/eyeOff.3187a188265f338c52402a638cce0e67.svg",
+    "index.html": "/index.html",
+    "static/media/account.svg": "/static/media/account.93d301021d4fe454c465971045385f79.svg",
+    "static/media/eye.svg": "/static/media/eye.e68674f521edc7b217a8ba01e7603101.svg",
+    "static/media/closeSVG.svg": "/static/media/closeSVG.b41ec3e85954cc942b3ddaa4cbc54b54.svg",
+    "static/media/chat.svg": "/static/media/chat.3fe0b09af32d27c0b15df9d072261b4b.svg",
+    "static/media/login.svg": "/static/media/login.1a87a9fe1025b5abe5dfb93ca61402b4.svg",
+    "static/media/save.svg": "/static/media/save.d863f838225405124acc0c28338985fb.svg",
+    "static/media/sendSVG.svg": "/static/media/sendSVG.7374e24c9eb2f6b2d356c915502f2cfd.svg",
+    "static/media/imageSVG.svg": "/static/media/imageSVG.8b647c923304087cb24d0dad62e87f43.svg",
+    "static/media/hamburger-menu.svg": "/static/media/hamburger-menu.c136aad0c33c24ed65d5b51e5f036ef9.svg",
+    "static/media/home.svg": "/static/media/home.f35ffd0dda8ee68a38b2bbee8b764dd6.svg"
+  },
+  "entrypoints": [
+    "build/bundle.4a514fab.js",
+    "static/css/main.428ce4ec.css"
+  ]
+}

@@ -22,9 +22,11 @@ export const store = configureStore({
     background: backgroundReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
+  // Attach the apiSlice as middleware, should be only one
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
-});
+})
 
+// A utility used to enable refetchOnFocus and refetchOnReconnect behaviors.
 setupListeners(store.dispatch);
 
 export type AppDispatch = typeof store.dispatch;

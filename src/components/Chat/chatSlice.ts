@@ -1,67 +1,127 @@
-import {
-  createAsyncThunk,
-  createEntityAdapter,
-  createSelector,
-  createSlice,
-  EntityState,
-  EntityStateAdapter,
-  PayloadAction,
-  ThunkAction,
-} from "@reduxjs/toolkit";
-import { RootState, AppThunk, AppDispatch } from "../../app/store";
+import { createEntityAdapter, createSlice, EntityState, PayloadAction } from "@reduxjs/toolkit"
+import { RootState, AppThunk } from "../../app/store"
 // import { fetchChat } from "./chatApi";
 
-import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnapshot } from "firebase/firestore";
-import { fireStore } from "../../firebase-config";
-import { UserData } from "../Auth/userSlice";
-import { getDateDataInUTC } from "../../app/utils";
+import { collection, query, onSnapshot, DocumentData, FirestoreError, QuerySnapshot } from "firebase/firestore"
+import { fireStore } from "../../firebase-config"
+import { UserData } from "../Auth/userSlice"
+import { getDateDataInUTC } from "../../app/utils"
 import { InboxMessage } from "./chatApi"
 
 type UsersArr = UserData[] | []
 
 export interface ChatRoomsContent {
+  /** The userId of the user that opened the room. */
   creator: string
+
+  /** The current user names. */
   userNames: string
+
+  /** The room id. */
   roomId: string
+
+  /** Time of opening. */
   timestamp: Date | string
-  otherUserNames: string
+
+  /** The userId of the other user in the chat. */
   otherUserId: string
+
+  /** The names of the other user in the chat. */
+  otherUserNames: string
+
+  /** The image of the other user. */
   otherUserImage: string
+
+  /** The room is created and the param shows if it is opened, visible or not. */
   isOpened: boolean
+
+  /** The room is created and is opened - the param shows if this room is currently visible. */
   active: boolean
+
+  /** The css class of the room - used for storing the appropriate styling of the room tab. */
   tabClass: string
+
+  /** Stores the messages a room has. */
   messages: []
 }
 export type UserRoomsArr = ChatRoomsContent[] | []
 
 interface OpenRoomProps {
+  /** The userId of the user that opened the room. */
   userId: string
+
+  /** The current user names. */
   userNames: string
+
+  /** The userId of the other user in the chat. */
   otherUserId: string
+
+  /** The image of the other user. */
   otherUserImage: string
+
+  /** The names of the other user in the chat. */
   otherUserNames: string
 }
 
 export interface ChatState {
+  /** An array of all created chat rooms. */
   userRooms: UserRoomsArr
+
+  /**
+   * All users that are registered in the website.
+   * An object which is an instance of createEntityAdapter containing all users.
+   * */
   users: EntityState<UserData>
+
+  /** Not yet used. TODO: Add state where the chat is still loading. */
   status: string
+
+  /** For showing and hiding the chat rooms. */
   showRooms: boolean
+
+  /**
+   * If the user has no unread messages it's null.
+   * If we have unread messages, it has a map of all unread messages for the current user.
+   * */
   inbox: MessageDataObj | null
 }
 
 export interface MessageData {
+  /** The userId of the user that sent the message. */
   userId: string
+
+  /** The names of the sender. */
   name: string
+
+  /** The text of the message. */
   text: string
+
+  /** If the message is an image, this will be a blob url. */
   imageUrl: string
+
+  /** The profile image of he sender. */
   profilePicUrl: string
+
+  /** The time of sending the message. TODO: validate that it's in the correct format. */
   timestamp: string
-  serverTime?: any // Times stamp from firebase server, don't use
+
+  /**
+   * Times stamp from firebase server, don't use and don't delete.
+   * In the front-end, it exists only to briefly store the reference from the server, which is then sent to the server again.
+   * It is not standard format and it requires additional handling just to make sure it is there.
+   * In the Firebase database it can be used to sort.
+   * */
+  serverTime?: any
 }
 
 export type MessageDataArr = MessageData[] | []
 
+/**
+ * A map of all unread messages the current user has.
+ * @param key - The roomId.
+ * The nested key inside Record (the "string") is the timestamp.
+ * The InboxMessage holds all data about the unread message.
+ */
 export interface MessageDataObj {
   [key: string]: Record<string, InboxMessage>
 }
@@ -91,6 +151,10 @@ const initialState = getMainInitialState()
 // typically used to make async requests.
 // export const fetchUserRooms = createAsyncThunk("chat/fetchRooms", async (userId: string) => {});
 
+/**
+ * Left as an example.
+ * Uses the Thunk approach to handle continuous connections for listening for changes.
+ */
 export const fetchUsers = (): AppThunk => async (dispatch) => {
   try {
     const usersCollectionQuery = query(collection(fireStore, "users"))
@@ -119,6 +183,10 @@ export const chatSlice = createSlice({
     openNewRoom: (state, action: PayloadAction<OpenRoomProps>) => {
       const { userId, userNames, otherUserId, otherUserImage, otherUserNames } = action.payload
 
+      /**
+       * This is the place where the roomId is generated.
+       * "room" + the sorted userIds.
+       * */
       const newRoomId = "room" + [userId, otherUserId].sort().join("")
 
       const prev = state.userRooms
@@ -126,20 +194,30 @@ export const chatSlice = createSlice({
       const updatedRooms = prev.map((currentRoom) => {
         let room = { ...currentRoom }
 
+        /** If the room was already created. */
         if (room.roomId === newRoomId) {
           room.otherUserNames = otherUserNames
+
+          /** Since we are opening a room, by default it's opened and active. */
           room.isOpened = true
           room.active = true
+
           room.tabClass = ""
+
+          /** Detect if the room was already created by the unread messages. */
           roomFound = true
         } else {
+          /** Set all other rooms to not active. */
           room.active = false
         }
         return room
       })
 
+      /**
+       * If we have not found an existing room, the room is new.
+       * Add room to local array.
+       * */
       if (!roomFound) {
-        // add room to local array
         const { utcDate: timestamp } = getDateDataInUTC()
 
         updatedRooms.push({
@@ -150,27 +228,34 @@ export const chatSlice = createSlice({
           otherUserNames,
           otherUserId,
           otherUserImage,
+
+          /** Since we are opening a new room, by default it's opened and active. */
           isOpened: true,
           active: true,
+
           tabClass: "",
           messages: [],
         })
       }
       state.userRooms = updatedRooms
+
+      /** Since the user has opened a room, we have to show the rooms by default. */
       state.showRooms = true
     },
     closeRoom: (state, action: PayloadAction<{ roomId: string }>) => {
       const { roomId } = action.payload
 
       const prev = state.userRooms
-      let assignedActive = false
+      let assignedActive = false // not clear what it does
 
+      /** TODO: fix the filter map logic */
       const updatedRooms = prev
         .filter((room) => {
-          return room.roomId !== roomId
+          return room.roomId !== roomId // first we remove room from the array
         })
         .map((room) => {
           if (room.roomId === roomId) {
+            // then we look for that room in the same array
             room.isOpened = false
             room.active = false
           } else if (room.isOpened && !assignedActive) {
@@ -189,6 +274,8 @@ export const chatSlice = createSlice({
       const { showRooms } = action.payload
 
       state.showRooms = showRooms
+
+      /** If we are setting showRooms to false, we make all rooms not active, so that when we set it to true there will not be a default active room. */
       state.userRooms = state.userRooms.map((room) => {
         room.active = false
         return room
@@ -227,6 +314,7 @@ export const chatSlice = createSlice({
     setInbox: (state, action: PayloadAction<{ inboxData: InboxMessage[] | null }>) => {
       const { inboxData } = action.payload
 
+      /** To enable easy clear of the Inbox */
       if (inboxData === null) {
         state.inbox = null
       } else {
@@ -234,11 +322,15 @@ export const chatSlice = createSlice({
 
         inboxData.forEach((msg) => {
           if (uniqueMessages[msg.roomId]) {
+            /** If we have unread messages in that roomId, test if that message is already stored. */
             if (!uniqueMessages[msg.roomId][msg.timestamp]) {
+              /** If the message was not stored, store it with timestamp as it's key. */
               uniqueMessages[msg.roomId][msg.timestamp] = msg
             }
           } else {
+            /** If the don't yet have messages from that roomId, create an object for it. */
             uniqueMessages[msg.roomId] = {}
+            /** Store the message with timestamp as it's key. */
             uniqueMessages[msg.roomId][msg.timestamp] = msg
           }
         })
@@ -249,6 +341,7 @@ export const chatSlice = createSlice({
     deleteInboxMessages: (state, action: PayloadAction<{ roomId: string }>) => {
       const { roomId } = action.payload
       if (state.inbox) {
+        /** If the room is opened, all unread messages inside are read. */
         delete state.inbox[roomId]
         if (Object.values(state.inbox).length === 0) {
           state.inbox = null
@@ -290,7 +383,7 @@ export const selectInbox = (state: RootState) => state.chat.inbox
 export const {
   selectAll: selectUsers,
   // Pass in a selector that returns the posts slice of state
-} = usersAdapter.getSelectors((state: RootState) => state.chat.users);
+} = usersAdapter.getSelectors((state: RootState) => state.chat.users)
 
 // https://redux.js.org/tutorials/essentials/part-6-performance-normalization#memoizing-selector-functions
 // https://redux.js.org/usage/deriving-data-selectors
@@ -306,4 +399,4 @@ export const {
 //   (posts, userId) => posts.filter(post => post.user === userId)
 // )
 
-export default chatSlice.reducer;
+export default chatSlice.reducer

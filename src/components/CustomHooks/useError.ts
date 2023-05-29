@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { getError, stringifyJSON } from "../../app/utils";
 import { selectUserPreferences } from "../Auth/userSlice";
-import ErrorTexts, { ErrorsType } from "./ErrorTexts";
+import ErrorTexts, { ErrorsType } from "./errorTexts"
 
 interface Langs {
   bg: string;
@@ -15,6 +15,12 @@ interface PrepareFn {
   (error: any, type?: "ambiguousSource"): void;
 }
 
+/**
+ * The function `useError` returns an array containing an error message and a function to prepare and
+ * set error objects based on user preferences.
+ * @returns An array containing two elements: the first element is `errorMessage` of type
+ * `ErrorMessage`, and the second element is `prepareError` of type `PrepareFn`.
+ */
 const useError = () => {
   const { lang: currentLang } = useAppSelector(selectUserPreferences);
 

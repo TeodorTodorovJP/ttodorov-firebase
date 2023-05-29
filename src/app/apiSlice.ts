@@ -2,8 +2,12 @@
 import { createApi, fetchBaseQuery, BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { fireStore } from "../firebase-config";
-
-// Define our single API slice object
+/**
+ * Currently these methods are not used.
+ * They are left here only for examples.
+ * TODO: test how to reduce it to minimum and focus only on the injected endpoints
+*/
+// Define the main API slice object
 export const apiSlice = createApi({
   // The cache reducer expects to be added at `state.api` (already default - this is optional)
   reducerPath: "api",

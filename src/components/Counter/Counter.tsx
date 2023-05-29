@@ -9,25 +9,25 @@ import { doc, setDoc } from "firebase/firestore";
 import { getDateDataInUTC } from "../../app/utils";
 
 export function Counter() {
-  const count = useAppSelector(selectCount);
-  const dispatch = useAppDispatch();
-  const [incrementAmount, setIncrementAmount] = useState("2");
+  const count = useAppSelector(selectCount)
+  const dispatch = useAppDispatch()
+  const [incrementAmount, setIncrementAmount] = useState("2")
 
-  const incrementValue = Number(incrementAmount) || 0;
+  const incrementValue = Number(incrementAmount) || 0
 
-  // Test it !!!
+  // TODO: Test it
   const testError = async (error: any) => {
-    const errorText = JSON.stringify(error);
-    const time = new Date().toString();
+    const errorText = JSON.stringify(error)
+    const time = new Date().toString()
     try {
-      const userRef = doc(fireStore, "errors", time);
+      const userRef = doc(fireStore, "errors", time)
 
-      const { utcDate: timestamp } = getDateDataInUTC();
-      await setDoc(userRef, { timestamp, errorText });
+      const { utcDate: timestamp } = getDateDataInUTC()
+      await setDoc(userRef, { timestamp, errorText })
     } catch (error) {
-      console.error("Error writing Error to Firebase Database", error);
+      console.error("Error writing Error to Firebase Database", error)
     }
-  };
+  }
 
   return (
     <Card additionalClass="counter">
@@ -60,5 +60,5 @@ export function Counter() {
         </div>
       </div>
     </Card>
-  );
+  )
 }

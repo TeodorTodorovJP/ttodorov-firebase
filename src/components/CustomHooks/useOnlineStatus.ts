@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 
+/**
+ * This function returns the online status of the user and whether they were previously offline, and
+ * provides a method to reset the offline status.
+ * @returns An object containing three properties: `isOnline`, `wasOffline`, and `resetOnlineStatus`.
+ */
 export const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [wasOffline, setWasOffline] = useState(false);

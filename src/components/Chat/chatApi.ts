@@ -26,12 +26,30 @@ export interface GetMessages {
 }
 
 export interface InboxMessage {
-  userId: string // owner of the "inbox"
-  messagesFrom: string // The message sender
-  roomId: string // The created room
+  /** The user that receives the messages. */
+  userId: string
+
+  /** The user that send's the messages. */
+  messagesFrom: string
+
+  /** The created roomId. */
+  roomId: string
+
+  /** Checks if the user receiving the messages, opened the Chat and looked at the rooms that have unread messages. */
   userClickedNotif: boolean
+
+  /** Checks if the user opened the room and read the messages. */
   userOpenedRoom: boolean
+
+  /** Time of sending the inbox messages. */
   timestamp: string
+
+  /**
+   * Times stamp from firebase server, don't use and don't delete.
+   * In the front-end, it exists only to briefly store the reference from the server, which is then sent to the server again.
+   * It is not standard format and it requires additional handling just to make sure it is there.
+   * In the Firebase database it can be used to sort.
+   * */
   serverTime?: string
 }
 
@@ -79,11 +97,13 @@ export const extendedApi = apiSlice.injectEndpoints({
                 if (changeData.serverTime) {
                   delete changeData.serverTime
                 }
+                /** Fill the unique messages in a map. */
                 if (!prepareMessages[changeData.timestamp]) {
                   prepareMessages[changeData.timestamp] = changeData
                 }
               })
               updateCachedData((draft) => {
+                /** Make a map of the old messages array. */
                 // @ts-ignore
                 const oldMessagesMap = draft.data.reduce((acc, cv: MessageData) => {
                   acc[cv.timestamp] = cv
@@ -179,21 +199,25 @@ export const extendedApi = apiSlice.injectEndpoints({
     saveImage: builder.mutation<SendImage, { userId: string; file: File }>({
       queryFn: async (args) => {
         try {
-          // 1 - Upload the image to Cloud Storage.
-          // forbidden symbols in fileName - #, [, ], *, or ?
-          // remove all symbols that are not letters
+          /**
+           * Upload the image to Cloud Storage.
+           * Requirements - forbidden symbols in fileName - #, [, ], *, or ?
+           * Remove all symbols that are not letters.
+           */
           const fileName = args.file.name.replace(/[^\w]/gi, "")
-          const { utcDate: timestampId } = getDateDataInUTC() // as message id
+
+          /** Here, the messageId is created. */
+          const { utcDate: timestampId } = getDateDataInUTC()
 
           const filePath = `${args.userId}/${timestampId}/${fileName}`
 
           const newImageRef = ref(fileStorageRef, filePath)
           const fileSnapshot = await uploadBytesResumable(newImageRef, args.file)
 
-          // 3 - Generate a public URL for the file.
+          /** Generate a public URL for the file. */
           const publicImageUrl = await getDownloadURL(newImageRef)
 
-          // response, that will be send to messages
+          /** Response, that will be send to messages. */
           const data = {
             imageUrl: publicImageUrl,
             storageUri: fileSnapshot.metadata.fullPath,
@@ -209,6 +233,10 @@ export const extendedApi = apiSlice.injectEndpoints({
     //
     // The current user sends a message to another user
     // That other user, will receive that message to it's "inbox"
+    /**
+     * When the current user sends a message to another user,
+     * this listener will receive the message.
+     */
     inboxListener: builder.query<InboxMessages, string>({
       queryFn: (userId: string) => ({ data: { data: [], error: null } }),
       keepUnusedDataFor: 60 * 60 * 24, // one day
@@ -216,6 +244,7 @@ export const extendedApi = apiSlice.injectEndpoints({
         await cacheDataLoaded
         let unsubscribe
         try {
+          /** Listen for messages in the current user's inbox. */
           const inboxMessagesQuery = query(
             collection(fireStore, "inboxes", userId, "messages"),
             orderBy("serverTime", "desc")
@@ -224,7 +253,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             try {
               let prepareMessages: Record<string, InboxMessage> = {}
               let removeMessages: string[] = []
-              // This will trigger when a new room is added
+
               querySnapshot.docChanges().forEach((change) => {
                 // types: "added", "modified", "removed"
                 const changeData = change.doc.data() as InboxMessage
@@ -245,8 +274,10 @@ export const extendedApi = apiSlice.injectEndpoints({
                   // @ts-ignore
                   const sortedMessages = inboxMessages.sort((a, b) => +a.timestamp - +b.timestamp)
 
+                  /** Remove any deleted unread messages. */
                   const withoutRemoved = draft.data.filter((msg) => !removeMessages.includes(msg.timestamp))
 
+                  /** TODO: Check if that shows only unique messages. */
                   draft.data = [...withoutRemoved, ...sortedMessages] as InboxMessage[]
                 } else {
                   draft.data = []
@@ -276,14 +307,18 @@ export const extendedApi = apiSlice.injectEndpoints({
     }),
     //
     //
-    // The current user sends a message to another user
-    // That other user, will receive that message to it's "inbox"
+    /**
+     * When the current user sends a message to another user,
+     * that other user, will receive that message to it's "inbox".
+     */
     sendToInbox: builder.mutation<DefaultQueryFnType, { roomId: string; userId: string; otherUserId: string }>({
       queryFn: async (args) => {
         try {
           const { utcMilliseconds: timestamp } = getDateDataInUTC()
           const serverTime = serverTimestamp()
-          // The argument is the user we are sending messages to
+          /** The argument is the user we are sending messages to.
+           * TODO: Move the payload object to a separate object and type it, so that it receives it's documentation.
+           * */
           await addDoc(collection(fireStore, "inboxes", args.otherUserId, "messages"), {
             userId: args.otherUserId, // owner of the "inbox"
             messagesFrom: args.userId, // The message sender
@@ -301,8 +336,10 @@ export const extendedApi = apiSlice.injectEndpoints({
     }),
     //
     //
-    // The current user has read the message from another user
-    // Delete the message
+    /**
+     * When the current user has read the messages from the room with another user,
+     * delete that room from the inbox.
+     */
     deleteInboxMessage: builder.mutation<DefaultQueryFnType, { roomId: string; userId: string; otherUserId: string }>({
       queryFn: async (args) => {
         try {

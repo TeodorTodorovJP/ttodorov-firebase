@@ -3,17 +3,18 @@ import useAuthContext from "./app/auth-context";
 import App from "./App";
 
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import AuthForm from "./components/Auth/AuthForm";
+import AuthForm from "./components/Auth/AuthForm"
 import { Counter } from "./components/Counter/Counter";
 import Home from "./components/Home/Home";
 import Chat from "./components/Chat/Chat";
 import Profile from "./components/Profile/Profile";
 
 /**
- * The only purpose of this component is to address the router + context issue
- * The issue is to require a hook (useContext, useAuthContext) inside index.tsx which is not a Component
+ * The only purpose of this component is to address the router + context issue.
+ * The issue is to require a hook (useContext, useAuthContext) inside index.tsx which is not a Component.
+ * @module
+ * @ignore
  */
-
 const RouterWrap = () => {
   const authCtx = useAuthContext();
 
@@ -49,7 +50,7 @@ const RouterWrap = () => {
             //   // children: [
             //   //   {
             //   //     path: "meal",
-            //   //     element: <p>Signle meal</p>,
+            //   //     element: <p>Single meal</p>,
             //   //   },
             //   // ],
             // },
@@ -61,7 +62,7 @@ const RouterWrap = () => {
         },
       ],
     },
-  ]);
+  ])
 
   return <RouterProvider router={router} />;
 };

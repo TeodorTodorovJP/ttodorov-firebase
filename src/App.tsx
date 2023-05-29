@@ -10,8 +10,8 @@ import Notif from "./components/Notif/Notif";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { defaultLang, setModal, clearNavData } from "./components/Navigation/navigationSlice";
 import useAuthContext from "./app/auth-context";
-import { Langs } from "./components/Navigation/NavigationTexts";
-import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
+import { Langs } from "./components/Navigation/navigationTexts"
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth"
 import {
   clearUserData,
   setUserData,
@@ -30,46 +30,79 @@ import { clearChatData, selectUserRooms, setInbox } from "./components/Chat/chat
 import { defaultTheme, MainObj, MainThemes, setTheme } from "./components/Navigation/themeSlice"
 import { InboxMessage, useInboxListenerQuery } from "./components/Chat/chatApi"
 
-// import useAuthContext from "./app/auth-context";
-
-const App = () => {
+/**
+ * App Component
+ *
+ * This is the main application component that sets up the initial state, handles authentication state changes, manages local storage settings, and updates the title based on the number of inbox messages.
+ *
+ * Props - This component does not receive any props.
+ *
+ * State - Description of the state instance within the component
+ * - localHost: Indicates if the application is running on localhost.
+ *
+ * Custom Hooks - Description of custom hooks used within the component
+ * - useAppDispatch: Allows access to the Redux dispatch function.
+ * - useAppSelector: Allows selection of specific slices of state from the Redux store.
+ * - useAuthContext: Provides access to the authentication context.
+ * - useNavigate: Provides the ability to navigate to different routes.
+ * - useError: Tracks errors that occur within the application.
+ * - useOnlineStatus: Tracks the online status of the user.
+ * - useAddUserDataMutation: Sends a mutation to add user data to Firebase.
+ * - useInboxListenerQuery: Listens for changes to the user's inbox and triggers refetches as needed.
+ *
+ * Functions - Short description of functions within the component
+ * - anonymousSignIn: Signs in the user anonymously.
+ */
+export const App = () => {
+  /** Access store */
   const dispatch = useAppDispatch()
-  const userHasDataR = useAppSelector(userHasData)
+  const userHasDataInStore = useAppSelector(userHasData)
   const currentUser = useAppSelector(selectUserData)
   const userRooms = useAppSelector(selectUserRooms)
 
+  /** Access Context */
+  const authCtx = useAuthContext()
+
+  /** Access Router */
+  const navigate = useNavigate()
+
+  /** Local state */
+  const [localHost, setLocalHost] = useState(false)
+
+  /** Error hooks */
   const [usersError, setUsersError] = useError()
   const [loginError, setLoginError] = useError()
   const [inboxError, setInboxError] = useError()
 
   const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus()
 
-  // const autoLogin = true;
-  const [localHost, setLocalHost] = useState(false)
-
-  // Context
-  const authCtx = useAuthContext()
-
-  // Router
-  const navigate = useNavigate()
-
-  // Add user to firebase hook
+  /** Add user to firebase */
   const [addUserData, { data: usersData, isLoading: isSendingPost, isError, error }] = useAddUserDataMutation()
 
-  // Handle useAddUserDataMutation errors
+  /**
+   * For useAddUserDataMutation
+   * Checks for errors generated from the RTKQ and errors generated from Firebase
+   * */
   useEffect(() => {
     if (((isError && error) || (usersData && usersData.error)) && !usersError) {
       setUsersError([isError, error, usersData], "ambiguousSource")
     }
   }, [isError, error, usersData])
 
+  /**
+   * For useAddUserDataMutation
+   * When error is caught show the modal
+   * */
   useEffect(() => {
     if (usersError) {
       dispatch(setModal({ message: usersError }))
     }
   }, [usersError])
 
-  // Get inbox messages from firebase hook
+  /**
+   * Get inbox messages based on userId
+   * @param currentUser.id
+   * */
   const {
     data: inboxMessages,
     isError: isErrorInbox,
@@ -77,17 +110,32 @@ const App = () => {
     refetch: refetchInbox,
   } = useInboxListenerQuery(currentUser.id, { refetchOnReconnect: true, skip: !currentUser.id })
 
-  // Handle useInboxListenerQuery errors
+  /**
+   * For useInboxListenerQuery
+   * Checks for errors generated from the RTKQ and errors generated from Firebase
+   * */
   useEffect(() => {
     if (((isErrorInbox && errorInbox) || (inboxMessages && inboxMessages.error)) && !inboxError) {
       setInboxError([isErrorInbox, errorInbox, inboxMessages], "ambiguousSource")
     }
   }, [isErrorInbox, errorInbox, inboxMessages])
 
+  /**
+   * For useInboxListenerQuery
+   * When error is caught show the modal
+   * */
   useEffect(() => {
     if (inboxError) dispatch(setModal({ message: inboxError }))
   }, [inboxError])
 
+  /**
+   * Updates the document title based on the number of inbox messages.
+   * It checks if there are any inbox messages and if so, it sets the inbox data in the store and updates
+   * the document title to include the number of messages in parentheses.
+   * If there are no inbox messages, it sets the inbox data in the store to null
+   * and removes the parentheses and message count from the document title.
+   * The hook is triggered whenever there is a change in the `inboxMessages` or`userRooms` variables.
+   * */
   useEffect(() => {
     if (inboxMessages && inboxMessages.data.length > 0) {
       dispatch(setInbox({ inboxData: inboxMessages.data }))
@@ -108,6 +156,10 @@ const App = () => {
     }
   }, [inboxMessages, userRooms])
 
+  /**
+   * For onAuthStateChanged
+   * When error is caught show the modal
+   * */
   useEffect(() => {
     if (loginError) {
       dispatch(setModal({ message: loginError }))
@@ -115,6 +167,7 @@ const App = () => {
   }, [loginError])
 
   useEffect(() => {
+    /** If in DEV */
     if (document.location.hostname === "localhost") {
       document.title = "TTodorov DEV"
       setLocalHost(true)
@@ -123,24 +176,33 @@ const App = () => {
       //   anonymousSignIn();
       // }
     } else {
+      /** If we are in PROD and the user is not logged in, signIn the user anonymously */
       document.title = "TTodorov"
       if (!authCtx.isLoggedIn) {
         anonymousSignIn()
       }
     }
 
+    // Local storage section
+    // User theme preference
     let userDefaultTheme = localStorage.getItem("theme") as MainThemes | null
     userDefaultTheme = userDefaultTheme ? userDefaultTheme : defaultTheme
 
+    // User language preference
     let userDefaultLang = localStorage.getItem("lang")
     userDefaultLang = userDefaultLang ? userDefaultLang : defaultLang
 
+    // Send preferences to the store
     dispatch(setUserPreferences({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }))
 
     let changeTheme: MainObj = { main: userDefaultTheme } as MainObj
     dispatch(setTheme(changeTheme))
   }, [])
 
+  /**
+   * Uses Firebase to sign in without any credentials
+   * The main reason is to log errors in Firebase in case login with other methods fails
+   */
   const anonymousSignIn = () => {
     try {
       signInAnonymously(getAuth())
@@ -148,14 +210,16 @@ const App = () => {
     } catch (error: any) {}
   }
 
+  /** The hook that attaches the onAuthStateChanged firebase listener */
   useEffect(() => {
     return onAuthStateChanged(getAuth(), async (user: any) => {
+      // From firebase - if we have user, we are guaranteed that the user is signed in
       if (user) {
-        // The signed-in user info.
         try {
+          // The signed-in user info.
           const getIdTokenResult = await user.getIdTokenResult()
           if (getIdTokenResult) {
-            if (!user.isAnonymous && !userHasDataR) {
+            if (!user.isAnonymous && !userHasDataInStore) {
               let userObj: UserData = {
                 id: user.uid,
                 names: user.displayName ? user.displayName : user.email ? user.email : "Anonymous",
@@ -177,6 +241,8 @@ const App = () => {
               // Add user to store
               dispatch(setUserData(userObj))
 
+              // If we were send to the auth screen automatically because we were logged out
+              // we will be send back to the previous screen
               const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname
               navigate(navigateTo)
 
@@ -196,6 +262,8 @@ const App = () => {
           setLoginError([err], "ambiguousSource")
         }
       } else if (authCtx.isLoggedIn) {
+        /** If the user has logged out by request or automatically, clear the login data */
+        // Context
         authCtx.logout()
         // Store
         dispatch(clearUserData())
@@ -207,6 +275,7 @@ const App = () => {
     })
   }, [onAuthStateChanged])
 
+  /** Displays a notification if the user is offline and if the user was offline and is now, online */
   useEffect(() => {
     if (isOnline && wasOffline) {
       dispatch(setNotif({ notifType: "topBar", contentType: "online" }))

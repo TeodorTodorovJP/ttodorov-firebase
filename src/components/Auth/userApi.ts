@@ -21,6 +21,12 @@ interface GetUsers {
 
 export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    /**
+     * Updating the user data
+     * @param {UserData} userData
+     * @returns data as null and error. Error can be null or error object
+     *
+     */
     //                            ResultType            QueryArg
     //                                  v                 v
     updateUserData: builder.mutation<UpdateUserData, { userData: UserData }>({
@@ -28,12 +34,17 @@ export const extendedApi = apiSlice.injectEndpoints({
       //                 v
       queryFn: async (args, { signal, dispatch, getState }, extraOptions, baseQuery) => {
         try {
-          const userRef = doc(fireStore, "users", args.userData.id);
-          await setDoc(userRef, args.userData);
+          // Gets a reference to the users
+          const userRef = doc(fireStore, "users", args.userData.id)
+          // Set's the user data
+          // TODO: go to the Firebase rules section and validate the userData object
+          // Currently if someone tempers with it, can mess with the data
+          await setDoc(userRef, args.userData)
         } catch (err: any) {
-          return { data: { data: null, error: getError(err) } };
+          return { data: { data: null, error: getError(err) } }
         }
-        return { data: { data: null, error: null } };
+        // data is always returned because of queryFn requirements
+        return { data: { data: null, error: null } }
       },
     }),
     //
@@ -44,20 +55,25 @@ export const extendedApi = apiSlice.injectEndpoints({
       // streaming updates below as they are received.
       queryFn: async (userData: UserData) => {
         try {
-          const usersRef = doc(fireStore, "users", userData.id);
-          const userSnap = await getDoc(usersRef);
-          let user: UserData;
+          // Gets a reference to the users
+          const usersRef = doc(fireStore, "users", userData.id)
+          const userSnap = await getDoc(usersRef)
+          let user: UserData
+          // Test if we have the user
           // .exists() doesn't work as expected
           if (!userSnap.data()) {
-            const { utcDate: timestamp } = getDateDataInUTC();
-            await setDoc(usersRef, { timestamp, ...userData });
-            user = { ...userData, timestamp };
+            // If we don't have the user, return the input data
+            // TODO: debug where "timestamp" comes from, also if the stored data is different than the existing data, there will be bugs
+            const { utcDate: timestamp } = getDateDataInUTC()
+            await setDoc(usersRef, { timestamp, ...userData })
+            user = { ...userData, timestamp }
           } else {
-            user = userSnap.data() as UserData;
+            // If we have the user, return the existing data
+            user = userSnap.data() as UserData
           }
-          return { data: { userData: user, error: null } };
+          return { data: { userData: user, error: null } }
         } catch (err: any) {
-          return { data: { userData: null, error: getError(err) } };
+          return { data: { userData: null, error: getError(err) } }
         }
       },
     }),
@@ -67,55 +83,60 @@ export const extendedApi = apiSlice.injectEndpoints({
       // The query is not relevant here as the data will be provided via streaming updates.
       // A queryFn returning an empty array is used, with contents being populated via
       // streaming updates below as they are received.
+      /**
+       * The "uselessParam" exists because the query + queryFn + Typescript combination,
+       * requires that the type of the second param of builder.query to match the type of the first param of queryFn.
+       * @link https://redux-toolkit.js.org/rtk-query/usage-with-typescript#typing-query-and-mutation-endpoints
+       */
       queryFn: (uselessParam: void) => ({ data: { data: [], error: null } }),
       keepUnusedDataFor: 60 * 60 * 24, // one day
+      // Attaches a listener for any changes from the query, but we use it as a way to sustain a listener from the API
+      // Otherwise the old Thunk may be used, but will cost the caching benefits
       async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
         // create a websocket connection when the cache subscription starts
 
         // no-op in case `cacheEntryRemoved` resolves before `cacheDataLoaded`,
         // in which case `cacheDataLoaded` will throw
-        await cacheDataLoaded;
-        // when data is received from the socket connection to the server,
-        // if it is a message and for the appropriate channel,
-        // update our query result with the received message
-        let unsubscribe;
+        await cacheDataLoaded
+        // when data is received from the socket connection to the server
+        let unsubscribe
         try {
-          const usersCollectionQuery = query(collection(fireStore, "users"));
+          const usersCollectionQuery = query(collection(fireStore, "users"))
           unsubscribe = onSnapshot(usersCollectionQuery, (querySnapshot) => {
             try {
-              let prepareUsers: UserData[] = [];
-              // This will trigger when a new room is added
+              let prepareUsers: UserData[] = []
+              // This will trigger when a new user is added
               querySnapshot.docChanges().forEach((change) => {
                 // types: "added", "modified", "removed"
-                const changeData = change.doc.data() as UserData;
-                if (!changeData.timestamp) return;
+                const changeData = change.doc.data() as UserData
+                if (!changeData.timestamp) return
                 // Firebase may return their bad timestamp
                 // changeData.timestamp = JSON.stringify(changeData.timestamp);
-                prepareUsers.push(changeData);
-              });
+                prepareUsers.push(changeData)
+              })
               updateCachedData((draft) => {
-                draft.data = [...draft.data, ...prepareUsers];
-                draft.error = null;
-                return draft;
-              });
+                draft.data = [...draft.data, ...prepareUsers]
+                draft.error = null
+                return draft
+              })
             } catch (err: any) {
               updateCachedData((draft) => {
-                draft.error = getError(err);
-                return draft;
-              });
+                draft.error = getError(err)
+                return draft
+              })
             }
-          });
+          })
         } catch (err: any) {
           updateCachedData((draft) => {
-            draft.error = getError(err);
-            return draft;
-          });
+            draft.error = getError(err)
+            return draft
+          })
         }
         // cacheEntryRemoved will resolve when the cache subscription is no longer active
-        await cacheEntryRemoved;
+        await cacheEntryRemoved
         // perform cleanup steps once the `cacheEntryRemoved` promise resolves
         if (unsubscribe) {
-          unsubscribe();
+          unsubscribe()
         }
       },
       // providesTags: (result, error, arg) =>
@@ -124,6 +145,6 @@ export const extendedApi = apiSlice.injectEndpoints({
     //
     //
   }),
-});
+})
 
 export const { useUpdateUserDataMutation, useAddUserDataMutation, useGetUserDataQuery } = extendedApi;

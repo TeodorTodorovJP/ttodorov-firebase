@@ -1,15 +1,18 @@
+/**
+ * Exports the translated texts needed for Chat in Bulgarian and English
+ */
 export interface Langs {
-  bg: Lang;
-  en: Lang;
+  bg: Lang
+  en: Lang
 }
 
 interface Lang {
-  main: Main;
+  main: Main
 }
 
 interface Main {
-  offline: string;
-  onlyImages: string;
+  offline: string
+  onlyImages: string
 }
 
 export const langs: Langs = {
@@ -25,4 +28,4 @@ export const langs: Langs = {
       onlyImages: "Може да качите само снимки!",
     },
   },
-};
+}

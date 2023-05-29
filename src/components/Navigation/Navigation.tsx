@@ -22,7 +22,7 @@ import { ReactComponent as ChatSVG } from "./icons/chat.svg";
 import Logo from "../UI/SVG/logo.svg";
 import useAuthContext from "../../app/auth-context";
 import Card from "../UI/Card";
-import { langs, Langs } from "./NavigationTexts";
+import { langs, Langs } from "./navigationTexts"
 import {
   clearUserData,
   saveLangToLocalStorage,
@@ -30,42 +30,84 @@ import {
   selectUserPreferences,
   setUserData,
   setUserPreferences,
-} from "../Auth/userSlice";
-import { getAuth, signOut } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice";
-import { getBlobUrl } from "../../app/utils";
+} from "../Auth/userSlice"
+import { getAuth, signOut } from "firebase/auth"
+import { useEffect, useState } from "react"
+import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice"
+import { getBlobUrl } from "../../app/utils"
 import { clearChatData, selectInbox, setInbox } from "../Chat/chatSlice"
 import { toggleSVG } from "../UI/Background/backgroundSlice"
 import { ALL_THEMES, MainObj, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice"
 import { useNavigate } from "react-router-dom"
-
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
-const Navigation = () => {
-  // Store
+/**
+ * Navigation Component
+ *
+ * This component provides navigation functionalities to the application.
+ *
+ * Props - This component does not have props.
+ *
+ * State - short description of all state instances within the component
+ * - imageData: Local state holding the image data.
+ *
+ * Custom Hooks - short description of all custom hooks within the component
+ * - useAppDispatch: Hook from Redux toolkit to dispatch actions.
+ * - useAppSelector: Hook from Redux toolkit to select values from the state.
+ * - useNavigate: Hook from react-router to programmatically navigate between routes.
+ * - useAuthContext: Custom hook to use authentication context.
+ *
+ * Functions - short description of all functions within the component
+ * - logoutHandler: Logs out the user by clearing context, local storage, state, Firebase authentication, store data, and local image data.
+ * - navLeftClickHandle: Toggles visibility of the left menu.
+ * - navRightClickHandle: Toggles visibility of the right menu and hides the themes submenu.
+ * - changeThemeHandle: Handles the change of theme based on the passed theme name.
+ * - saveThemeHandle: Displays a modal with options to confirm or deny the save theme action.
+ * - handleToggleTheme: Toggles visibility of the theme menu.
+ * - handleToggleLanguage: Toggles the language between Bulgarian (bg) and English (en).
+ * - handleNewMessageNotif: Redirects to the chat page and sets the userClickedNotif flag for all inbox messages.
+ */
+export const Navigation = () => {
+  /** Access store */
+  const dispatch = useAppDispatch()
   const theme = useAppSelector(selectTheme)
   const { lang } = useAppSelector(selectUserPreferences)
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen)
   const { profilePic, profilePicStored } = useAppSelector(selectUserData)
   const waitingActions = useAppSelector(selectWaitingActions)
   const inboxData = useAppSelector(selectInbox)
-
   const images = useAppSelector(selectImageBlobUrl)
 
-  const dispatch = useAppDispatch()
-
-  // Router
+  /** Access Router */
   const navigate = useNavigate()
 
+  /** Local state */
   const [imageData, setImageData] = useState<Image | null>(null)
 
+  /**
+   * Prepare component data.
+   */
+  const { main, themeModal } = langs[lang as keyof Langs]
+
+  /** Access Context */
+  const authCtx = useAuthContext()
+  const { isLoggedIn, logout } = authCtx
+
+  /**
+   * If we have not stored the image, store it.
+   */
   if ((profilePicStored && !imageData) || (profilePicStored && imageData && profilePicStored !== imageData.imageUrl)) {
     const foundImage = images(profilePicStored)[0]
     if (foundImage) setImageData(foundImage)
   }
 
+  /**
+   * If we have a waiting action "changeDefaultTheme", saveThemeToLocalStorage.
+   * The reasons for this setup:
+   * 1 - The reducer action should not do side effects. (changing the local storage)
+   * 2 - The task is performed by a thunk "saveThemeToLocalStorage", which cannot be called by extraReducers.
+   * */
   useEffect(() => {
     if (waitingActions.length > 0) {
       if (waitingActions.includes("changeDefaultTheme")) {
@@ -75,6 +117,10 @@ const Navigation = () => {
     }
   }, [waitingActions])
 
+  /**
+   * If the current user has an image but is not yet loaded or
+   * use the user's image has changed, add the new image to the list.
+   */
   useEffect(() => {
     let revoke: Function | null
     if (
@@ -91,13 +137,7 @@ const Navigation = () => {
     return () => (revoke ? revoke(profilePicStored) : null)
   }, [profilePicStored, imageData])
 
-  // Texts
-  const { main, themeModal } = langs[lang as keyof Langs]
-
-  // Context
-  const authCtx = useAuthContext()
-  const { isLoggedIn, logout } = authCtx
-
+  /** Prepare all links for the left menu. */
   const navLeftItems = [
     { path: "/", text: "Home", icon: <HomeSVG /> },
     { path: "auth", text: "Authenticate", icon: <LoginSVG /> },
@@ -110,6 +150,10 @@ const Navigation = () => {
     </NavElement>
   ))
 
+  /**
+   * Logout the user by clearing context, local storage, state, Firebase authentication,
+   * store data, and local image data.
+   */
   const logoutHandler = () => {
     // Context, local storage, state
     logout()
@@ -123,28 +167,43 @@ const Navigation = () => {
     setImageData(null)
   }
 
+  /** Toggling the left menu. */
   let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide
   const navLeftClickHandle = () => {
     dispatch(setIsOpenToTrue({ item: "navLeftVisible", isOpen: !navLeftVisible }))
   }
 
+  /** Toggling the right menu. */
   let navRightShowClass = navRightVisible ? classes.navRightItemsShow : classes.navRightItemsHide
   const navRightClickHandle = () => {
     dispatch(setIsOpenToTrue({ item: "navRightVisible", isOpen: !navRightVisible }))
+    /** If the right menu is opened or closed, always hide the themes submenu. */
     dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: false }))
   }
 
+  /**
+   * @param toTheme - the name of the theme, can be SVG and one of the main themes
+   * @typeParam toTheme - string
+   */
   const changeThemeHandle = (toTheme: string) => {
+    /** @description - If the new theme is the same, return */
     if (toTheme === theme.main) return
 
+    /** @description - If 'toTheme' is 'svg' include to the theme the svg effect */
     if (toTheme === "svg") {
       dispatch(toggleSVG())
     } else {
+      /** @description - If 'toTheme' is any of the MainObj themes set the regular theme */
       let changeTheme: MainObj = { main: toTheme } as MainObj
       dispatch(setTheme(changeTheme))
     }
   }
 
+  /**
+   * Displays a modal message with options to confirm or deny
+   * the save theme action.
+   * Depending on the response, the modal will handle the action.
+   */
   const saveThemeHandle = () => {
     const message = themeModal.message.replace("${}", theme.main)
 
@@ -166,17 +225,24 @@ const Navigation = () => {
     dispatch(setModal(modalObj))
   }
 
+  /** Hides/shows the theme menu. */
   let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide
   const handleToggleTheme = () => {
     dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: !showThemes }))
   }
 
+  /** Toggles the languages between bg and en. */
   const handleToggleLanguage = () => {
     const setLang = lang == "bg" ? "en" : "bg"
     dispatch(setUserPreferences({ lang: setLang }))
     dispatch(saveLangToLocalStorage())
   }
 
+  /**
+   * If there are unread messages and the user is not in the chat page,
+   * there will be a chat icon to notify the user.
+   * When clicking it, it will lead to the chat page.
+   */
   const handleNewMessageNotif = () => {
     if (inboxData) {
       const updatedInbox = Object.values(inboxData)

@@ -5,48 +5,92 @@ import { addImageBlobUrl, selectImageBlobUrl, UserData } from "../../Auth/userSl
 import { MessageData } from "../chatSlice";
 import classes from "./ChatMessage.module.css";
 
-const ChatMessage = (props: { isFront: boolean; data: MessageData; otherUser: UserData }) => {
-  const { name, userId, text, timestamp, profilePicUrl, imageUrl } = props.data;
-  const { id: otherUserId, names: otherNames, email: otherEmail, profilePic: otherPic } = props.otherUser;
+/**
+ * Props for the ChatMessage component.
+ */
+interface ChatMessageProps {
+  /**
+   * Indicates if the message is displayed on the top side of the chat window and it overlaps with the chat icon.
+   */
+  isFront: boolean
 
-  const images = useAppSelector(selectImageBlobUrl);
-  const dispatch = useAppDispatch();
-  const messageRef = useRef<HTMLDivElement>(null);
+  /**
+   * The message data to display.
+   */
+  data: MessageData
 
-  const imageData = images(imageUrl)[0];
+  /**
+   * The data of the other user in the chat.
+   */
+  otherUser: UserData
+}
 
+/**
+ * A component that displays a message in a chat window.
+ */
+export const ChatMessage = memo(({ isFront, data, otherUser }: ChatMessageProps): ReactElement => {
+  /** Access store */
+  const dispatch = useAppDispatch()
+
+  /** TODO: find if you can add documentation somewhere, that will show when you hover over "images". */
+  const images = useAppSelector(selectImageBlobUrl)
+
+  /** Local state */
+  const messageRef = useRef<HTMLDivElement>(null)
+
+  /** The data for the current user. */
+  const { name, userId, text, timestamp, profilePicUrl, imageUrl } = data
+
+  /** The data for the other user. */
+  const { id: otherUserId, names: otherNames, email: otherEmail, profilePic: otherPic } = otherUser
+
+  /** The image url pointing to the browser's memory. */
+  const imageData = images(imageUrl)[0]
+
+  /**
+   * Used to scroll the chat window to the bottom when a new message is added.
+   * TODO: Check if tt triggers when the message is loaded and if it is the last message.
+   * */
   useEffect(() => {
-    messageRef.current?.scrollIntoView();
-  }, []);
+    messageRef.current?.scrollIntoView()
+  }, [])
 
+  /**
+   * When we have imageUrl and we don't yet have imageData.
+   * We download the image, get the browser's memory reference and store it.
+   * Then the above useEffect triggers and update's the image.
+    */
   useEffect(() => {
-    let revoke: Function | null;
+    let revoke: Function | null
     if (imageUrl) {
       if (!imageData) {
         const getData = async () => {
-          const { blobUrl, revokeUrl } = await getBlobUrl(imageUrl);
-          revoke = revokeUrl;
-          dispatch(addImageBlobUrl({ imageUrl, blobUrl }));
-        };
-        getData();
+          const { blobUrl, revokeUrl } = await getBlobUrl(imageUrl)
+          revoke = revokeUrl
+          dispatch(addImageBlobUrl({ imageUrl, blobUrl }))
+        }
+        getData()
       }
     }
 
-    return () => (revoke ? revoke(imageUrl) : null);
-  }, [imageUrl]);
+    return () => (revoke ? revoke(imageUrl) : null)
+  }, [imageUrl])
 
-  const isOther = userId === otherUserId;
+  /** Check if this message is from the other user. */
+  const isOther = userId === otherUserId
 
-  const sideClass = isOther ? classes.leftSide : classes.rightSide;
+  /** If this is the other user, place the text at the left, else on the right. */
+  const sideClass = isOther ? classes.leftSide : classes.rightSide
 
-  const moveFront = props.isFront && !isOther ? classes.moveFront : "";
+  /** If the message overlaps with the chat icon, we move it to make adjust the view. */
+  const moveFront = isFront && !isOther ? classes.moveFront : ""
 
   return (
     <div className={`${sideClass} ${moveFront}`} ref={messageRef}>
       {text && <p className={classes.text}>{text}</p>}
       {imageData && <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />}
     </div>
-  );
-};
+  )
+})
 
 export default ChatMessage;
