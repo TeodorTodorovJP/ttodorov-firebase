@@ -63,7 +63,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // .exists() doesn't work as expected
           if (!userSnap.data()) {
             // If we don't have the user, return the input data
-            // TODO: debug where "timestamp" comes from, also if the stored data is different than the existing data, there will be bugs
+            // Add the current time as timestamp
             const { utcDate: timestamp } = getDateDataInUTC()
             await setDoc(usersRef, { timestamp, ...userData })
             user = { ...userData, timestamp }

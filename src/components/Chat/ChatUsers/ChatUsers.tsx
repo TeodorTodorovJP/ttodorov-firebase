@@ -69,16 +69,16 @@ export const ChatUsers = () => {
    * It then sets this array as the new value of the `chatUsersElements` state.
    * */
   useEffect(() => {
-    if (chatUsers) {
-      const chatUsersEl = chatUsers.data
-        .filter((user) => user.id !== currentUser.id)
-        .map((user) => {
-          return <ChatUser key={user.id} currentUser={currentUser} otherUser={user} />
-        })
-
-      setChatUsersElements(chatUsersEl)
+    if (chatUsers && currentUser.id !== "") {
+      setChatUsersElements((prev) => {
+        return chatUsers.data
+          .filter((user) => user.id !== currentUser.id)
+          .map((user) => {
+            return <ChatUser key={user.id} currentUser={currentUser} otherUser={user} />
+          })
+      })
     }
-  }, [chatUsers])
+  }, [chatUsers, currentUser])
 
   return <div className={classes.chatUsers}>{chatUsersElements}</div>
 }

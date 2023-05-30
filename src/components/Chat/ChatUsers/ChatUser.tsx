@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from "react";
 import classes from "./ChatUsers.module.css";
 import { ReactComponent as AccountSVG } from "../../UI/SVG/account.svg";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { addImageBlobUrl, Image, selectImageBlobUrl, selectUserData, UserData } from "../../Auth/userSlice";
+import { addImageBlobUrl, Image, selectImageBlobUrl, UserData } from "../../Auth/userSlice"
 import { openNewRoom, selectActiveRoom, selectInbox, selectUserRooms, setInbox } from "../chatSlice"
 import { getBlobUrl } from "../../../app/utils"
 import Card from "../../UI/Card"

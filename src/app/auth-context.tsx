@@ -8,7 +8,8 @@ import React, {
 } from "react";
 import { getDateDataInUTC } from "./utils";
 
-let logoutTimer: ReturnType<typeof setTimeout> = setTimeout(() => "", 1000);
+/** Here only for initial value with proper type. */
+let logoutTimer: ReturnType<typeof setTimeout> = setTimeout(() => "", 0);
 
 type AuthContent = {
   token: string | null | undefined;
@@ -54,8 +55,8 @@ const retrieveStoredToken = () => {
 
   const remainingTime = calculateRemainingTime(storedExpirationDate)
 
-  /** TODO: fix it, it should be <= 0, now if we have a token for the next 45 minutes it will be deleted */
-  if (remainingTime <= 3600) {
+  /** The token will be removed when the remaining time is 0 or negative. */
+  if (remainingTime <= 0) {
     localStorage.removeItem("token")
     localStorage.removeItem("expirationTime")
     return null

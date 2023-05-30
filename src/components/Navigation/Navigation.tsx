@@ -28,7 +28,6 @@ import {
   saveLangToLocalStorage,
   selectUserData,
   selectUserPreferences,
-  setUserData,
   setUserPreferences,
 } from "../Auth/userSlice"
 import { getAuth, signOut } from "firebase/auth"

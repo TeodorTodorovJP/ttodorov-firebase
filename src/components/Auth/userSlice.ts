@@ -11,11 +11,11 @@ export interface UserData {
   /** The names - taken from the registration.*/
   names: string
 
-  /** The time of registration. TODO: check if this is true*/
-  timestamp?: string
+  /** The email from the registration. */
+  email: string
 
-  /** The email from the registration. - TODO: make it not optional, was set that way to allow anonymous login. */
-  email?: string
+  /** The time of registration. */
+  timestamp?: string
 
   /** The url of the registration image if it was available.*/
   profilePic?: string
@@ -71,7 +71,7 @@ export const defaultLang: keyof Langs = "en"
 
 const getMainInitialState = () => {
   const newState: UserState = {
-    userData: { id: "", names: "", profilePic: "" },
+    userData: { id: "", names: "", profilePic: "", email: "" },
     images: [],
     preferences: {
       theme: defaultTheme,

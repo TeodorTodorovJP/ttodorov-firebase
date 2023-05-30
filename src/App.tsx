@@ -222,8 +222,8 @@ export const App = () => {
             if (!user.isAnonymous && !userHasDataInStore) {
               let userObj: UserData = {
                 id: user.uid,
-                names: user.displayName ? user.displayName : user.email ? user.email : "Anonymous",
-                email: user.email ? user.email : "No Email",
+                names: user.displayName ? user.displayName : user.email,
+                email: user.email,
                 profilePic: user.photoURL && !localHost ? user.photoURL : null, // Got 403 for too many requests of the image
               }
 
