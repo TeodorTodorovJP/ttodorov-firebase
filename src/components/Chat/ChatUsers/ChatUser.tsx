@@ -111,7 +111,6 @@ export const ChatUser = (props: { currentUser: UserData; otherUser: UserData }) 
   /**
    * Opens a new chat room and if there are inbox messages
    * updates the inbox data.
-   * TODO: if the user has read the messages, why not delete them?
    */
   const openRoom = () => {
     let imageSource = ""

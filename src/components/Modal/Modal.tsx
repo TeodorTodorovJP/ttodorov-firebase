@@ -1,12 +1,12 @@
 import { ReactElement, useEffect, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import classes from "./Modal.module.css";
-import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { Modal as ModalType, selectModal, setModal } from "../Navigation/navigationSlice";
+import { useAppSelector, useAppDispatch } from "../../app/hooks"
 import Card from "../UI/Card";
 import { langs, Langs } from "./modalTexts"
 import { selectTheme } from "../Navigation/themeSlice"
 import { selectUserPreferences } from "../Auth/userSlice"
+import { Modal as ModalType, selectModal, setModal } from "./modalSlice"
 
 /**
  * Modal is a React component that displays a modal dialog with varying content based on the current state.

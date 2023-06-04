@@ -277,7 +277,6 @@ export const extendedApi = apiSlice.injectEndpoints({
                   /** Remove any deleted unread messages. */
                   const withoutRemoved = draft.data.filter((msg) => !removeMessages.includes(msg.timestamp))
 
-                  /** TODO: Check if that shows only unique messages. */
                   draft.data = [...withoutRemoved, ...sortedMessages] as InboxMessage[]
                 } else {
                   draft.data = []
@@ -316,9 +315,7 @@ export const extendedApi = apiSlice.injectEndpoints({
         try {
           const { utcMilliseconds: timestamp } = getDateDataInUTC()
           const serverTime = serverTimestamp()
-          /** The argument is the user we are sending messages to.
-           * TODO: Move the payload object to a separate object and type it, so that it receives it's documentation.
-           * */
+
           await addDoc(collection(fireStore, "inboxes", args.otherUserId, "messages"), {
             userId: args.otherUserId, // owner of the "inbox"
             messagesFrom: args.userId, // The message sender

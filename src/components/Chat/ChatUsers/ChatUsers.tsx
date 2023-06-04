@@ -3,9 +3,9 @@ import classes from "./ChatUsers.module.css";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import ChatUser from "./ChatUser";
 import useError from "../../CustomHooks/useError"
-import { setModal } from "../../Navigation/navigationSlice"
 import { useGetUserDataQuery } from "../../Auth/userApi"
 import { selectUserData } from "../../Auth/userSlice"
+import { setModal } from "../../Modal/modalSlice"
 
 /**
  * ChatUsers Component

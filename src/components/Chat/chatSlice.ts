@@ -102,7 +102,7 @@ export interface MessageData {
   /** The profile image of he sender. */
   profilePicUrl: string
 
-  /** The time of sending the message. TODO: validate that it's in the correct format. */
+  /** The time of sending the message. */
   timestamp: string
 
   /**
@@ -248,17 +248,12 @@ export const chatSlice = createSlice({
       const prev = state.userRooms
       let assignedActive = false // not clear what it does
 
-      /** TODO: fix the filter map logic */
       const updatedRooms = prev
         .filter((room) => {
-          return room.roomId !== roomId // first we remove room from the array
+          return room.roomId !== roomId
         })
         .map((room) => {
-          if (room.roomId === roomId) {
-            // then we look for that room in the same array
-            room.isOpened = false
-            room.active = false
-          } else if (room.isOpened && !assignedActive) {
+          if (room.isOpened && !assignedActive) {
             assignedActive = true
             room.active = true
           }

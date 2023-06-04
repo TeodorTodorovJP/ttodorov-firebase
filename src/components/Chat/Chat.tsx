@@ -6,8 +6,8 @@ import ChatRooms from "./ChatRooms/ChatRooms"
 import ChatUsers from "./ChatUsers/ChatUsers"
 import { useGetUserDataQuery } from "../Auth/userApi"
 import useError from "../CustomHooks/useError"
-import { setModal } from "../Navigation/navigationSlice"
 import { useEffect } from "react"
+import { setModal } from "../Modal/modalSlice"
 
 /**
  * Chat Component

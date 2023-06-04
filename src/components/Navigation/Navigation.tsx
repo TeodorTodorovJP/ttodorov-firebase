@@ -1,14 +1,5 @@
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import {
-  Modal,
-  setModal,
-  selectIsOpen,
-  setIsOpenToTrue,
-  clearNavData,
-  selectModal,
-  selectWaitingActions,
-  removeWaitingAction,
-} from "./navigationSlice";
+import { selectIsOpen, setIsOpenToTrue, clearNavData } from "./navigationSlice"
 
 import NavElement from "../UI/NavElement";
 import classes from "./Navigation.module.css";
@@ -36,8 +27,9 @@ import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice"
 import { getBlobUrl } from "../../app/utils"
 import { clearChatData, selectInbox, setInbox } from "../Chat/chatSlice"
 import { toggleSVG } from "../UI/Background/backgroundSlice"
-import { ALL_THEMES, MainObj, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice"
+import { MainObj, MainThemes, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice"
 import { useNavigate } from "react-router-dom"
+import { Modal, removeWaitingAction, selectWaitingActions, setModal } from "../Modal/modalSlice"
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
@@ -184,7 +176,7 @@ export const Navigation = () => {
    * @param toTheme - the name of the theme, can be SVG and one of the main themes
    * @typeParam toTheme - string
    */
-  const changeThemeHandle = (toTheme: string) => {
+  const changeThemeHandle = (toTheme: MainThemes | "svg") => {
     /** @description - If the new theme is the same, return */
     if (toTheme === theme.main) return
 
@@ -328,28 +320,28 @@ export const Navigation = () => {
                   <button
                     type="button"
                     className={`${classes.themeBtn} hover ${classes.red}`}
-                    onClick={() => changeThemeHandle(ALL_THEMES.red)}
+                    onClick={() => changeThemeHandle("red")}
                   >
                     R
                   </button>
                   <button
                     type="button"
                     className={`${classes.themeBtn} hover ${classes.green}`}
-                    onClick={() => changeThemeHandle(ALL_THEMES.green)}
+                    onClick={() => changeThemeHandle("green")}
                   >
                     G
                   </button>
                   <button
                     type="button"
                     className={`${classes.themeBtn} hover ${classes.blue}`}
-                    onClick={() => changeThemeHandle(ALL_THEMES.blue)}
+                    onClick={() => changeThemeHandle("blue")}
                   >
                     B
                   </button>
                   <button
                     type="button"
                     className={`${classes.themeBtn} hover ${classes.blue}`}
-                    onClick={() => changeThemeHandle(ALL_THEMES.svg)}
+                    onClick={() => changeThemeHandle("svg")}
                   >
                     <p style={{ fontSize: "0.8rem" }}>SVG</p>
                   </button>

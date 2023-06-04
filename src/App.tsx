@@ -8,7 +8,7 @@ import Modal from "./components/Modal/Modal";
 import Notif from "./components/Notif/Notif";
 
 import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { defaultLang, setModal, clearNavData } from "./components/Navigation/navigationSlice";
+import { defaultLang, clearNavData } from "./components/Navigation/navigationSlice"
 import useAuthContext from "./app/auth-context";
 import { Langs } from "./components/Navigation/navigationTexts"
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth"
@@ -29,6 +29,7 @@ import { getError } from "./app/utils"
 import { clearChatData, selectUserRooms, setInbox } from "./components/Chat/chatSlice"
 import { defaultTheme, MainObj, MainThemes, setTheme } from "./components/Navigation/themeSlice"
 import { InboxMessage, useInboxListenerQuery } from "./components/Chat/chatApi"
+import { setModal } from "./components/Modal/modalSlice"
 
 /**
  * App Component

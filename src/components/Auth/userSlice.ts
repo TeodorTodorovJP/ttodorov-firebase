@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunk, RootState } from "../../app/store";
-import { setModal } from "../Navigation/navigationSlice";
+import { AppThunk, RootState } from "../../app/store"
 import { Langs } from "../Navigation/navigationTexts"
 import { defaultTheme, MainThemes, setTheme } from "../Navigation/themeSlice"
 

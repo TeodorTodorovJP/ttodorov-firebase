@@ -19,11 +19,11 @@ import {
   useSendToInboxMutation,
 } from "../chatApi"
 import useError from "../../CustomHooks/useError"
-import { setModal } from "../../Navigation/navigationSlice"
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus"
 import { getDateDataInUTC, getError } from "../../../app/utils"
 import { useGetUserDataQuery } from "../../Auth/userApi"
 import { selectTheme } from "../../Navigation/themeSlice"
+import { setModal } from "../../Modal/modalSlice"
 
 type ReactArr = React.ReactElement[]
 const initReactElArr: ReactArr = []

@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunk, RootState } from "../../app/store";
-import { Modal, setModal } from "./navigationSlice";
+import { AppThunk, RootState } from "../../app/store"
 
 /** The default theme of the app. */
 export const defaultTheme = "blue";
@@ -8,24 +7,8 @@ export const defaultTheme = "blue";
 /** For all buttons that will have a hover effect. */
 const buttonStyling = "buttonStyling hover";
 
-/** 
- * All available themes.
- * TODO: remove that and use the MainThemes type.
- * */
-export const ALL_THEMES = {
-  /** Red, Green and Blue are classic. */
-  red: "red",
-  green: "green",
-  blue: "blue",
-
-  /** SVG adds a svg background.
-   * Check UI / Background / SVGBackground.
-   * */
-  svg: "svg",
-}
-
 /** All available themes. */
-export type MainThemes = "red" | "green" | "blue";
+export type MainThemes = "red" | "green" | "blue"
 export type MainObj = { main: MainThemes };
 
 /** Set the tones for each theme. */

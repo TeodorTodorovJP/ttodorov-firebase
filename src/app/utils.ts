@@ -273,9 +273,8 @@ export const stringifyJSON = (data: any): any => {
 
 /**
  * Get's the actual error out of the error object.
- * @param {any} err - Any object that may contain one of the common error names - code, message, text, error
+ * @param {any} err - Any object that may contain one of the common error names - code, message, text, error, err
  * @returns - The error message, if nothing is found, join all object's values and return them. The error may be there.
- * TODO: Modify it to recursively search for the error within the err param.
 */
 export const getError = (err: any) => {
   const errorValue = err.code
@@ -284,9 +283,11 @@ export const getError = (err: any) => {
     ? err.message
     : err.text
     ? err.text
+    : err.err
+    ? err.err
     : err.error
     ? err.error
-    : Object.values(err).join(",");
+    : Object.values(err).join(",")
   return errorValue;
 };
 
@@ -297,7 +298,6 @@ export const getError = (err: any) => {
  * @returns An object with two properties: `blobUrl` and `revokeUrl`. `blobUrl` is a URL that
  * represents the Blob file stored in the browser's memory, and `revokeUrl` is a function that can be
  * used to release the memory used by the Blob file.
- * TODO: Add a default return case for browsers that don't support it and pass the Firebase fetch as param
  */
 export const getBlobUrl = async (imageUrl: string) => {
   // Uses Firebase to fetch an image as a Blob file
@@ -313,31 +313,31 @@ export const getBlobUrl = async (imageUrl: string) => {
  * The function `loadXHR` uses XMLHttpRequest to load a file from a given URL and returns a Promise
  * that resolves with the file's data as a blob or rejects with an error message.
  * @param {string} url - A string representing the URL of the resource to be loaded using
+ * @param {string} asType - A string representing the responseType of the resource to be loaded using
  * XMLHttpRequest.
  * @returns A Promise object is being returned.
  * Despite its name, XMLHttpRequest can be used to retrieve any type of data, not just XML.
- * TODO: add param to modify the responseType
  */
-export const loadXHR = (url: string) => {
+export const loadXHR = (url: string, asType: "arraybuffer" | "blob" | "document" | "json" | "text") => {
   return new Promise((resolve, reject) => {
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", url);
-      xhr.responseType = "blob";
-      xhr.onerror = () => reject("Network error.");
+      const xhr = new XMLHttpRequest()
+      xhr.open("GET", url)
+      xhr.responseType = asType ? asType : ""
+      xhr.onerror = () => reject("Network error.")
       xhr.onload = () => {
         if (xhr.status === 200) {
-          resolve(xhr.response);
+          resolve(xhr.response)
         } else {
-          reject("Loading error:" + xhr.statusText);
+          reject("Loading error:" + xhr.statusText)
         }
-      };
-      xhr.send();
+      }
+      xhr.send()
     } catch (err) {
-      reject(getError(err));
+      reject(getError(err))
     }
-  });
-};
+  })
+}
 
 /**
  * This function takes a date input and returns an object with various date values in UTC format.

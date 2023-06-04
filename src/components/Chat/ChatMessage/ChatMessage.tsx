@@ -32,7 +32,6 @@ export const ChatMessage = memo(({ isFront, data, otherUser }: ChatMessageProps)
   /** Access store */
   const dispatch = useAppDispatch()
 
-  /** TODO: find if you can add documentation somewhere, that will show when you hover over "images". */
   const images = useAppSelector(selectImageBlobUrl)
 
   /** Local state */
@@ -49,7 +48,6 @@ export const ChatMessage = memo(({ isFront, data, otherUser }: ChatMessageProps)
 
   /**
    * Used to scroll the chat window to the bottom when a new message is added.
-   * TODO: Check if tt triggers when the message is loaded and if it is the last message.
    * */
   useEffect(() => {
     messageRef.current?.scrollIntoView()
@@ -59,7 +57,7 @@ export const ChatMessage = memo(({ isFront, data, otherUser }: ChatMessageProps)
    * When we have imageUrl and we don't yet have imageData.
    * We download the image, get the browser's memory reference and store it.
    * Then the above useEffect triggers and update's the image.
-    */
+   */
   useEffect(() => {
     let revoke: Function | null
     if (imageUrl) {

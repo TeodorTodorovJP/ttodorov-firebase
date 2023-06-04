@@ -37,7 +37,6 @@ export const extendedApi = apiSlice.injectEndpoints({
           // Gets a reference to the users
           const userRef = doc(fireStore, "users", args.userData.id)
           // Set's the user data
-          // TODO: go to the Firebase rules section and validate the userData object
           // Currently if someone tempers with it, can mess with the data
           await setDoc(userRef, args.userData)
         } catch (err: any) {

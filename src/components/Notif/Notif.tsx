@@ -78,7 +78,7 @@ export const Notif = () => {
     dispatch(setNotif({ useNotif: false }))
   }
 
-  /** Assign a style depending on it's purpose. TODO: merge it with the top IFs. */
+  /** Assign a style depending on it's purpose. */
   const notifStyle = notif.contentType === "online" ? classes.success : classes.error
   let notifContent: JSX.Element
 

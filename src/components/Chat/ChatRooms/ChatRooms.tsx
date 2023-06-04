@@ -50,7 +50,6 @@ const ChatRooms = () => {
 
   /**
    * Listen's for room changes and update's the tabs and the styling.
-   * TODO: What is the difference between classes.activeTab and theme.decoration
    */
   useEffect(() => {
     let activeRoomId = ""

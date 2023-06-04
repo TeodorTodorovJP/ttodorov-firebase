@@ -2,7 +2,6 @@ import { useState, useRef, FormEvent, useEffect } from "react"
 import Card from "../UI/Card"
 import classes from "./authForm.module.css"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { setModal } from "../Navigation/navigationSlice"
 import { langs, Langs } from "./authTexts"
 import useError from "../CustomHooks/useError"
 import { selectUserPreferences } from "./userSlice"
@@ -21,6 +20,7 @@ import {
   createUserWithEmailAndPassword,
   updatePassword,
 } from "firebase/auth"
+import { setModal } from "../Modal/modalSlice"
 
 /**
  * AuthForm Component
