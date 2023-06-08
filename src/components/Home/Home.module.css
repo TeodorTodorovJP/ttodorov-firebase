@@ -4,3 +4,14 @@
 .home {
     padding: 1rem;
 }
+
+.header {
+    display: flex;
+}
+
+.data {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 3rem;
+}
