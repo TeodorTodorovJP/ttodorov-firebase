@@ -21,6 +21,7 @@ interface Main {
   yourPassword: string
   googleSignIn: string
   anonymousSignIn: string
+  changePassword: string
 }
 
 export const langs: Langs = {
@@ -36,6 +37,7 @@ export const langs: Langs = {
       yourPassword: "Your Password",
       googleSignIn: "Sign In With Google",
       anonymousSignIn: "Anonymous Login",
+      changePassword: "Change password",
     },
   },
   bg: {
@@ -50,6 +52,7 @@ export const langs: Langs = {
       yourPassword: "Вашата парола",
       googleSignIn: "Влезте с Google",
       anonymousSignIn: "Влезте като анонимен потребител",
+      changePassword: "Смени парола",
     },
   },
 }

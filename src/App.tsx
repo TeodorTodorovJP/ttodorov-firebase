@@ -30,6 +30,7 @@ import { clearChatData, selectUserRooms, setInbox } from "./components/Chat/chat
 import { defaultTheme, MainObj, MainThemes, setTheme } from "./components/Navigation/themeSlice"
 import { InboxMessage, useInboxListenerQuery } from "./components/Chat/chatApi"
 import { setModal } from "./components/Modal/modalSlice"
+import { useAddLogMutation } from "./logsApi"
 
 /**
  * App Component
@@ -77,8 +78,10 @@ export const App = () => {
 
   const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus()
 
-  /** Add user to firebase */
   const [addUserData, { data: usersData, isLoading: isSendingPost, isError, error }] = useAddUserDataMutation()
+
+  /** Add log to firebase */
+  const [addLog] = useAddLogMutation()
 
   /**
    * For useAddUserDataMutation
@@ -182,6 +185,7 @@ export const App = () => {
       if (!authCtx.isLoggedIn) {
         anonymousSignIn()
       }
+      addLog({ type: "User visited" })
     }
 
     // Local storage section
@@ -246,9 +250,11 @@ export const App = () => {
               // we will be send back to the previous screen
               const navigateTo = window.location.pathname === "/auth" ? "/" : window.location.pathname
               navigate(navigateTo)
-
+              addLog({ type: "User signed in", data: userObj })
               console.log("Signed in")
             } else if (user.isAnonymous && authCtx.isLoggedIn) {
+              addLog({ type: "User logout", currentUser })
+
               // If the user didn't login, but there is data in local storage
               // Context, local storage, state
               authCtx.logout()

@@ -15,20 +15,6 @@ export function Counter() {
 
   const incrementValue = Number(incrementAmount) || 0
 
-  // TODO: Test it
-  const testError = async (error: any) => {
-    const errorText = JSON.stringify(error)
-    const time = new Date().toString()
-    try {
-      const userRef = doc(fireStore, "errors", time)
-
-      const { utcDate: timestamp } = getDateDataInUTC()
-      await setDoc(userRef, { timestamp, errorText })
-    } catch (error) {
-      console.error("Error writing Error to Firebase Database", error)
-    }
-  }
-
   return (
     <Card additionalClass="counter">
       <div className={classes.counter}>

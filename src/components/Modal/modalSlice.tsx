@@ -72,7 +72,6 @@ export const modalSlice = createSlice({
   reducers: {
     /**
      * Set's the modal to whatever settings.
-     * TODO: move this logic to a separate slice for the modal.
      */
     setModal: (state, action: PayloadAction<Modal>) => {
       const data = action.payload

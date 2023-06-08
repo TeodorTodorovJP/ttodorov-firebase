@@ -48,7 +48,6 @@ const calculateRemainingTime = (expirationDate: string | number | Date) => {
  * @returns Returns an object with two properties: `token` and `duration`. 
  * The `token` property contains the value of the token retrieved from the local storage,
  * and the `duration` property contains the remaining time in seconds until the token expires.
- * TODO: When the user has not logged in for a long time, when loading the webpage, the user is still logged in.
  */
 const retrieveStoredToken = () => {
   const storedToken = localStorage.getItem("token")

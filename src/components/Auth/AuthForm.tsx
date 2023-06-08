@@ -4,7 +4,7 @@ import classes from "./authForm.module.css"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { langs, Langs } from "./authTexts"
 import useError from "../CustomHooks/useError"
-import { selectUserPreferences } from "./userSlice"
+import { selectUserData, selectUserPreferences } from "./userSlice"
 import { ReactComponent as Eye } from "./SVG/eye.svg"
 import { ReactComponent as EyeOff } from "./SVG/eyeOff.svg"
 import { selectTheme } from "../Navigation/themeSlice"
@@ -21,6 +21,7 @@ import {
   updatePassword,
 } from "firebase/auth"
 import { setModal } from "../Modal/modalSlice"
+import { useAddLogMutation } from "../../logsApi"
 
 /**
  * AuthForm Component
@@ -45,7 +46,7 @@ import { setModal } from "../Modal/modalSlice"
  * - saveError: Function to save any error to Firebase (Currently not in use).
  * - anonymousSignIn: Initiates an anonymous sign-in process using Firebase authentication (Currently not in use).
  * - googleSignIn: Initiates a Google sign-in process using Firebase authentication.
- * - updateProfilePassword: Updates the password of the current user (Currently not in use).
+ * - changePassword: Updates the password of the current user (Currently not in use).
  * - togglePassword: Toggles the visibility of a password.
  * - submitHandler: Handles form submission for user Email login, and provides appropriate error messages based on the type of error encountered.
  */
@@ -54,6 +55,7 @@ export const AuthForm = () => {
   const dispatch = useAppDispatch()
   const { button } = useAppSelector(selectTheme)
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
+  const currentUser = useAppSelector(selectUserData)
 
   /** Local state */
   type AuthMethod = "options" | "email" | "google" | "anonymous" | "changePassword"
@@ -69,6 +71,9 @@ export const AuthForm = () => {
   const emailInputRef = useRef<HTMLInputElement>(null)
   const passwordInputRef = useRef<HTMLInputElement>(null)
   const newPasswordInputRef = useRef<HTMLInputElement>(null)
+
+  /** Add log to firebase */
+  const [addLog] = useAddLogMutation()
 
   /** Setup the GoogleAuthProvider for the googleSignIn method */
   let provider = useRef<GoogleAuthProvider>()
@@ -128,23 +133,6 @@ export const AuthForm = () => {
   }
 
   /**
-   * TODO: not working yet
-   * Saves and Error to Firebase.
-   * Intended for use only when logged in anonymously.
-   * When user generates errors, we can log them in Firebase with some form of credential.
-   */
-  const saveError = async (error: object) => {
-    // Add a new message entry to the Firebase database.
-    try {
-      await addDoc(collection(fireStore, "errors"), {
-        error: JSON.stringify(error),
-      })
-    } catch (error) {
-      console.error("Error writing new message to Firebase Database", error)
-    }
-  }
-
-  /**
    * This function signs in a user anonymously.
    * Removed from the options.
    * Generated too many anonymous logins.
@@ -168,6 +156,7 @@ export const AuthForm = () => {
         if (error.message.includes("auth/popup-closed-by-user")) {
           dispatch(setModal({ useModal: false }))
         } else {
+          addLog({ type: "error while google login", error })
           setGeneralError(error)
         }
       })
@@ -178,7 +167,7 @@ export const AuthForm = () => {
    * TODO: not working yet
    * This function updates the password of the current user.
    */
-  const updateProfilePassword = () => {
+  const changePassword = () => {
     const auth = getAuth()
 
     const newPassword = newPasswordInputRef.current?.value
@@ -254,6 +243,11 @@ export const AuthForm = () => {
               {/* <button type="button" className={button} onClick={anonymousSignIn}>
                 {main.anonymousSignIn}
               </button> */}
+              {currentUser && (
+                <button type="button" className={button} onClick={() => switchAuthMethodHandler("changePassword")}>
+                  {main.changePassword}
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -289,6 +283,46 @@ export const AuthForm = () => {
                   <button className={button}>{isLogin ? main.login : main.createAccount}</button>
                   <button type="button" className={button} onClick={switchEmailAuthModeHandler}>
                     {isLogin ? main.createAccount : main.goToLogin}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
+        {authMethod === "changePassword" && (
+          <div className={classes.emailForm}>
+            <div className={classes.backBtn}>
+              <button type="button" className={button} onClick={() => switchAuthMethodHandler("options")}>
+                {main.goBack}
+              </button>
+            </div>
+            <h1>Change password</h1>
+
+            <form onSubmit={changePassword}>
+              <div className={`${classes.control} ${passwordError && classes.error}`}>
+                <label htmlFor="password">Your old password</label>
+                <input id="password" type={passwordVisible ? "text" : "password"} required ref={passwordInputRef} />
+                <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
+                  {passwordVisible ? <Eye /> : <EyeOff />}
+                </button>
+              </div>
+
+              {emailError && <p className={classes.errorText}>{emailError}</p>}
+
+              <div className={`${classes.control} ${passwordError && classes.error}`}>
+                <label htmlFor="password">Your new password</label>
+                <input id="password" type={passwordVisible ? "text" : "password"} required ref={passwordInputRef} />
+                <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
+                  {passwordVisible ? <Eye /> : <EyeOff />}
+                </button>
+              </div>
+
+              {passwordError && <p className={classes.errorText}>{passwordError}</p>}
+
+              <div className={classes.actions}>
+                <div className={classes.emailAuth}>
+                  <button className={button} type="submit">
+                    Change
                   </button>
                 </div>
               </div>
