@@ -28,6 +28,13 @@ type SVG = "svg-red" | "svg-green" | "svg-blue";
 /** Set's the color of any element to the chosen theme. */
 type Decoration = "decoration-red" | "decoration-green" | "decoration-blue";
 
+/** Set's the light decoration tone. */
+type DecorationToneL = "decoration-red-l" | "decoration-green-l" | "decoration-blue-l";
+/** Set's the medium decoration tone. */
+type DecorationToneM = "decoration-red-m" | "decoration-green-m" | "decoration-blue-m";
+/** Set's the hard decoration tone. */
+type DecorationToneH = "decoration-red-h" | "decoration-green-h" | "decoration-blue-h";
+
 /** For all scrollbars. */
 type Scrollbar = "scrollbar-red" | "scrollbar-green" | "scrollbar-blue";
 
@@ -36,15 +43,18 @@ type Loader = "loader loader-red" | "loader loader-green" | "loader loader-blue"
 
 /** Combines all available stylings. */
 interface Theme {
-  main: MainThemes;
-  light: Light;
-  medium: Medium;
-  hard: Hard;
-  button: Button;
-  svg: SVG;
-  decoration: Decoration;
-  scrollbar: Scrollbar;
-  loader: Loader;
+  main: MainThemes
+  light: Light
+  medium: Medium
+  hard: Hard
+  button: Button
+  svg: SVG
+  decoration: Decoration
+  decorationL: DecorationToneL
+  decorationM: DecorationToneM
+  decorationH: DecorationToneH
+  scrollbar: Scrollbar
+  loader: Loader
 }
 
 export interface ThemeState {
@@ -65,10 +75,13 @@ const getMainInitialState = () => {
       button: `${buttonStyling} button-${defaultTheme}`,
       svg: `svg-${defaultTheme}`,
       decoration: `decoration-${defaultTheme}`,
+      decorationL: `decoration-${defaultTheme}-l`,
+      decorationM: `decoration-${defaultTheme}-m`,
+      decorationH: `decoration-${defaultTheme}-h`,
       scrollbar: `scrollbar-${defaultTheme}`,
       loader: `loader loader-${defaultTheme}`,
     },
-  };
+  }
   return newState;
 };
 
@@ -92,6 +105,9 @@ export const themeSlice = createSlice({
         button: `${buttonStyling} button-${theme}`,
         svg: `svg-${theme}`,
         decoration: `decoration-${theme}`,
+        decorationL: `decoration-${theme}-l`,
+        decorationM: `decoration-${theme}-m`,
+        decorationH: `decoration-${theme}-h`,
         scrollbar: `scrollbar-${theme}`,
         loader: `loader loader-${theme}`,
       }

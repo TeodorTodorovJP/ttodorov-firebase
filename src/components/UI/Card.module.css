@@ -143,4 +143,9 @@
     top: 12vh;
     left: 2rem;
   }
+
+  .card.home {
+    margin-top: 3rem;
+  }
+  
 }
