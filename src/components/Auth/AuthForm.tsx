@@ -22,6 +22,8 @@ import {
 } from "firebase/auth"
 import { setModal } from "../Modal/modalSlice"
 import { useAddLogMutation } from "../../logsApi"
+import useAuthContext from "../../app/auth-context"
+import { useNavigate } from "react-router-dom"
 
 /**
  * AuthForm Component
@@ -67,10 +69,17 @@ export const AuthForm = () => {
   const [emailError, setEmailError] = useError()
   const [passwordError, setPasswordError] = useError()
   const [generalError, setGeneralError] = useError()
+  const [newPasswordError, setNewPasswordError] = useError()
 
   const emailInputRef = useRef<HTMLInputElement>(null)
   const passwordInputRef = useRef<HTMLInputElement>(null)
   const newPasswordInputRef = useRef<HTMLInputElement>(null)
+
+  /** Access Context */
+  const authCtx = useAuthContext()
+
+  /** Access Router */
+  const navigate = useNavigate()
 
   /** Add log to firebase */
   const [addLog] = useAddLogMutation()
@@ -87,16 +96,17 @@ export const AuthForm = () => {
 
   /** Handle all hook errors */
   useEffect(() => {
-    if (emailError === 0 || passwordError === 0 || generalError === 0) {
+    if (emailError === 0 || passwordError === 0 || generalError === 0 || newPasswordError === 0) {
       // default error modal
       dispatch(setModal({ modalType: "error" }))
       setEmailError(null)
       setPasswordError(null)
+      setNewPasswordError(null)
     } else if (generalError) {
       setGeneralError(null)
       dispatch(setModal({ message: generalError }))
     }
-  }, [emailError, passwordError, generalError])
+  }, [emailError, passwordError, generalError, newPasswordError])
 
   /** Access all text translations */
   const { main } = langs[currentLang as keyof Langs]
@@ -167,7 +177,8 @@ export const AuthForm = () => {
    * TODO: not working yet
    * This function updates the password of the current user.
    */
-  const changePassword = () => {
+  const changePassword = (event: FormEvent) => {
+    event.preventDefault()
     const auth = getAuth()
 
     const newPassword = newPasswordInputRef.current?.value
@@ -177,10 +188,11 @@ export const AuthForm = () => {
         updatePassword(user, newPassword)
           .then(() => {
             // Update successful.
+            navigate("/")
           })
           .catch((error) => {
             // An error ocurred
-            // ...
+            setNewPasswordError(error)
           })
       }
     }
@@ -243,7 +255,7 @@ export const AuthForm = () => {
               {/* <button type="button" className={button} onClick={anonymousSignIn}>
                 {main.anonymousSignIn}
               </button> */}
-              {currentUser && (
+              {authCtx.isLoggedIn && currentUser && (
                 <button type="button" className={button} onClick={() => switchAuthMethodHandler("changePassword")}>
                   {main.changePassword}
                 </button>
@@ -282,7 +294,7 @@ export const AuthForm = () => {
                 <div className={classes.emailAuth}>
                   <button className={button}>{isLogin ? main.login : main.createAccount}</button>
                   <button type="button" className={button} onClick={switchEmailAuthModeHandler}>
-                    {isLogin ? main.createAccount : main.goToLogin}
+                    {isLogin ? main.toCreateAccount : main.goToLogin}
                   </button>
                 </div>
               </div>
@@ -300,24 +312,14 @@ export const AuthForm = () => {
 
             <form onSubmit={changePassword}>
               <div className={`${classes.control} ${passwordError && classes.error}`}>
-                <label htmlFor="password">Your old password</label>
-                <input id="password" type={passwordVisible ? "text" : "password"} required ref={passwordInputRef} />
-                <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
-                  {passwordVisible ? <Eye /> : <EyeOff />}
-                </button>
-              </div>
-
-              {emailError && <p className={classes.errorText}>{emailError}</p>}
-
-              <div className={`${classes.control} ${passwordError && classes.error}`}>
                 <label htmlFor="password">Your new password</label>
-                <input id="password" type={passwordVisible ? "text" : "password"} required ref={passwordInputRef} />
+                <input id="password" type={passwordVisible ? "text" : "password"} required ref={newPasswordInputRef} />
                 <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
                   {passwordVisible ? <Eye /> : <EyeOff />}
                 </button>
               </div>
 
-              {passwordError && <p className={classes.errorText}>{passwordError}</p>}
+              {newPasswordError && <p className={classes.errorText}>{newPasswordError}</p>}
 
               <div className={classes.actions}>
                 <div className={classes.emailAuth}>

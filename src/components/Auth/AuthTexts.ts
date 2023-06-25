@@ -16,6 +16,7 @@ interface Main {
   goBack: string
   options: string
   createAccount: string
+  toCreateAccount: string
   goToLogin: string
   yourEmail: string
   yourPassword: string
@@ -32,6 +33,7 @@ export const langs: Langs = {
       goBack: "back",
       options: "Choose a Login method",
       createAccount: "Create Account",
+      toCreateAccount: "To Create Account",
       goToLogin: "Go to Login",
       yourEmail: "Your Email",
       yourPassword: "Your Password",
@@ -46,7 +48,8 @@ export const langs: Langs = {
       email: "Email",
       goBack: "назад",
       options: "Изберете начин на влизане",
-      createAccount: "Създай профил",
+      createAccount: "Създаване",
+      toCreateAccount: "Създай профил",
       goToLogin: "Влез в профил",
       yourEmail: "Вашата поща",
       yourPassword: "Вашата парола",

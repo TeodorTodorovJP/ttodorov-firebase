@@ -3,11 +3,12 @@
 
 .chatUsers {
     height: fit-content;
+    max-height: 65vh;
     padding: 1rem;
-    border-radius: 50%;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    overflow: scroll;
 }
 
 .chatUser {
