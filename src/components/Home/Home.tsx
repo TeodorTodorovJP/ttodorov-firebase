@@ -1,20 +1,17 @@
-import classes from "./Home.module.css";
-
-import Card from "../UI/Card";
 import { Langs, langs } from "./homeTexts"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { selectImageBlobUrl, selectUserPreferences, addImageBlobUrl, Image } from "../Auth/userSlice"
-import { Data, useGetHomeDataQuery, useUpdateHomeDataMutation } from "./homeApi"
+import { Data, useGetHomeDataQuery } from "./homeApi"
 import useError from "../CustomHooks/useError"
-import { ReactElement, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { setModal } from "../Modal/modalSlice"
 import { getBlobUrl } from "../../app/utils"
-import { selectTheme } from "../Navigation/themeSlice"
-import { ReactComponent as AddressSVG } from "./SVG/address.svg"
-import { ReactComponent as GitHubSVG } from "./SVG/gitHub.svg"
-import { ReactComponent as GmailSVG } from "./SVG/gmail.svg"
-import { ReactComponent as LinkedInSVG } from "./SVG/linkedIn.svg"
-import { ReactComponent as PhoneSVG } from "./SVG/phone.svg"
+import { Box, Button, ButtonGroup, Link, Snackbar, Stack, Typography, useMediaQuery } from "@mui/material"
+import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt"
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
+import { BackGround } from "../UI/BackGround"
+
+type AboutButtons = "aboutMe" | "skills" | "experience"
 
 /**
  * The Home component returns a Card component with a div containing the text "Home Page".
@@ -24,11 +21,10 @@ import { ReactComponent as PhoneSVG } from "./SVG/phone.svg"
  */
 export const Home = () => {
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
-  const theme = useAppSelector(selectTheme)
   const dispatch = useAppDispatch()
   const images = useAppSelector(selectImageBlobUrl)
 
-  const DATARemove = {
+  const FallbackData = {
     email: "ttodorov.jp@gmail.com",
     linkedIn: "https://www.linkedin.com/in/ttodorovjp/",
     phone: "0882 59 19 90",
@@ -38,10 +34,28 @@ export const Home = () => {
   }
 
   const [imageData, setImageData] = useState<Image | null>(null)
-  const [data, setData] = useState<Data>()
+  const [data, setData] = useState<Data>(FallbackData)
+  const [openGmailSnack, setOpenGmailSnack] = useState<boolean>(false)
+  const [aboutButton, setAboutButton] = useState<AboutButtons>("aboutMe")
+
+  // @ts-ignore
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"))
 
   /** Error hooks */
   const [homeDataError, setHomeDataError] = useError()
+
+  /**
+   * Copy the email to the user's clipboard and
+   * show a popup to notify the user.
+   * */
+  const handleGmailClick = () => {
+    setOpenGmailSnack(true)
+    navigator.clipboard.writeText(data.email)
+  }
+
+  const handleAboutButtonsChange = (setButton: AboutButtons) => {
+    setAboutButton(setButton)
+  }
 
   /**
    * Get the current user data.
@@ -108,84 +122,175 @@ export const Home = () => {
     const foundImage = images(data.profilePicStored)[0]
     if (foundImage) setImageData(foundImage)
   }
-  let profileImage: ReactElement = <p>No image</p>
-
-  if (imageData) {
-    profileImage = <img className={classes.mainImage} src={imageData.blobUrl} alt="image can't load" />
-  }
 
   const { main } = langs[currentLang as keyof Langs]
 
   return (
-    <Card additionalClass="home">
+    <Box sx={{ alignSelf: "flex-start", minHeight: "inherit", minWidth: "inherit" }}>
       {data ? (
-        <div className={classes.home}>
-          <div className={classes.data}>
-            <div>
-              <div className={` ${classes.address} ${theme.svg}`}>
-                <AddressSVG /> <p>Sofia</p>
-              </div>
-              <div className={classes.mainHeader}>
-                <p className={theme.decorationH}>I Build Custom</p>
-                <p className={theme.decorationM}>Website Solutions</p>
-                <p className={theme.decorationH}>That Help Your</p>
-                <p className={theme.decorationM}>Business Grow</p>
-              </div>
-              <p>I help you increase conversion and performance in every possible way.</p>
-            </div>
-            {profileImage}
-          </div>
+        <Box sx={{ display: "flex", minHeight: "inherit", minWidth: "inherit", alignItems: "center" }}>
+          <Box
+            sx={{
+              minWidth: "70vw",
+              minHeight: "65vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              color: "text",
+              marginLeft: { xs: "1vw", md: "10vw" },
+            }}
+          >
+            <BackGround />
+            <Stack direction="column" spacing={2}>
+              <Box>
+                <Typography variant="h3">I am Teodor Todorov</Typography>
+                <Typography variant="h3">A Web Developer</Typography>
+              </Box>
+              <Box sx={{ marginTop: { xs: "40px", md: "initial" } }}>
+                <Typography sx={{ fontSize: "15px" }}>
+                  If we get to know each other, you will see that I'm a hard-working, creative
+                </Typography>
+                <Typography sx={{ fontSize: "15px" }}>individual, constantly setting new goals to achieve.</Typography>
+              </Box>
 
-          {
-            <div className={classes.data}>
-              <div>
-                <div className={classes.contact}>
-                  <div className={` ${classes.contactSvg} ${theme.svg}`}>
-                    <GmailSVG />
-                  </div>
-                  <div>
-                    <div>{data.email}</div>
-                  </div>
-                </div>
+              <Stack spacing={2} direction={{ xs: "column", md: "row" }}>
+                <Button variant="contained" endIcon={<ArrowRightAltIcon />}>
+                  <Typography>HIRE ME</Typography>
+                </Button>
+                <Button variant="contained" endIcon={<ArrowRightAltIcon />}>
+                  <Typography>VIEW MY WORK</Typography>
+                </Button>
+              </Stack>
 
-                <div className={classes.contact}>
-                  <div className={` ${classes.contactSvg} ${theme.svg}`}>
-                    <LinkedInSVG />
-                  </div>
-                  <div>
-                    <a href={data.linkedIn} target="_blank">
-                      {data.linkedIn}
-                    </a>
-                  </div>
-                </div>
+              <Stack direction="row" spacing={2} sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
+                <Button
+                  startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
+                  sx={{ color: { xs: "text", md: "white" } }}
+                  onClick={() => handleGmailClick()}
+                >
+                  Gmail
+                </Button>
+                <Snackbar
+                  open={openGmailSnack}
+                  onClose={() => setOpenGmailSnack(false)}
+                  autoHideDuration={20000}
+                  message={`Copied ${data.email}`}
+                  key={"top" + "center"}
+                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  sx={{ display: "block", textAlign: "center" }}
+                />
 
-                <div className={classes.contact}>
-                  <div className={` ${classes.contactSvg} ${theme.svg}`}>
-                    <PhoneSVG />
-                  </div>
-                  <div>
-                    <div>{data.phone}</div>
-                  </div>
-                </div>
+                <Button
+                  startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
+                  sx={{ color: { xs: "text", md: "white" } }}
+                >
+                  <Link href={data.linkedIn} target="_blank" underline="none" color="inherit">
+                    LinkedIn
+                  </Link>
+                </Button>
+                <Button
+                  startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
+                  sx={{ color: { xs: "text", md: "white" } }}
+                >
+                  <Link href={data.repo} target="_blank" underline="none" color="inherit">
+                    GitHub
+                  </Link>
+                </Button>
+              </Stack>
+            </Stack>
+            <Box sx={{ display: "flex", flexDirection: "row", marginTop: "50px" }}>
+              <Box
+                sx={{
+                  backgroundImage: `url(${data.profilePicStored})`,
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  width: "400px",
+                  objectFit: "contain",
 
-                <div className={classes.contact}>
-                  <div className={` ${classes.contactSvg} ${theme.svg}`}>
-                    <GitHubSVG />
-                  </div>
+                  display: { xs: "none", md: "block" },
+                }}
+              ></Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: { xs: "center", md: "flex-start" },
+                  alignItems: { xs: "center", md: "flex-start" },
+                }}
+              >
+                <Stack direction="row" justifyContent="center" alignItems="center">
+                  <ButtonGroup aria-label="About buttons" variant={isSmallScreen ? "outlined" : "contained"}>
+                    <Button onClick={() => handleAboutButtonsChange("aboutMe")}>ABOUT ME</Button>
+                    <Button onClick={() => handleAboutButtonsChange("skills")}>SKILLS</Button>
+                    <Button onClick={() => handleAboutButtonsChange("experience")}>EXPERIENCE</Button>
+                  </ButtonGroup>
+                </Stack>
 
-                  <div>
-                    <a href={data.repo} target="_blank">
-                      {data.repo}
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
+                {aboutButton === "aboutMe" && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: { xs: "center", md: "flex-start" },
+                      alignItems: { xs: "center", md: "flex-start" },
+                      padding: "10px",
+                    }}
+                  >
+                    <Typography variant="h3">My Story</Typography>
+                    <Typography variant="subtitle1" mt="10px" maxWidth="500px">
+                      Long text text text text text text text text text text text text text text text text text text
+                      text text text text text texttext text text text text text texttext text text text text text
+                      texttext text text text text text text
+                    </Typography>
+                    <Typography variant="h4">I work on websites</Typography>
+                  </Box>
+                )}
+                {aboutButton === "skills" && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: { xs: "center", md: "flex-start" },
+                      alignItems: { xs: "center", md: "flex-start" },
+                      padding: "10px",
+                    }}
+                  >
+                    <Typography variant="h3">My Skills</Typography>
+                    <Typography variant="subtitle1" mt="10px" maxWidth="500px">
+                      Long text text text text text text text text text text text text text text text text text text
+                      text text text text text texttext text text text text text texttext text text text text text
+                      texttext text text text text text text
+                    </Typography>
+                    <Typography variant="h4">I work on websites</Typography>
+                  </Box>
+                )}
+                {aboutButton === "experience" && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: { xs: "center", md: "flex-start" },
+                      alignItems: { xs: "center", md: "flex-start" },
+                      padding: "10px",
+                    }}
+                  >
+                    <Typography variant="h3">My experience</Typography>
+                    <Typography variant="subtitle1" mt="10px" maxWidth="500px">
+                      Long text text text text text text text text text text text text text text text text text text
+                      text text text text text texttext text text text text text texttext text text text text text
+                      texttext text text text text text text
+                    </Typography>
+                    <Typography variant="h4">I work on websites</Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       ) : null}
-    </Card>
+    </Box>
   )
 }
 
-export default Home;
+export default Home

@@ -1,15 +1,11 @@
-import { useEffect, useState } from "react";
-import classes from "./App.module.css";
+import { useEffect, useState } from "react"
 // import "./App.css";
-import Navigation from "./components/Navigation/Navigation";
-import { Outlet } from "react-router-dom";
-import Background from "./components/UI/Background/Background";
-import Modal from "./components/Modal/Modal";
-import Notif from "./components/Notif/Notif";
-
-import { useAppDispatch, useAppSelector } from "./app/hooks";
+import Navigation from "./components/Navigation/Navigation"
+import { Outlet } from "react-router-dom"
+import Modal from "./components/Modal/Modal"
+import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { defaultLang, clearNavData } from "./components/Navigation/navigationSlice"
-import useAuthContext from "./app/auth-context";
+import useAuthContext from "./app/auth-context"
 import { Langs } from "./components/Navigation/navigationTexts"
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth"
 import {
@@ -20,17 +16,19 @@ import {
   userHasData,
   selectUserData,
 } from "./components/Auth/userSlice"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useAddUserDataMutation } from "./components/Auth/userApi"
 import useError from "./components/CustomHooks/useError"
-import { setNotif } from "./components/Notif/NotifSlice"
 import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus"
 import { getError } from "./app/utils"
 import { clearChatData, selectUserRooms, setInbox } from "./components/Chat/chatSlice"
-import { defaultTheme, MainObj, MainThemes, setTheme } from "./components/Navigation/themeSlice"
-import { InboxMessage, useInboxListenerQuery } from "./components/Chat/chatApi"
+import { selectTheme, setTheme, Themes } from "./components/Navigation/themeSlice"
+import { useInboxListenerQuery } from "./components/Chat/chatApi"
 import { setModal } from "./components/Modal/modalSlice"
 import { useAddLogMutation } from "./logsApi"
+import { CssBaseline, Grid, Snackbar, Theme } from "@mui/material"
+import { ThemeProvider, createTheme } from "@mui/material/styles"
+import useMediaQuery from "@mui/material/useMediaQuery"
 
 /**
  * App Component
@@ -55,12 +53,14 @@ import { useAddLogMutation } from "./logsApi"
  * Functions - Short description of functions within the component
  * - anonymousSignIn: Signs in the user anonymously.
  */
+
 export const App = () => {
   /** Access store */
   const dispatch = useAppDispatch()
   const userHasDataInStore = useAppSelector(userHasData)
   const currentUser = useAppSelector(selectUserData)
   const userRooms = useAppSelector(selectUserRooms)
+  const { value: storeTheme } = useAppSelector(selectTheme)
 
   /** Access Context */
   const authCtx = useAuthContext()
@@ -70,6 +70,17 @@ export const App = () => {
 
   /** Local state */
   const [localHost, setLocalHost] = useState(false)
+  const [notif, setNotif] = useState(false)
+  const [notifMsg, setNotifMsg] = useState("")
+  const [stateTheme, setStateTheme] = useState<Theme>(
+    createTheme({
+      palette: {
+        mode: storeTheme,
+      },
+    })
+  )
+  const [previousTheme, setPreviousTheme] = useState<Themes>(storeTheme)
+  const [initLoad, setInitLoad] = useState<boolean>(true)
 
   /** Error hooks */
   const [usersError, setUsersError] = useError()
@@ -102,6 +113,45 @@ export const App = () => {
       dispatch(setModal({ message: usersError }))
     }
   }, [usersError])
+
+  /**
+   * For finding if the user has chosen dark mode through browser or OS settings
+   * */
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
+
+  /**
+   * The initial value has to be the one from the store, so that
+   * on init, we we assign it, and then reassign it with the user's choice.
+   * On init, set the theme to the default theme.
+   * Then listen for changes from the store.
+   * */
+  useEffect(() => {
+    setStateTheme(
+      createTheme({
+        palette: {
+          mode: storeTheme,
+        },
+      })
+    )
+  }, [storeTheme])
+  /**
+   * This reassignment has to be second, so that, on init this will be
+   * the default choice.
+   * On init, set the theme to dark if the user prefer's it.
+   * Then listen for changes from the user.
+   * */
+  useEffect(() => {
+    setStateTheme(
+      createTheme({
+        palette: {
+          mode: prefersDarkMode ? "dark" : "light",
+        },
+      })
+    )
+    // If the change is done from the browser, notify the store.
+    // Otherwise, some times the first click on the toggle theme will do nothing.
+    dispatch(setTheme({ theme: prefersDarkMode ? "dark" : "light" }))
+  }, [prefersDarkMode])
 
   /**
    * Get inbox messages based on userId
@@ -188,20 +238,12 @@ export const App = () => {
       addLog({ type: "User visited" })
     }
 
-    // Local storage section
-    // User theme preference
-    let userDefaultTheme = localStorage.getItem("theme") as MainThemes | null
-    userDefaultTheme = userDefaultTheme ? userDefaultTheme : defaultTheme
-
     // User language preference
     let userDefaultLang = localStorage.getItem("lang")
     userDefaultLang = userDefaultLang ? userDefaultLang : defaultLang
 
     // Send preferences to the store
-    dispatch(setUserPreferences({ theme: userDefaultTheme, lang: userDefaultLang as keyof Langs }))
-
-    let changeTheme: MainObj = { main: userDefaultTheme } as MainObj
-    dispatch(setTheme(changeTheme))
+    dispatch(setUserPreferences({ lang: userDefaultLang as keyof Langs }))
   }, [])
 
   /**
@@ -285,26 +327,44 @@ export const App = () => {
   /** Displays a notification if the user is offline and if the user was offline and is now, online */
   useEffect(() => {
     if (isOnline && wasOffline) {
-      dispatch(setNotif({ notifType: "topBar", contentType: "online" }))
+      setNotif(true)
+      setNotifMsg("online")
       resetOnlineStatus()
     } else if (!isOnline) {
-      dispatch(setNotif({ notifType: "topBar", contentType: "offline" }))
+      setNotif(true)
+      setNotifMsg("offline")
     }
   }, [isOnline])
 
   return (
-    <div className={classes.app}>
-      <Modal />
-      <Notif />
-      <Background />
-      <Navigation />
-      <div className={classes.outlet}>
+    <ThemeProvider theme={stateTheme}>
+      <CssBaseline enableColorScheme />
+      <Grid
+        container
+        spacing={0}
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ minHeight: "100vh", minWidth: "100vw", maxHeight: "100vh", maxWidth: "100vw" }}
+      >
+        <Modal />
+        <Navigation />
         <Outlet />
-      </div>
-    </div>
+
+        <Snackbar
+          open={notif}
+          onClose={() => setNotif(false)}
+          autoHideDuration={20000}
+          message={`You are currently ${notifMsg}!`}
+          key={"top" + "center"}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          sx={{ display: "block", textAlign: "center" }}
+        />
+      </Grid>
+    </ThemeProvider>
   )
 }
 
-export default App;
+export default App
 // You can use autocomplete, look how to do it with user permission like popup or alert
 // <input id="email" autocomplete="email" name="email" aria-required="true" placeholder="Email" required>

@@ -1,20 +1,30 @@
-import classes from "./Profile.module.css";
-import Card from "../UI/Card";
-import { selectUserData, selectUserPreferences, setUserData } from "../Auth/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { ReactElement, useEffect, useRef, useState } from "react";
-import { ReactComponent as AccountSVG } from "../UI/SVG/account.svg"
-import { ReactComponent as ImageSVG } from "../UI/SVG/imageSVG.svg";
-import { useOnlineStatus } from "../CustomHooks/useOnlineStatus";
-import { getAuth } from "firebase/auth";
+import { selectUserData, selectUserPreferences, setUserData } from "../Auth/userSlice"
+import { useAppDispatch, useAppSelector } from "../../app/hooks"
+import { ReactElement, useEffect, useRef, useState } from "react"
+import { useOnlineStatus } from "../CustomHooks/useOnlineStatus"
+import { getAuth } from "firebase/auth"
 import { langs, Langs } from "./profileTexts"
 import { useSaveImageMutation } from "../Chat/chatApi"
 import useError from "../CustomHooks/useError"
 import { useUpdateUserDataMutation } from "../Auth/userApi"
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice"
 import { getBlobUrl } from "../../app/utils"
-import { selectTheme } from "../Navigation/themeSlice"
 import { setModal } from "../Modal/modalSlice"
+import InsertPhotoIcon from "@mui/icons-material/InsertPhoto"
+import { AccountCircle } from "@mui/icons-material"
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography,
+} from "@mui/material"
+import { BackGround } from "../UI/BackGround"
 
 /**
  * Profile Component
@@ -52,7 +62,6 @@ export const Profile = () => {
   const dispatch = useAppDispatch()
   const userData = useAppSelector(selectUserData)
   const images = useAppSelector(selectImageBlobUrl)
-  const theme = useAppSelector(selectTheme)
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
 
   /** Custom hooks */
@@ -162,12 +171,15 @@ export const Profile = () => {
     return url
   }
 
+  const imageSide = { xs: "100px", md: "300px" }
+  const imageSizes = { width: imageSide, height: imageSide }
+
   if (imageData) {
-    profileImage = <img src={imageData.blobUrl} alt="image can't load" />
+    profileImage = <Avatar alt="Your Image" src={imageData.blobUrl} sx={imageSizes} />
   } else if (profilePic) {
-    profileImage = <img src={profilePic} alt="image can't load"></img>
+    profileImage = <Avatar alt="Your Image" src={profilePic} sx={imageSizes} />
   } else {
-    profileImage = <AccountSVG />
+    profileImage = <AccountCircle />
   }
 
   /**
@@ -217,41 +229,76 @@ export const Profile = () => {
   }
 
   return (
-    <Card additionalClass="profile">
-      <div className={classes.profile}>
-        <h1>Profile page</h1>
-        <div className={classes.data}>
-          <div className={classes.leftSide}>
-            <p>{idRow}</p>
-            <p>{namesRow}</p>
-            <p>{emailRow}</p>
-          </div>
-          <div className={`${classes.rightSide} ${theme.svg}`}>
-            {profileImage}
-            <input
-              type="file"
-              style={{ display: "none" }}
-              ref={imageInputRef}
-              onChange={(e) => handleSaveImageBtn(e)}
-            />
-            {
-              <div className={classes.uploadImage}>
-                <button
-                  id="submitImage"
-                  onClick={() => triggerInput()}
-                  className={`${classes.saveImageBtn} hover`}
-                  disabled={!isOnline}
-                >
-                  <ImageSVG />
-                </button>
-                <p>Upload Image</p>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    </Card>
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+      <BackGround sx={{ top: "10vh" }} />
+
+      <Typography variant="h3">Profile page</Typography>
+      <Paper
+        variant="elevation"
+        elevation={10}
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column-reverse", md: "row" },
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: "5vh",
+          maxWidth: "100vw",
+          minWidth: "100vw",
+          gap: "30px",
+          padding: "40px",
+        }}
+      >
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: "100%", maxWidth: "100%" }} size="small" aria-label="a dense table">
+            <TableBody>
+              <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableCell sx={{ minWidth: "84px" }} align="left">
+                  User Id:
+                </TableCell>
+                <TableCell align="left">{userId}</TableCell>
+              </TableRow>
+              <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableCell sx={{ minWidth: "84px" }} align="left">
+                  User names:
+                </TableCell>
+                <TableCell align="left">{names}</TableCell>
+              </TableRow>
+              <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableCell sx={{ minWidth: "84px" }} align="left">
+                  User email:
+                </TableCell>
+                <TableCell align="left">{email ? email : "No email"}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          {profileImage}
+
+          <input type="file" style={{ display: "none" }} ref={imageInputRef} onChange={(e) => handleSaveImageBtn(e)} />
+          <IconButton
+            id="submitImage"
+            onClick={() => triggerInput()}
+            disabled={!isOnline}
+            type="button"
+            edge="start"
+            color="inherit"
+            aria-label="send image"
+            sx={{
+              transform: { xs: "scale(2)", md: "scale(3)" },
+              fontSize: "large",
+              padding: "0",
+              margin: "30px",
+            }}
+          >
+            <InsertPhotoIcon color="primary" />
+          </IconButton>
+          <Typography>Upload Image</Typography>
+        </Box>
+      </Paper>
+    </Box>
   )
 }
 
-export default Profile;
+export default Profile

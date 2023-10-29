@@ -1,5 +1,5 @@
-import { memo } from "react";
-import classes from "./GenerateProfilePic.module.css";
+import { Avatar, Box, Typography } from "@mui/material"
+import { memo } from "react"
 
 /**
  * GenerateProfilePic Component
@@ -11,32 +11,25 @@ import classes from "./GenerateProfilePic.module.css";
  * - className (optional): A string to apply custom CSS classes.
  *
  */
-export const GenerateProfilePic = (props: { names: string; className?: string }) => {
-  const names = props.names;
-  const nameType = +names.indexOf(".") === -1 ? "name" : "email";
+export const GenerateProfilePic = (props: { names: string }) => {
+  const names = props.names
+  const nameType = +names.indexOf(".") === -1 ? "name" : "email"
 
-  let firstName = "";
-  let secondName = "";
+  let firstName = ""
+  let secondName = ""
   if (nameType === "name") {
-    const namesArr = names.split(" ");
-    firstName = namesArr[0];
-    secondName = namesArr[namesArr.length - 1] && namesArr[namesArr.length - 1];
+    const namesArr = names.split(" ")
+    firstName = namesArr[0]
+    secondName = namesArr[namesArr.length - 1] && namesArr[namesArr.length - 1]
   }
   if (nameType === "email") {
-    [firstName, secondName] = names.split(".");
+    ;[firstName, secondName] = names.split(".")
   }
 
-  const firstLetter = firstName.charAt(0).toUpperCase();
-  const secondLetter = secondName.charAt(0).toUpperCase();
+  const firstLetter = firstName.charAt(0).toUpperCase()
+  const secondLetter = secondName.charAt(0).toUpperCase()
 
-  const addClass = props.className ? props.className : "";
+  return <Avatar>{`${firstLetter} ${secondLetter}`}</Avatar>
+}
 
-  return (
-    <div className={`${classes.profilePic} ${addClass}`}>
-      <p>{firstLetter}</p>
-      <p>{secondLetter}</p>
-    </div>
-  );
-};
-
-export default memo(GenerateProfilePic);
+export default memo(GenerateProfilePic)

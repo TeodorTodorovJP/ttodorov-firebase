@@ -1,17 +1,14 @@
-import { ReactElement, useEffect, useState } from "react";
-import classes from "./ChatUsers.module.css";
-import { ReactComponent as AccountSVG } from "../../UI/SVG/account.svg";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { ReactElement, useEffect, useState } from "react"
+import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import { addImageBlobUrl, Image, selectImageBlobUrl, UserData } from "../../Auth/userSlice"
-import { openNewRoom, selectActiveRoom, selectInbox, selectUserRooms, setInbox } from "../chatSlice"
+import { openNewRoom, selectActiveRoom, selectInbox, setInbox } from "../chatSlice"
 import { getBlobUrl } from "../../../app/utils"
-import Card from "../../UI/Card"
 import GenerateProfilePic from "../../UI/generateImages/GenerateProfilePic"
-import { InboxMessage } from "../chatApi"
+import { Avatar, Badge, Box, ListItem, ListItemAvatar, Tooltip } from "@mui/material"
 
 /**
  * ChatUser Component
- * 
+ *
  * This component provides a chat user interface for the current user and another user.
  *
  * Props - description of all props in this format.
@@ -136,44 +133,77 @@ export const ChatUser = (props: { currentUser: UserData; otherUser: UserData }) 
     dispatch(openNewRoom({ userId, userNames, otherUserId, otherUserImage: imageSource, otherUserNames }))
   }
 
+  const stringToColor = (string: string) => {
+    let hash = 0
+    let i
+
+    /* eslint-disable no-bitwise */
+    for (i = 0; i < string.length; i += 1) {
+      hash = string.charCodeAt(i) + ((hash << 5) - hash)
+    }
+
+    let color = "#"
+
+    for (i = 0; i < 3; i += 1) {
+      const value = (hash >> (i * 8)) & 0xff
+      color += `00${value.toString(16)}`.slice(-2)
+    }
+    /* eslint-enable no-bitwise */
+
+    return color
+  }
+
+  const stringAvatar = (name: string) => {
+    return {
+      sx: {
+        bgcolor: stringToColor(name),
+      },
+      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+    }
+  }
+
   /** Sets the profile image of the other user in the chat. */
   useEffect(() => {
     let image
     if (imageData) {
-      image = <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />
+      image = <Avatar alt="Your Image" src={imageData.blobUrl} />
     } else if (otherProfilePic && !otherProfilePicStored) {
       image = (
-        <img
-          className={classes.image}
+        <Box
+          component="img"
           onError={({ currentTarget }) => {
             currentTarget.onerror = null // prevents looping
-            setProfileImage(<AccountSVG />)
+            setProfileImage(<GenerateProfilePic names={otherUserNames} />)
           }}
           src={otherProfilePic}
-        ></img>
+        ></Box>
       )
     } else {
-      image = <GenerateProfilePic names={otherUserNames} className={classes.generatedImage} />
+      image = <GenerateProfilePic names={otherUserNames} />
     }
     setProfileImage(image)
   }, [imageData, otherProfilePic, otherProfilePicStored])
 
+  const notifyAboutMessage = !showUserInfo && showInboxPop ? true : null
+
+  const numberOfMessages = notifyAboutMessage && inboxData ? Object.keys(inboxData).length : null
+
   return (
-    <div
-      className={classes.chatUser}
-      onMouseOver={() => setShowUserInfo(true)}
-      onMouseOut={() => setShowUserInfo(false)}
-      onClick={() => openRoom()}
-    >
-      {profileImage}
-      {showUserInfo && (
-        <Card additionalClass="userPopUp">
-          <div className={classes.popUp}>{otherUserNames}</div>
-        </Card>
-      )}
-      {!showUserInfo && showInboxPop && <div className={classes.inboxPopUp}>New messages</div>}
-    </div>
+    <ListItem onClick={() => openRoom()}>
+      <Tooltip title={otherUserNames} placement="left">
+        <Badge
+          overlap="circular"
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+          color="error"
+          badgeContent={numberOfMessages}
+        >
+          <ListItemAvatar sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            {profileImage}
+          </ListItemAvatar>
+        </Badge>
+      </Tooltip>
+    </ListItem>
   )
 }
 
-export default ChatUser;
+export default ChatUser

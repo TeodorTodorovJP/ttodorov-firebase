@@ -1,9 +1,9 @@
-import { memo, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { getBlobUrl } from "../../../app/utils";
-import { addImageBlobUrl, selectImageBlobUrl, UserData } from "../../Auth/userSlice";
-import { MessageData } from "../chatSlice";
-import classes from "./ChatMessage.module.css";
+import { Avatar, Box, Typography } from "@mui/material"
+import { memo, ReactElement, ReactNode, useEffect, useRef, useState } from "react"
+import { useAppDispatch, useAppSelector } from "../../../app/hooks"
+import { getBlobUrl } from "../../../app/utils"
+import { addImageBlobUrl, selectImageBlobUrl, UserData } from "../../Auth/userSlice"
+import { MessageData } from "../chatSlice"
 
 /**
  * Props for the ChatMessage component.
@@ -78,17 +78,27 @@ export const ChatMessage = memo(({ isFront, data, otherUser }: ChatMessageProps)
   const isOther = userId === otherUserId
 
   /** If this is the other user, place the text at the left, else on the right. */
-  const sideClass = isOther ? classes.leftSide : classes.rightSide
+  const alignClass = isOther ? "flex-start" : "flex-end"
 
   /** If the message overlaps with the chat icon, we move it to make adjust the view. */
-  const moveFront = isFront && !isOther ? classes.moveFront : ""
+  const moveFront = isFront && !isOther ? { xs: "5rem", md: "initial" } : ""
 
   return (
-    <div className={`${sideClass} ${moveFront}`} ref={messageRef}>
-      {text && <p className={classes.text}>{text}</p>}
-      {imageData && <img className={classes.image} src={imageData.blobUrl} alt="image can't load" />}
-    </div>
+    <Box sx={{ alignSelf: alignClass, marginRight: moveFront }} ref={messageRef}>
+      {text && <Typography>{text}</Typography>}
+      {imageData && (
+        <Box
+          sx={{
+            backgroundImage: `url(${imageData.blobUrl})`,
+            backgroundRepeat: "no-repeat",
+            width: "300px",
+            height: "300px",
+            backgroundSize: "100%",
+          }}
+        ></Box>
+      )}
+    </Box>
   )
 })
 
-export default ChatMessage;
+export default ChatMessage

@@ -4,11 +4,8 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { selectUserData, selectUserPreferences, UserData } from "../../Auth/userSlice";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { ChatRoomsContent, closeRoom, deleteInboxMessages, selectInbox } from "../chatSlice"
-import classes from "./ChatRoom.module.css"
 import { langs, Langs } from "../chatTexts"
-import { ReactComponent as SendSVG } from "./sendSVG.svg"
-import { ReactComponent as ImageSVG } from "../../UI/SVG/imageSVG.svg"
-import { ReactComponent as CloseSVG } from "../closeSVG.svg"
+
 import {
   GetMessages,
   useDeleteInboxMessageMutation,
@@ -22,8 +19,21 @@ import useError from "../../CustomHooks/useError"
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus"
 import { getDateDataInUTC, getError } from "../../../app/utils"
 import { useGetUserDataQuery } from "../../Auth/userApi"
-import { selectTheme } from "../../Navigation/themeSlice"
 import { setModal } from "../../Modal/modalSlice"
+import {
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Stack,
+  StackProps,
+  styled,
+  TextField,
+  Typography,
+} from "@mui/material"
+import HighlightOffIcon from "@mui/icons-material/HighlightOff"
+import SendIcon from "@mui/icons-material/Send"
+import InsertPhotoIcon from "@mui/icons-material/InsertPhoto"
 
 type ReactArr = React.ReactElement[]
 const initReactElArr: ReactArr = []
@@ -77,7 +87,6 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
   const dispatch = useAppDispatch()
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
   const userData = useAppSelector(selectUserData)
-  const theme = useAppSelector(selectTheme)
   const inboxStoreData = useAppSelector(selectInbox)
 
   /** Local state */
@@ -458,36 +467,112 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
   // }
 
   return (
-    <div className={classes.ChatRoom}>
-      <div className={classes.Header}>
-        {otherUserNames && <h2>{otherUserNames}</h2>}
-        <button type="button" className={classes.closeBtn} onClick={() => handleCloseRoom()}>
-          <CloseSVG />
-        </button>
-      </div>
-      <div className={`${classes.chatMessages} ${classes.scrollbar} ${theme.scrollbar}`}>{messages}</div>
-      {!isOnline && <p className={classes.error}>{main.offline}</p>}
-      <form onSubmit={onMessageFormSubmit} className={classes.form}>
-        <input
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        heigh: { xs: "85vh", md: "67vh" },
+        maxHeight: { xs: "85vh", md: "67vh" },
+        minHeight: { xs: "85vh", md: "67vh" },
+        padding: "15px",
+        justifyContent: "space-between",
+      }}
+    >
+      <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px", alignItems: "center" }}>
+        {otherUserNames && <Typography sx={{ fontWeight: "bold" }}>{otherUserNames}</Typography>}
+        <IconButton type="button" onClick={() => handleCloseRoom()}>
+          <HighlightOffIcon />
+        </IconButton>
+      </Box>
+
+      <Stack
+        spacing={2}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: "1",
+          marginTop: "7%",
+          overflow: "overlay",
+
+          // To move the scrollbar to the right
+          minWidth: { xs: "103%", sm: "101%" },
+          paddingRight: { xs: "3%", sm: "2%" },
+
+          "&::-webkit-scrollbar": {
+            width: "0.4em",
+          },
+          "&::-webkit-scrollbar-track": {
+            "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.00)",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "primary",
+            outline: "1px solid slategrey",
+            borderRadius: "8px",
+          },
+        }}
+      >
+        {messages}
+      </Stack>
+
+      <Box
+        component="form"
+        onSubmit={onMessageFormSubmit}
+        sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "30px" }}
+      >
+        <TextField
           type="text"
+          margin="normal"
+          required
+          label="Enter message"
+          name="message"
+          autoComplete="message"
+          autoFocus
+          error={!isOnline}
+          helperText={!isOnline && main.offline}
           ref={messageInputRef}
           onTouchStart={handleTouch}
           value={message}
           onChange={(e) => {
             setMessage(e.target.value)
           }}
-          className={classes.formInput}
+          sx={{ minWidth: "80%" }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="send message"
+                  edge="end"
+                  id="submit"
+                  type="submit"
+                  disabled={!message.length || !isOnline}
+                >
+                  <SendIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
-        <button id="submit" type="submit" className={classes.formBtn} disabled={!message.length || !isOnline}>
-          <SendSVG />
-        </button>
 
         <input type="file" style={{ display: "none" }} ref={imageInputRef} onChange={(e) => handleSaveImageBtn(e)} />
-        <button id="submitImage" onClick={() => triggerInput()} className={classes.formBtn} disabled={!isOnline}>
-          <ImageSVG />
-        </button>
-      </form>
-    </div>
+        <IconButton
+          id="submitImage"
+          onClick={() => triggerInput()}
+          disabled={!isOnline}
+          type="button"
+          edge="start"
+          color="inherit"
+          aria-label="send image"
+          sx={{
+            transform: "scale(3)",
+            fontSize: "large",
+            padding: "0",
+            marginTop: "7px",
+          }}
+        >
+          <InsertPhotoIcon color="primary" />
+        </IconButton>
+      </Box>
+    </Box>
   )
 }
 

@@ -6,6 +6,7 @@ import useError from "../../CustomHooks/useError"
 import { useGetUserDataQuery } from "../../Auth/userApi"
 import { selectUserData } from "../../Auth/userSlice"
 import { setModal } from "../../Modal/modalSlice"
+import { Box, List, ListItem, ListItemText, ListSubheader, Paper } from "@mui/material"
 
 /**
  * ChatUsers Component
@@ -80,7 +81,24 @@ export const ChatUsers = () => {
     }
   }, [chatUsers, currentUser])
 
-  return <div className={classes.chatUsers}>{chatUsersElements}</div>
+  return (
+    <List
+      sx={{
+        borderColor: "primary",
+        width: "100%",
+        maxWidth: 360,
+        bgcolor: "background.paper",
+        position: "relative",
+        overflow: "auto",
+        "& ul": { padding: 0 },
+        "::-webkit-scrollbar": {
+          display: "none",
+        },
+      }}
+    >
+      {chatUsersElements}
+    </List>
+  )
 }
 
 export default memo(ChatUsers);

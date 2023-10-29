@@ -1,12 +1,18 @@
-import { ReactElement, useEffect, useState, MouseEvent } from "react";
-import { createPortal } from "react-dom";
-import classes from "./Modal.module.css";
+import { createPortal } from "react-dom"
 import { useAppSelector, useAppDispatch } from "../../app/hooks"
-import Card from "../UI/Card";
 import { langs, Langs } from "./modalTexts"
-import { selectTheme } from "../Navigation/themeSlice"
 import { selectUserPreferences } from "../Auth/userSlice"
 import { Modal as ModalType, selectModal, setModal } from "./modalSlice"
+import {
+  Backdrop,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material"
 
 /**
  * Modal is a React component that displays a modal dialog with varying content based on the current state.
@@ -19,7 +25,6 @@ const Modal = () => {
   /** Access store */
   const dispatch = useAppDispatch()
   const modalStore = useAppSelector(selectModal)
-  const theme = useAppSelector(selectTheme)
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
 
   /**
@@ -63,14 +68,10 @@ const Modal = () => {
   /**
    * Regardless of the button clicked on the modal it closes it, then the action is handled by the reducer based on the button.
    */
-  const handleAction = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-
-    const button = (event.target as HTMLInputElement).name
-
+  const handleAction = (fromPlace: string) => {
     const modifiedModal = { ...modal }
     modifiedModal.useModal = false
-    modifiedModal.response = button
+    modifiedModal.response = fromPlace
 
     dispatch(setModal(modifiedModal))
   }
@@ -79,35 +80,31 @@ const Modal = () => {
 
   if (modal.modalType === "loader") {
     /** If the modal is a type "loader, show only a loader animation. " */
-    modalContent = <div className={theme.loader}></div>
+    modalContent = (
+      <Backdrop open={true} onClick={() => handleAction("deny")}>
+        <CircularProgress variant="indeterminate" thickness={5} size={150} disableShrink />
+      </Backdrop>
+    )
   } else {
     /** If the modal is not a "loader" add all necessary texts and buttons. */
     modalContent = (
-      <>
-        <h2>{modal.header}</h2>
-        <div className={classes.message}>{modal.message}</div>
-        <div className={classes.actions}>
-          <button name="agree" className={theme.button} onClick={handleAction}>
+      <Dialog onClose={() => handleAction("deny")} open={true}>
+        <DialogTitle>{modal.header}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{modal.message}</DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => handleAction("agree")} autoFocus>
             {modal.agree}
-          </button>
-          {modal.deny && (
-            <button name="deny" className={theme.button} onClick={handleAction}>
-              {modal.deny}
-            </button>
-          )}
-        </div>
-      </>
+          </Button>
+          {modal.deny && <Button onClick={() => handleAction("deny")}>{modal.deny}</Button>}
+        </DialogActions>
+      </Dialog>
     )
   }
 
-  const modalJSX: JSX.Element = (
-    <div className={classes.modalWrapper}>
-      <div className={classes.backdrop} />
-      <Card additionalClass="modal">
-        <div className={`${classes.modal}`}>{modalContent}</div>
-      </Card>
-    </div>
-  )
+  const modalJSX: JSX.Element = modalContent
 
   if (modalRoot !== null && modal.useModal) {
     return createPortal(modalJSX, modalRoot)
@@ -116,4 +113,4 @@ const Modal = () => {
   }
 }
 
-export default Modal;
+export default Modal

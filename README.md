@@ -43,7 +43,7 @@ If you like what you see or have any questions, contact me at:
     - Save your choice to localStorage.
 
 ## 4.2 Theme
-    - Change your prefered theme to Red, Green or Blue.
+    - Change your prefered theme to Red, Dark or Blue.
     - Additional choice for an SVG background.
     - Save your choice to localStorage.
 

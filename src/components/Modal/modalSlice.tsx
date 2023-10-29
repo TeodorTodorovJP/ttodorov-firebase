@@ -1,10 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 import { RootState, AppThunk, AppDispatch } from "../../app/store"
 
-/** Pending actions that will be executed when present. */
-type AvailableActions = "changeDefaultTheme" | "test"
-export type WaitingActions = AvailableActions[]
-
 export interface Modal {
   /** For open/close the modal. */
   useModal?: boolean
@@ -45,7 +41,6 @@ export interface Modal {
 
 export interface ModalState {
   modal: Modal
-  waitingActions: WaitingActions
 }
 const getMainInitialState = () => {
   const newState: ModalState = {
@@ -58,7 +53,6 @@ const getMainInitialState = () => {
       deny: null,
       response: null,
     },
-    waitingActions: [],
   }
   return newState
 }
@@ -74,25 +68,7 @@ export const modalSlice = createSlice({
      * Set's the modal to whatever settings.
      */
     setModal: (state, action: PayloadAction<Modal>) => {
-      const data = action.payload
-      state.modal = data
-
-      /** If the user has clicked agree. */
-      if (data.response === "agree") {
-        /** If it comes from the modal asking for change theme. */
-        if (data.action === "changeDefaultTheme") {
-          /** Attach a waiting action to do it safely outside the pure function slice. */
-          if (state.waitingActions) {
-            state.waitingActions = state.waitingActions.concat("changeDefaultTheme")
-          }
-        }
-      }
-    },
-    /**
-     * Removes a "waitingAction".
-     */
-    removeWaitingAction: (state, action: PayloadAction<{ waitingAction: string }>) => {
-      state.waitingActions = state.waitingActions.filter((act) => act !== action.payload.waitingAction)
+      state.modal = action.payload
     },
 
     /** Reset's the modal state to the initial values. */
@@ -100,12 +76,11 @@ export const modalSlice = createSlice({
   },
 })
 
-export const { setModal, clearModalData, removeWaitingAction } = modalSlice.actions
+export const { setModal, clearModalData } = modalSlice.actions
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectModal = (state: RootState) => state.modal.modal
-export const selectWaitingActions = (state: RootState) => state.modal.waitingActions
 
 export default modalSlice.reducer

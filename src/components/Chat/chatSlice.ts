@@ -38,9 +38,6 @@ export interface ChatRoomsContent {
   /** The room is created and is opened - the param shows if this room is currently visible. */
   active: boolean
 
-  /** The css class of the room - used for storing the appropriate styling of the room tab. */
-  tabClass: string
-
   /** Stores the messages a room has. */
   messages: []
 }
@@ -202,8 +199,6 @@ export const chatSlice = createSlice({
           room.isOpened = true
           room.active = true
 
-          room.tabClass = ""
-
           /** Detect if the room was already created by the unread messages. */
           roomFound = true
         } else {
@@ -233,7 +228,6 @@ export const chatSlice = createSlice({
           isOpened: true,
           active: true,
 
-          tabClass: "",
           messages: [],
         })
       }

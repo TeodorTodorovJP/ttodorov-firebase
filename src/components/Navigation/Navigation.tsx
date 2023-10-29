@@ -1,18 +1,7 @@
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { selectIsOpen, setIsOpenToTrue, clearNavData } from "./navigationSlice"
-
-import NavElement from "../UI/NavElement";
-import classes from "./Navigation.module.css";
-import { ReactComponent as HamburgerMenu } from "./icons/hamburger-menu.svg";
-import { ReactComponent as AccountSVG } from "../UI/SVG/account.svg";
-import { ReactComponent as SaveSVG } from "./icons/save.svg";
-import { ReactComponent as HomeSVG } from "./icons/home.svg";
-import { ReactComponent as LoginSVG } from "./icons/login.svg";
-import { ReactComponent as CounterSVG } from "./icons/counter.svg";
-import { ReactComponent as ChatSVG } from "./icons/chat.svg";
+import { selectIsOpen, clearNavData } from "./navigationSlice"
 import Logo from "../UI/SVG/logo.svg";
 import useAuthContext from "../../app/auth-context";
-import Card from "../UI/Card";
 import { langs, Langs } from "./navigationTexts"
 import {
   clearUserData,
@@ -26,10 +15,36 @@ import { useEffect, useState } from "react"
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice"
 import { getBlobUrl } from "../../app/utils"
 import { clearChatData, selectInbox, setInbox } from "../Chat/chatSlice"
-import { toggleSVG } from "../UI/Background/backgroundSlice"
-import { MainObj, MainThemes, saveThemeToLocalStorage, selectTheme, setTheme } from "./themeSlice"
+import { selectTheme, toggleTheme } from "./themeSlice"
 import { useNavigate } from "react-router-dom"
-import { Modal, removeWaitingAction, selectWaitingActions, setModal } from "../Modal/modalSlice"
+import MenuIcon from "@mui/icons-material/Menu"
+import {
+  AppBar,
+  Avatar,
+  Badge,
+  Box,
+  Collapse,
+  Container,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  Menu,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material"
+import { AccountCircle } from "@mui/icons-material"
+import NotificationsIcon from "@mui/icons-material/Notifications"
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded"
+import LoginIcon from "@mui/icons-material/Login"
+import LogoutIcon from "@mui/icons-material/Logout"
+import GTranslateIcon from "@mui/icons-material/GTranslate"
+import CalculateIcon from "@mui/icons-material/Calculate"
+import ChatIcon from "@mui/icons-material/Chat"
+import Brightness4Icon from "@mui/icons-material/Brightness4"
+import Brightness7Icon from "@mui/icons-material/Brightness7"
+
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
 
@@ -62,12 +77,11 @@ import { Modal, removeWaitingAction, selectWaitingActions, setModal } from "../M
 export const Navigation = () => {
   /** Access store */
   const dispatch = useAppDispatch()
-  const theme = useAppSelector(selectTheme)
   const { lang } = useAppSelector(selectUserPreferences)
   const { navLeftVisible, navRightVisible, showThemes } = useAppSelector(selectIsOpen)
   const { profilePic, profilePicStored } = useAppSelector(selectUserData)
-  const waitingActions = useAppSelector(selectWaitingActions)
   const inboxData = useAppSelector(selectInbox)
+  const { value: storeTheme } = useAppSelector(selectTheme)
   const images = useAppSelector(selectImageBlobUrl)
 
   /** Access Router */
@@ -75,6 +89,9 @@ export const Navigation = () => {
 
   /** Local state */
   const [imageData, setImageData] = useState<Image | null>(null)
+
+  const [anchorElMenuLeft, setAnchorElMenuLeft] = useState<null | HTMLElement>(null)
+  const [anchorElMenuRight, setAnchorElMenuRight] = useState<null | HTMLElement>(null)
 
   /**
    * Prepare component data.
@@ -92,21 +109,6 @@ export const Navigation = () => {
     const foundImage = images(profilePicStored)[0]
     if (foundImage) setImageData(foundImage)
   }
-
-  /**
-   * If we have a waiting action "changeDefaultTheme", saveThemeToLocalStorage.
-   * The reasons for this setup:
-   * 1 - The reducer action should not do side effects. (changing the local storage)
-   * 2 - The task is performed by a thunk "saveThemeToLocalStorage", which cannot be called by extraReducers.
-   * */
-  useEffect(() => {
-    if (waitingActions.length > 0) {
-      if (waitingActions.includes("changeDefaultTheme")) {
-        dispatch(saveThemeToLocalStorage())
-        dispatch(removeWaitingAction({ waitingAction: "changeDefaultTheme" }))
-      }
-    }
-  }, [waitingActions])
 
   /**
    * If the current user has an image but is not yet loaded or
@@ -130,15 +132,23 @@ export const Navigation = () => {
 
   /** Prepare all links for the left menu. */
   const navLeftItems = [
-    { path: "/", text: "Home", icon: <HomeSVG /> },
-    { path: "auth", text: "Authenticate", icon: <LoginSVG /> },
-    { path: "counter", text: "Your Counter", icon: <CounterSVG /> },
-    { path: "chat", text: "Chat", icon: <ChatSVG /> },
+    { path: "/", text: "Home", icon: <HomeRoundedIcon color="primary" /> },
+    { path: "auth", text: "Authenticate", icon: <LoginIcon color="primary" /> },
+    { path: "counter", text: "Your Counter", icon: <CalculateIcon color="primary" /> },
+    { path: "chat", text: "Chat", icon: <ChatIcon color="primary" /> },
     // { path: "meals/meal", text: "Your Single Meal", icon: <HamburgerMenu /> },
   ].map((link) => (
-    <NavElement key={link.path} path={link.path} customStylingClass={theme.svg}>
-      {link.icon}
-    </NavElement>
+    <ListItemButton
+      key={link.path}
+      sx={{ pl: 4 }}
+      onClick={() => {
+        handleCloseNavMenuLeft()
+        navigate(link.path)
+      }}
+    >
+      <ListItemIcon>{link.icon}</ListItemIcon>
+      <Typography>{link.text}</Typography>
+    </ListItemButton>
   ))
 
   /**
@@ -158,75 +168,94 @@ export const Navigation = () => {
     setImageData(null)
   }
 
-  /** Toggling the left menu. */
-  let navLeftShowClass = navLeftVisible ? classes.navLeftItemsShow : classes.navLeftItemsHide
-  const navLeftClickHandle = () => {
-    dispatch(setIsOpenToTrue({ item: "navLeftVisible", isOpen: !navLeftVisible }))
-  }
-
-  /** Toggling the right menu. */
-  let navRightShowClass = navRightVisible ? classes.navRightItemsShow : classes.navRightItemsHide
-  const navRightClickHandle = () => {
-    dispatch(setIsOpenToTrue({ item: "navRightVisible", isOpen: !navRightVisible }))
-    /** If the right menu is opened or closed, always hide the themes submenu. */
-    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: false }))
-  }
-
-  /**
-   * @param toTheme - the name of the theme, can be SVG and one of the main themes
-   * @typeParam toTheme - string
-   */
-  const changeThemeHandle = (toTheme: MainThemes | "svg") => {
-    /** @description - If the new theme is the same, return */
-    if (toTheme === theme.main) return
-
-    /** @description - If 'toTheme' is 'svg' include to the theme the svg effect */
-    if (toTheme === "svg") {
-      dispatch(toggleSVG())
-    } else {
-      /** @description - If 'toTheme' is any of the MainObj themes set the regular theme */
-      let changeTheme: MainObj = { main: toTheme } as MainObj
-      dispatch(setTheme(changeTheme))
-    }
-  }
-
-  /**
-   * Displays a modal message with options to confirm or deny
-   * the save theme action.
-   * Depending on the response, the modal will handle the action.
-   */
-  const saveThemeHandle = () => {
-    const message = themeModal.message.replace("${}", theme.main)
-
-    const modalObj: Modal = {
-      action: "changeDefaultTheme",
-      header: themeModal.header,
-      message: message,
-      agree: themeModal.agree,
-      deny: themeModal.deny,
-    }
-
-    const currentTheme = localStorage.getItem("theme")
-    if (theme.main === currentTheme) {
-      modalObj.message = themeModal.messageDone
-      modalObj.agree = themeModal.agreeDone
-      modalObj.deny = null
-    }
-
-    dispatch(setModal(modalObj))
-  }
-
-  /** Hides/shows the theme menu. */
-  let themesOptionsClass = showThemes ? classes.themesShow : classes.themesHide
-  const handleToggleTheme = () => {
-    dispatch(setIsOpenToTrue({ item: "showThemes", isOpen: !showThemes }))
-  }
-
   /** Toggles the languages between bg and en. */
   const handleToggleLanguage = () => {
     const setLang = lang == "bg" ? "en" : "bg"
     dispatch(setUserPreferences({ lang: setLang }))
     dispatch(saveLangToLocalStorage())
+  }
+
+  const navRightItems = (
+    <>
+      {isLoggedIn && (
+        <Tooltip title="Your Profile">
+          <ListItemButton
+            sx={{ pl: 4 }}
+            onClick={() => {
+              navigate("profile")
+            }}
+          >
+            <ListItemIcon>
+              {imageData || profilePic ? (
+                <Avatar
+                  alt="Your Image"
+                  sx={{ height: "24px", width: "24px" }}
+                  src={imageData ? imageData.blobUrl : profilePic}
+                />
+              ) : (
+                <AccountCircle color="primary" />
+              )}
+            </ListItemIcon>
+
+            <Typography>{main.profile}</Typography>
+          </ListItemButton>
+        </Tooltip>
+      )}
+      {!isLoggedIn && (
+        <Tooltip title="Login">
+          <ListItemButton
+            sx={{ pl: 4 }}
+            onClick={() => {
+              navigate("auth")
+            }}
+          >
+            <ListItemIcon>
+              <LoginIcon color="primary" />
+            </ListItemIcon>
+
+            <Typography>{main.login}</Typography>
+          </ListItemButton>
+        </Tooltip>
+      )}
+      {isLoggedIn && (
+        <Tooltip title="Logout">
+          <ListItemButton
+            sx={{ pl: 4 }}
+            onClick={() => {
+              logoutHandler()
+              navigate("/")
+            }}
+          >
+            <ListItemIcon>
+              <LogoutIcon color="primary" />
+            </ListItemIcon>
+            <Typography>{main.logout}</Typography>
+          </ListItemButton>
+        </Tooltip>
+      )}
+    </>
+  )
+
+  /** Toggling the left menu. */
+  const handleOpenNavMenuLeft = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElMenuLeft(event.currentTarget)
+  }
+
+  const handleCloseNavMenuLeft = () => {
+    setAnchorElMenuLeft(null)
+  }
+
+  /** Toggling the right menu. */
+  const handleOpenNavMenuRight = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElMenuRight(event.currentTarget)
+  }
+
+  const handleCloseNavMenuRight = () => {
+    setAnchorElMenuRight(null)
+  }
+
+  const toggleThemeHandle = () => {
+    dispatch(toggleTheme())
   }
 
   /**
@@ -249,112 +278,183 @@ export const Navigation = () => {
 
   const isInChat = window.location.pathname === "/chat"
 
+  const numberOfMessages = inboxData && !isInChat ? Object.keys(inboxData).length : null
+
   return (
-    <>
-      <header className={`${classes[theme.main]}`}>
-        <div className={classes.leftSide}>
-          <div className={classes.logoAndBtn}>
-            <img src={Logo} alt="" className={classes.logo} />
-            <button
-              type="button"
-              onClick={navLeftClickHandle}
-              className={`${classes.leftMenuBtn} ${theme.decoration} ${theme.svg}`}
+    <AppBar sx={{ paddingRight: "0!important" }}>
+      <Container sx={{ minWidth: "100vw" }}>
+        <Toolbar sx={{ maxHeight: { xs: "64px", md: "110px" } }}>
+          <IconButton
+            type="button"
+            onClick={handleOpenNavMenuLeft}
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+
+          <Menu
+            sx={{ mt: { xs: "60px", md: "65px" } }}
+            id="menu-appbar-left"
+            anchorEl={anchorElMenuLeft}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+            open={Boolean(anchorElMenuLeft)}
+            onClose={handleCloseNavMenuLeft}
+          >
+            <Collapse in={Boolean(anchorElMenuLeft)} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {navLeftItems}
+              </List>
+            </Collapse>
+          </Menu>
+
+          <Box component="img" src={Logo} alt="Logo" sx={{ maxWidth: { xs: 80, md: 100 } }} />
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Box sx={{ display: "flex", gap: "15px" }}>
+            <IconButton sx={{ ml: 1 }} color="inherit" onClick={() => toggleThemeHandle()}>
+              {storeTheme === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+
+            <IconButton
+              size="large"
+              aria-label="show new notifications"
+              color="inherit"
+              onClick={() => handleToggleLanguage()}
+              sx={{ display: { xs: "none", sm: "flex" } }}
             >
-              <HamburgerMenu />
-            </button>
-            {inboxData && !isInChat && (
-              <button onClick={() => handleNewMessageNotif()} className={classes.newMessages}>
-                <ChatSVG />
-              </button>
-            )}
-          </div>
+              <GTranslateIcon />
+              <Typography sx={{ ml: "5px" }}>{lang == "bg" ? "EN" : "BG"}</Typography>
+            </IconButton>
 
-          <nav className={navLeftShowClass}>
-            <Card additionalClass="navLeftItems">
-              <div className={`${classes.navLeftItems}`}>{navLeftItems}</div>
-            </Card>
-          </nav>
-        </div>
+            <IconButton
+              size="large"
+              aria-label="show new notifications"
+              color="inherit"
+              onClick={() => handleNewMessageNotif()}
+            >
+              <Badge badgeContent={numberOfMessages} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
 
-        <div className={classes.rightSide}>
-          <button type="button" onClick={navRightClickHandle} className={`${classes.rightMenuBtn} ${theme.svg}`}>
-            {imageData ? (
-              <img className={classes.profilePic} src={imageData.blobUrl}></img>
-            ) : profilePic ? (
-              <img className={classes.profilePic} src={profilePic}></img>
-            ) : (
-              <AccountSVG />
-            )}
-          </button>
-          <div className={navRightShowClass}>
-            <Card additionalClass="navRightItems">
-              <div className={classes.navRightItems}>
-                {isLoggedIn && (
-                  <NavElement path="profile" customStylingClass={theme.button}>
-                    {main.profile}
-                  </NavElement>
+            <Tooltip title="Your Menu">
+              <IconButton onClick={handleOpenNavMenuRight} sx={{ p: 0 }}>
+                {(imageData || profilePic) && (
+                  <Avatar alt="Your Image" src={imageData ? imageData.blobUrl : profilePic} />
                 )}
-                {!isLoggedIn && (
-                  <NavElement path="auth" customStylingClass={theme.button}>
-                    {main.login}
-                  </NavElement>
-                )}
-                {isLoggedIn && (
-                  <NavElement path="/" customStylingClass={theme.button} onClick={logoutHandler}>
-                    {main.logout}
-                  </NavElement>
-                )}
-                {isLoggedIn && (
-                  <button type="button" className={theme.button} onClick={handleToggleTheme}>
-                    {main.themes}
-                  </button>
-                )}
-                <button type="button" className={theme.button} onClick={handleToggleLanguage}>
-                  {lang == "bg" ? "English" : "Български"}
-                </button>
-              </div>
-            </Card>
-            <div className={themesOptionsClass}>
-              <Card additionalClass="themes">
-                <div className={classes.themes}>
-                  <button
-                    type="button"
-                    className={`${classes.themeBtn} hover ${classes.red}`}
-                    onClick={() => changeThemeHandle("red")}
-                  >
-                    R
-                  </button>
-                  <button
-                    type="button"
-                    className={`${classes.themeBtn} hover ${classes.green}`}
-                    onClick={() => changeThemeHandle("green")}
-                  >
-                    G
-                  </button>
-                  <button
-                    type="button"
-                    className={`${classes.themeBtn} hover ${classes.blue}`}
-                    onClick={() => changeThemeHandle("blue")}
-                  >
-                    B
-                  </button>
-                  <button
-                    type="button"
-                    className={`${classes.themeBtn} hover ${classes.blue}`}
-                    onClick={() => changeThemeHandle("svg")}
-                  >
-                    <p style={{ fontSize: "0.8rem" }}>SVG</p>
-                  </button>
-                  <button type="button" className={`${classes.saveSVG} hover`} onClick={() => saveThemeHandle()}>
-                    <SaveSVG />
-                  </button>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </header>
-    </>
+                {!(imageData || profilePic) && <AccountCircle />}
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar-right"
+              anchorEl={anchorElMenuRight}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElMenuRight)}
+              onClose={handleCloseNavMenuRight}
+            >
+              <Collapse in={Boolean(anchorElMenuRight)} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {isLoggedIn && (
+                    <Tooltip title="Your Profile">
+                      <ListItemButton
+                        sx={{ pl: 4 }}
+                        onClick={() => {
+                          handleCloseNavMenuRight()
+                          navigate("profile")
+                        }}
+                      >
+                        <ListItemIcon>
+                          {imageData || profilePic ? (
+                            <Avatar
+                              alt="Your Image"
+                              sx={{ height: "24px", width: "24px" }}
+                              src={imageData ? imageData.blobUrl : profilePic}
+                            />
+                          ) : (
+                            <AccountCircle color="primary" />
+                          )}
+                        </ListItemIcon>
+
+                        <Typography>{main.profile}</Typography>
+                      </ListItemButton>
+                    </Tooltip>
+                  )}
+                  {!isLoggedIn && (
+                    <Tooltip title="Login">
+                      <ListItemButton
+                        sx={{ pl: 4 }}
+                        onClick={() => {
+                          handleCloseNavMenuRight()
+                          navigate("auth")
+                        }}
+                      >
+                        <ListItemIcon>
+                          <LoginIcon color="primary" />
+                        </ListItemIcon>
+
+                        <Typography>{main.login}</Typography>
+                      </ListItemButton>
+                    </Tooltip>
+                  )}
+                  {isLoggedIn && (
+                    <Tooltip title="Logout">
+                      <ListItemButton
+                        sx={{ pl: 4 }}
+                        onClick={() => {
+                          handleCloseNavMenuRight()
+                          logoutHandler()
+                          navigate("/")
+                        }}
+                      >
+                        <ListItemIcon>
+                          <LogoutIcon color="primary" />
+                        </ListItemIcon>
+                        <Typography>{main.logout}</Typography>
+                      </ListItemButton>
+                    </Tooltip>
+                  )}
+
+                  <Tooltip title="Language" sx={{ display: { xs: "flex", sm: "none" } }}>
+                    <ListItemButton
+                      sx={{ pl: 4, display: { xs: "flex", sm: "none" } }}
+                      onClick={() => handleToggleLanguage()}
+                      aria-label="change language"
+                    >
+                      <ListItemIcon>
+                        <GTranslateIcon color="primary" />
+                      </ListItemIcon>
+                      <Typography sx={{ ml: "5px" }}>{lang == "bg" ? "EN" : "BG"}</Typography>
+                    </ListItemButton>
+                  </Tooltip>
+                </List>
+              </Collapse>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   )
 }
 

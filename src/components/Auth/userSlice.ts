@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../../app/store"
 import { Langs } from "../Navigation/navigationTexts"
-import { defaultTheme, MainThemes, setTheme } from "../Navigation/themeSlice"
+import { defaultTheme } from "../Navigation/themeSlice"
 
 export interface UserData {
   /** User Id - usually from Firebase.*/
@@ -36,11 +36,6 @@ export interface Image {
 
 export interface Preferences {
   /**
-   * The current user theme.
-   */
-  theme?: MainThemes
-
-  /**
    * The current user language.
    */
   lang?: keyof Langs
@@ -73,7 +68,6 @@ const getMainInitialState = () => {
     userData: { id: "", names: "", profilePic: "", email: "" },
     images: [],
     preferences: {
-      theme: defaultTheme,
       lang: defaultLang,
     },
   }
@@ -96,14 +90,6 @@ export const userSlice = createSlice({
     addImageBlobUrl: (state, action: PayloadAction<{ imageUrl: string; blobUrl: string }>) => {
       state.images.push(action.payload)
     },
-  },
-  extraReducers: (builder) => {
-    /**
-     * When the theme is set from the theme slice, update the user theme.
-     */
-    builder.addCase(setTheme, (state, action) => {
-      state.preferences.theme = action.payload.main
-    })
   },
 })
 

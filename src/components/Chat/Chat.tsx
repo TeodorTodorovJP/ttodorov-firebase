@@ -1,13 +1,13 @@
-import Card from "../UI/Card";
-import classes from "./Chat.module.css";
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { selectShowRooms, selectUserRooms } from "./chatSlice"
 import ChatRooms from "./ChatRooms/ChatRooms"
 import ChatUsers from "./ChatUsers/ChatUsers"
 import { useGetUserDataQuery } from "../Auth/userApi"
 import useError from "../CustomHooks/useError"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { setModal } from "../Modal/modalSlice"
+import { Box, Drawer, IconButton, Typography } from "@mui/material"
+import ChatIcon from "@mui/icons-material/Chat"
 
 /**
  * Chat Component
@@ -36,8 +36,16 @@ export const Chat = () => {
   const rooms = useAppSelector(selectUserRooms)
   const showRooms = useAppSelector(selectShowRooms)
 
+  /** Hooks */
+  const [viewUsers, setViewUsers] = useState<boolean>(false)
+
   /** Error hooks */
   const [usersError, setUsersError] = useError()
+
+  /** Toggling the chat Users. */
+  const toggleUsers = () => {
+    setViewUsers(!viewUsers)
+  }
 
   /**
    * Left as an example.
@@ -96,18 +104,119 @@ export const Chat = () => {
     }
   }, [usersError])
 
-  const setOpacity = showRooms ? "100" : "0"
+  useEffect(() => {
+    setViewUsers(!showRooms)
+  }, [showRooms])
+
+  const toggleViewUsersButton = viewUsers ? "none" : "inline-flex"
+
+  const setOpacityForRooms = showRooms ? "100" : "0"
+
+  const setDisplayForIntro = showRooms ? "none" : "flex"
 
   return (
-    <div className={classes.chat}>
-      <div style={{ opacity: setOpacity }}>
-        {rooms && <Card additionalClass="chatRooms">{rooms.length > 0 ? <ChatRooms /> : <p>No rooms</p>}</Card>}
-      </div>
-      <Card additionalClass={`${showRooms ? "chatUsersHide" : "chatUsers"}`}>
-        {isSuccess && !chatUsers.error && chatUsers.data.length > 0 ? <ChatUsers /> : <p>No Users</p>}
-      </Card>
-    </div>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        position: "fixed",
+        // The general sizing of the chat page
+        maxWidth: "100vw",
+        maxHeight: "100vh",
+        minWidth: "100vw",
+        minHeight: { xs: "90vh", md: "80vh" },
+        top: { xs: "8vh", md: "initial" },
+      }}
+    >
+      <Box
+        sx={{
+          opacity: setOpacityForRooms,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "auto",
+        }}
+      >
+        {rooms && rooms.length > 0 && <ChatRooms />}
+      </Box>
+
+      <Box
+        sx={{
+          display: setDisplayForIntro,
+          position: "absolute",
+          width: "70vw",
+          top: "20vh",
+          left: 0,
+          right: 0,
+          margin: "auto",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Typography sx={{ fontSize: { xs: "26px", md: "30px" } }}>Welcome to my chat!</Typography>
+        <Typography sx={{ fontSize: { xs: "18px", md: "30px", marginTop: "30px", textAlign: "center" } }}>
+          Click the message icon {<ChatIcon color="primary" />} to select a user to chat with.
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <IconButton
+          type="button"
+          onClick={toggleUsers}
+          edge="start"
+          color="inherit"
+          aria-label="open drawer"
+          sx={{
+            mr: 2,
+            position: "fixed",
+            right: 0,
+            top: "10vh",
+            display: toggleViewUsersButton,
+            size: "large",
+            transform: "scale(2)",
+          }}
+        >
+          <ChatIcon color="primary" />
+        </IconButton>
+
+        <Drawer
+          anchor="right"
+          variant="persistent"
+          open={viewUsers}
+          onClose={toggleUsers}
+          PaperProps={{
+            elevation: 10,
+            sx: {
+              variant: "elevation",
+              height: "fit-content",
+              maxHeight: 474,
+              display: "flex",
+              justifyContent: "flex-end",
+              top: "15vh",
+              "::-webkit-scrollbar": {
+                display: "none",
+              },
+            },
+          }}
+        >
+          <IconButton
+            type="button"
+            onClick={toggleUsers}
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            sx={{ mr: 2, transform: "scale(1.8)" }}
+          >
+            <ChatIcon color="primary" />
+          </IconButton>
+
+          {isSuccess && !chatUsers.error && chatUsers.data.length > 0 ? <ChatUsers /> : <p>No Users</p>}
+        </Drawer>
+      </Box>
+    </Box>
   )
 }
 
-export default Chat;
+export default Chat

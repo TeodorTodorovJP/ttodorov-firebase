@@ -1,16 +1,8 @@
 import { useState, useRef, FormEvent, useEffect } from "react"
-import Card from "../UI/Card"
-import classes from "./authForm.module.css"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { langs, Langs } from "./authTexts"
 import useError from "../CustomHooks/useError"
 import { selectUserData, selectUserPreferences } from "./userSlice"
-import { ReactComponent as Eye } from "./SVG/eye.svg"
-import { ReactComponent as EyeOff } from "./SVG/eyeOff.svg"
-import { selectTheme } from "../Navigation/themeSlice"
-
-import { addDoc, collection } from "firebase/firestore"
-import { fireStore } from "../../firebase-config"
 import {
   getAuth,
   GoogleAuthProvider,
@@ -24,6 +16,13 @@ import { setModal } from "../Modal/modalSlice"
 import { useAddLogMutation } from "../../logsApi"
 import useAuthContext from "../../app/auth-context"
 import { useNavigate } from "react-router-dom"
+import { Button, Grid, Stack, Typography } from "@mui/material"
+import Box from "@mui/material/Box"
+import Paper from "@mui/material/Paper"
+import TextField from "@mui/material/TextField"
+import InputAdornment from "@mui/material/InputAdornment"
+import IconButton from "@mui/material/IconButton"
+import { VisibilityOff } from "@mui/icons-material"
 
 /**
  * AuthForm Component
@@ -55,7 +54,6 @@ import { useNavigate } from "react-router-dom"
 export const AuthForm = () => {
   /** Access store */
   const dispatch = useAppDispatch()
-  const { button } = useAppSelector(selectTheme)
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
   const currentUser = useAppSelector(selectUserData)
 
@@ -162,14 +160,23 @@ export const AuthForm = () => {
     dispatch(setModal({ modalType: "loader" }))
     if (provider.current) {
       // Sign in Firebase using popup auth and Google as the identity provider.
-      signInWithPopup(getAuth(), provider.current).catch((error) => {
-        if (error.message.includes("auth/popup-closed-by-user")) {
+      signInWithPopup(getAuth(), provider.current)
+        .catch((error) => {
+          if (error.message.includes("auth/popup-closed-by-user")) {
+            // The modal is closed by the user without any action
+            dispatch(setModal({ useModal: false }))
+          } else {
+            addLog({ type: "error while google login", error })
+            setGeneralError(error)
+          }
+        })
+        .finally(() => {
+          // Usually, this is not needed, because the modal close is handled from App.tsx / onAuthStateChanged
+          // But because of this Firebase issue: https://github.com/vercel/next.js/discussions/51135
+          // the signInWithPopup will not return the error and because there is an error the onAuthStateChanged will not be triggered
+          // thus, nothing will close the modal, braking the website's flow
           dispatch(setModal({ useModal: false }))
-        } else {
-          addLog({ type: "error while google login", error })
-          setGeneralError(error)
-        }
-      })
+        })
     }
   }
 
@@ -205,6 +212,10 @@ export const AuthForm = () => {
     setPasswordVisible(!passwordVisible)
   }
 
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+  }
+
   /**
    * This function handles form submission for user Email login, displaying appropriate error messages
    * based on the type of error encountered.
@@ -217,11 +228,12 @@ export const AuthForm = () => {
     event.preventDefault()
     setEmailError(null)
     setPasswordError(null)
-    dispatch(setModal({ modalType: "loader" }))
+
     const enteredEmail = emailInputRef.current?.value
     const enteredPassword = passwordInputRef.current?.value
 
     if (enteredEmail && enteredPassword) {
+      dispatch(setModal({ modalType: "loader" }))
       const authRequest = isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword
 
       authRequest(getAuth(), enteredEmail, enteredPassword).catch((error) => {
@@ -239,100 +251,161 @@ export const AuthForm = () => {
   }
 
   return (
-    <Card additionalClass="authForm">
-      <section className={classes.auth}>
+    <Paper
+      variant="elevation"
+      elevation={10}
+      sx={{
+        width: "fit-content",
+        height: "fit-content",
+        padding: 5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "flex-start",
+        marginTop: 11,
+      }}
+    >
+      {" "}
+      <Grid>
         {authMethod === "options" && (
-          <div className={classes.options}>
-            <h1>{main.options}</h1>
+          <Stack spacing={2}>
+            <Typography variant="h6" color="primary">
+              {main.options}
+            </Typography>
 
-            <div className={classes.optionsBtns}>
-              <button type="button" className={button} onClick={() => switchAuthMethodHandler("email")}>
-                {main.email}
-              </button>
-              <button type="button" className={button} onClick={googleSignIn}>
-                {main.googleSignIn}
-              </button>
-              {/* <button type="button" className={button} onClick={anonymousSignIn}>
-                {main.anonymousSignIn}
-              </button> */}
-              {authCtx.isLoggedIn && currentUser && (
-                <button type="button" className={button} onClick={() => switchAuthMethodHandler("changePassword")}>
-                  {main.changePassword}
-                </button>
-              )}
-            </div>
-          </div>
+            <Button variant="contained" onClick={() => switchAuthMethodHandler("email")}>
+              {main.email}
+            </Button>
+            <Button variant="contained" onClick={googleSignIn}>
+              {main.googleSignIn}
+            </Button>
+            {/* <button type="button" onClick={anonymousSignIn}>
+              {main.anonymousSignIn}
+            </button> */}
+            {authCtx.isLoggedIn && currentUser && (
+              <Button variant="contained" onClick={() => switchAuthMethodHandler("changePassword")}>
+                {main.changePassword}
+              </Button>
+            )}
+          </Stack>
         )}
         {authMethod === "email" && (
-          <div className={classes.emailForm}>
-            <div className={classes.backBtn}>
-              <button type="button" className={button} onClick={() => switchAuthMethodHandler("options")}>
+          <Stack spacing={2}>
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ position: "relative" }}>
+              <Button variant="contained" type="button" onClick={() => switchAuthMethodHandler("options")}>
                 {main.goBack}
-              </button>
-            </div>
-            <h1>{isLogin ? main.login : main.createAccount}</h1>
+              </Button>
 
-            <form onSubmit={submitHandler}>
-              <div className={`${classes.control} ${emailError && classes.error}`}>
-                <label htmlFor="email">{main.yourEmail}</label>
-                <input id="email" required ref={emailInputRef} />
-              </div>
+              <Typography variant="h6" sx={{ position: "absolute", left: "45%" }}>
+                {isLogin ? main.login : main.createAccount}
+              </Typography>
+            </Stack>
 
-              {emailError && <p className={classes.errorText}>{emailError}</p>}
+            <Box component="form" onSubmit={submitHandler}>
+              <Stack direction="column" justifyContent="space-around" alignItems="center">
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  required
+                  id="email"
+                  label={main.yourEmail}
+                  name="email"
+                  autoComplete="email"
+                  autoFocus
+                  error={!!emailError}
+                  helperText={emailError}
+                  inputRef={emailInputRef}
+                />
 
-              <div className={`${classes.control} ${passwordError && classes.error}`}>
-                <label htmlFor="password">{main.yourPassword}</label>
-                <input id="password" type={passwordVisible ? "text" : "password"} required ref={passwordInputRef} />
-                <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
-                  {passwordVisible ? <Eye /> : <EyeOff />}
-                </button>
-              </div>
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  required
+                  id="password"
+                  label={main.yourPassword}
+                  name="password"
+                  autoComplete="password"
+                  autoFocus
+                  error={!!passwordError}
+                  helperText={passwordError}
+                  inputRef={passwordInputRef}
+                  type={passwordVisible ? "text" : "password"}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => togglePassword()}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {passwordVisible ? <VisibilityOff /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Stack>
 
-              {passwordError && <p className={classes.errorText}>{passwordError}</p>}
-
-              <div className={classes.actions}>
-                <div className={classes.emailAuth}>
-                  <button className={button}>{isLogin ? main.login : main.createAccount}</button>
-                  <button type="button" className={button} onClick={switchEmailAuthModeHandler}>
-                    {isLogin ? main.toCreateAccount : main.goToLogin}
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+              <Stack direction="row" justifyContent="space-around" alignItems="flex-start" spacing={2} marginTop="10px">
+                <Button variant="contained" type="submit">
+                  {isLogin ? main.login : main.createAccount}
+                </Button>
+                <Button variant="contained" type="button" onClick={switchEmailAuthModeHandler}>
+                  {isLogin ? main.toCreateAccount : main.goToLogin}
+                </Button>
+              </Stack>
+            </Box>
+          </Stack>
         )}
         {authMethod === "changePassword" && (
-          <div className={classes.emailForm}>
-            <div className={classes.backBtn}>
-              <button type="button" className={button} onClick={() => switchAuthMethodHandler("options")}>
+          <Stack spacing={2}>
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Button variant="contained" type="button" onClick={() => switchAuthMethodHandler("options")}>
                 {main.goBack}
-              </button>
-            </div>
-            <h1>Change password</h1>
+              </Button>
+              <Typography variant="h6">Change password</Typography>
+            </Stack>
 
-            <form onSubmit={changePassword}>
-              <div className={`${classes.control} ${passwordError && classes.error}`}>
-                <label htmlFor="password">Your new password</label>
-                <input id="password" type={passwordVisible ? "text" : "password"} required ref={newPasswordInputRef} />
-                <button type="button" className={classes.eyeSVG} onClick={() => togglePassword()}>
-                  {passwordVisible ? <Eye /> : <EyeOff />}
-                </button>
-              </div>
+            <Box component="form" onSubmit={changePassword}>
+              <Stack direction="column" justifyContent="space-around" alignItems="center">
+                <TextField
+                  margin="normal"
+                  required
+                  id="password"
+                  label="Your new password"
+                  name="password"
+                  autoComplete="password"
+                  autoFocus
+                  error={!!newPasswordError}
+                  helperText={newPasswordError}
+                  inputRef={newPasswordInputRef}
+                  type={passwordVisible ? "text" : "password"}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => togglePassword()}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {passwordVisible ? <VisibilityOff /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-              {newPasswordError && <p className={classes.errorText}>{newPasswordError}</p>}
-
-              <div className={classes.actions}>
-                <div className={classes.emailAuth}>
-                  <button className={button} type="submit">
-                    Change
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+                <Button variant="contained" type="submit">
+                  Change
+                </Button>
+              </Stack>
+            </Box>
+          </Stack>
         )}
-      </section>
-    </Card>
+      </Grid>
+    </Paper>
   )
 }
 

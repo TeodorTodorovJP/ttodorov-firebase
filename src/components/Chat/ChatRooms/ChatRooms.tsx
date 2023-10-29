@@ -1,12 +1,9 @@
 import { memo, useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import ChatRoom from "../ChatRoom/ChatRoom"
-import classes from "./ChatRooms.module.css"
-import { ReactComponent as CloseSVG } from "../closeSVG.svg"
 import { ChatRoomsContent, selectUserRooms, setShowRooms } from "../chatSlice"
 import GenerateProfilePic from "../../UI/generateImages/GenerateProfilePic"
-import { ReactComponent as ChatSVG } from "../../Navigation/icons/chat.svg"
-import { selectTheme } from "../../Navigation/themeSlice"
+import { Avatar, Badge, Box, Button, List, ListItem, ListItemAvatar, Paper } from "@mui/material"
 
 /**
  * ChatRooms component provides functionality to manage multiple chat rooms. It maintains
@@ -36,7 +33,6 @@ const ChatRooms = () => {
   /** Access store */
   const dispatch = useAppDispatch()
   const rooms = useAppSelector(selectUserRooms)
-  const theme = useAppSelector(selectTheme)
 
   /** Local state */
   const [activeRoom, setActiveRoom] = useState<string>(rooms[0].roomId)
@@ -58,7 +54,6 @@ const ChatRooms = () => {
       .map((currentRoom) => {
         let room = { ...currentRoom }
         if (room.active) activeRoomId = room.roomId
-        room.tabClass = `${classes.tab} ${room.active ? classes.activeTab : ""}`
         return room
       })
     setRoomTabs(currentTabs)
@@ -83,7 +78,6 @@ const ChatRooms = () => {
     setRoomTabs((prev) => {
       const updatedClass = [...prev].map((currentTab) => {
         let tab = { ...currentTab }
-        tab.tabClass = `${classes.tab} ${tab.roomId === roomId ? theme.decoration : ""}`
         return tab
       })
       return updatedClass
@@ -131,42 +125,88 @@ const ChatRooms = () => {
   }
 
   return (
-    <div className={classes.chatRooms}>
-      <button type="button" className={classes.goBackBtn} onClick={() => handleHideRooms()}>
-        <CloseSVG />
-      </button>
-      <div className={`${classes.tabs}`}>
-        <div className={`${classes.tabToggle} ${theme.svg}`} onClick={() => toggleTabs()}>
-          <ChatSVG />
-        </div>
-        {roomTabs.length > 0 &&
-          roomTabs.map((room) => {
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+      }}
+    >
+      <Paper
+        variant="elevation"
+        elevation={10}
+        sx={{
+          // The general sizing of the chat rooms
+          maxWidth: { xs: "96vw", md: "40vw" },
+          minWidth: { xs: "96vw", md: "40vw" },
+          maxHeight: { xs: "88vh", md: "70vh" },
+          minHeight: { xs: "88vh", md: "70vh" },
+
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          top: "1vh",
+          marginLeft: "2vw",
+          zIndex: "1",
+        }}
+      >
+        <Button variant="contained" type="button" onClick={() => handleHideRooms()}>
+          Close Chats
+        </Button>
+
+        {rooms &&
+          rooms.map((room) => {
+            const setDisplay = room.roomId === activeRoom ? "block" : "none"
             return (
-              <div
-                key={room.roomId}
-                className={`${room.tabClass} ${showTabs ? classes.showTabs : ""}`}
-                onClick={() => changeRoom(room.roomId)}
-              >
-                {room.otherUserImage ? (
-                  <img className={classes.profileImage} src={room.otherUserImage} alt="image can't load" />
-                ) : (
-                  <GenerateProfilePic names={room.otherUserNames} />
-                )}
-                {unreadMessages[room.roomId] && <div className={classes.notif}>{unreadMessages[room.roomId]}</div>}
-              </div>
+              <Box key={room.roomId} style={{ display: setDisplay }}>
+                <ChatRoom key={room.roomId} room={room} notifyForMessages={listenForMessages(activeRoom)} />
+              </Box>
             )
           })}
-      </div>
-      {rooms &&
-        rooms.map((room) => {
-          const setOpacity = room.roomId === activeRoom ? "100" : "0"
-          return (
-            <div key={room.roomId} style={{ opacity: setOpacity }}>
-              <ChatRoom key={room.roomId} room={room} notifyForMessages={listenForMessages(activeRoom)} />
-            </div>
-          )
-        })}
-    </div>
+      </Paper>
+
+      <Box>
+        <List
+          dense
+          sx={{
+            borderColor: "primary",
+            width: "100%",
+            maxWidth: 360,
+            position: "relative",
+            zIndex: "2",
+            top: "15vh",
+            right: { xs: "50px", md: "30px" },
+            overflow: "auto",
+            "& ul": { padding: 0 },
+            "::-webkit-scrollbar": {
+              display: "none",
+            },
+          }}
+        >
+          {roomTabs.length > 0 &&
+            roomTabs.map((room) => {
+              return (
+                <ListItem dense key={room.roomId} onClick={() => changeRoom(room.roomId)}>
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                    color="error"
+                    badgeContent={unreadMessages[room.roomId] && unreadMessages[room.roomId]}
+                  >
+                    <ListItemAvatar sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                      {room.otherUserImage ? (
+                        <Avatar src={room.otherUserImage} alt="image can't load" />
+                      ) : (
+                        <GenerateProfilePic names={room.otherUserNames} />
+                      )}
+                    </ListItemAvatar>
+                  </Badge>
+                </ListItem>
+              )
+            })}
+        </List>
+      </Box>
+    </Box>
   )
 }
 
