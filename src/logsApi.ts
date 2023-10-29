@@ -6,6 +6,11 @@ import { fireStore } from "./firebase-config"
 
 interface NoResult {}
 
+interface LogData {
+  timestamp: string
+  log: any
+}
+
 export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     //                   ResultType   QueryArg
@@ -14,7 +19,7 @@ export const extendedApi = apiSlice.injectEndpoints({
       queryFn: async (log: any) => {
         try {
           // Gets a reference to the logs
-          const { utcDate: timestamp } = getDateDataInUTC()
+          const { formattedDate: timestamp } = getDateDataInUTC()
           const usersRef = doc(fireStore, "logs", timestamp)
           await setDoc(usersRef, { timestamp, log })
 

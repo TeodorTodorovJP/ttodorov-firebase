@@ -10,6 +10,8 @@ import { Box, Button, ButtonGroup, Link, Snackbar, Stack, Typography, useMediaQu
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import { BackGround } from "../UI/BackGround"
+import ContentCopyIcon from "@mui/icons-material/ContentCopy"
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 
 type AboutButtons = "aboutMe" | "skills" | "experience"
 
@@ -35,7 +37,7 @@ export const Home = () => {
 
   const [imageData, setImageData] = useState<Image | null>(null)
   const [data, setData] = useState<Data>(FallbackData)
-  const [openGmailSnack, setOpenGmailSnack] = useState<boolean>(false)
+  const [openSnack, setOpenSnack] = useState<string | null>(null)
   const [aboutButton, setAboutButton] = useState<AboutButtons>("aboutMe")
 
   // @ts-ignore
@@ -48,9 +50,13 @@ export const Home = () => {
    * Copy the email to the user's clipboard and
    * show a popup to notify the user.
    * */
-  const handleGmailClick = () => {
-    setOpenGmailSnack(true)
-    navigator.clipboard.writeText(data.email)
+  const handleSnackClick = (whichButton: string) => {
+    const convertToKey = whichButton as keyof Data
+    const text = data[convertToKey]
+
+    setOpenSnack(text)
+
+    navigator.clipboard.writeText(text)
   }
 
   const handleAboutButtonsChange = (setButton: AboutButtons) => {
@@ -154,48 +160,67 @@ export const Home = () => {
               </Box>
 
               <Stack spacing={2} direction={{ xs: "column", md: "row" }}>
-                <Button variant="contained" endIcon={<ArrowRightAltIcon />}>
-                  <Typography>HIRE ME</Typography>
-                </Button>
-                <Button variant="contained" endIcon={<ArrowRightAltIcon />}>
-                  <Typography>VIEW MY WORK</Typography>
+                <Button variant="contained" endIcon={<ArrowDownwardIcon />}>
+                  <Typography>VIEW MY WORK PROJECTS HERE OR VIA:</Typography>
                 </Button>
               </Stack>
 
-              <Stack direction="row" spacing={2} sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
-                <Button
-                  startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
-                  sx={{ color: { xs: "text", md: "white" } }}
-                  onClick={() => handleGmailClick()}
-                >
-                  Gmail
-                </Button>
+              <Stack direction="column" spacing={2} sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
+                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
+                  <Button
+                    startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
+                    sx={{ color: { xs: "text", md: "white" } }}
+                    endIcon={<ContentCopyIcon sx={{ width: "20px" }} />}
+                    onClick={() => handleSnackClick("linkedIn")}
+                  >
+                    LinkedIn
+                  </Button>
+                  <Link
+                    href={data.linkedIn}
+                    target="_blank"
+                    underline="none"
+                    color="inherit"
+                    sx={{ textAlign: "center" }}
+                  >
+                    {data.linkedIn}
+                  </Link>
+                </Box>
+
+                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <Button
+                    startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
+                    endIcon={<ContentCopyIcon sx={{ width: "20px" }} />}
+                    sx={{ color: { xs: "text", md: "white" } }}
+                    onClick={() => handleSnackClick("repo")}
+                  >
+                    GitHub
+                  </Button>
+                  <Link href={data.repo} target="_blank" underline="none" color="inherit" sx={{ textAlign: "center" }}>
+                    {data.repo}
+                  </Link>
+                </Box>
+
+                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <Button
+                    startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
+                    endIcon={<ContentCopyIcon sx={{ width: "20px" }} />}
+                    sx={{ color: { xs: "text", md: "white" } }}
+                    onClick={() => handleSnackClick("email")}
+                  >
+                    Gmail
+                  </Button>
+                  <Typography sx={{ textAlign: "center" }}>{data.email}</Typography>
+                </Box>
+
                 <Snackbar
-                  open={openGmailSnack}
-                  onClose={() => setOpenGmailSnack(false)}
+                  open={!!openSnack}
+                  onClose={() => setOpenSnack(null)}
                   autoHideDuration={20000}
-                  message={`Copied ${data.email}`}
+                  message={`Copied ${openSnack}`}
                   key={"top" + "center"}
                   anchorOrigin={{ vertical: "top", horizontal: "center" }}
                   sx={{ display: "block", textAlign: "center" }}
                 />
-
-                <Button
-                  startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
-                  sx={{ color: { xs: "text", md: "white" } }}
-                >
-                  <Link href={data.linkedIn} target="_blank" underline="none" color="inherit">
-                    LinkedIn
-                  </Link>
-                </Button>
-                <Button
-                  startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
-                  sx={{ color: { xs: "text", md: "white" } }}
-                >
-                  <Link href={data.repo} target="_blank" underline="none" color="inherit">
-                    GitHub
-                  </Link>
-                </Button>
               </Stack>
             </Stack>
             <Box sx={{ display: "flex", flexDirection: "row", marginTop: "50px" }}>

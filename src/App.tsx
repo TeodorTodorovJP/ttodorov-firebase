@@ -235,7 +235,7 @@ export const App = () => {
       if (!authCtx.isLoggedIn) {
         anonymousSignIn()
       }
-      addLog({ type: "User visited" })
+      addLog({ type: "User visited via anonymous sign in" })
     }
 
     // User language preference

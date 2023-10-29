@@ -374,6 +374,8 @@ export const getDateDataInUTC = (date?: string | number | Date) => {
   // Get's the timezone difference in hours between the input date and the UTC date
   const utcDifference = new Date().getTimezoneOffset() / 60
 
+  const formattedDate = `${fullYear}${month}${day}${hours}${minutes}`
+
   return {
     year,
     month,
@@ -384,6 +386,7 @@ export const getDateDataInUTC = (date?: string | number | Date) => {
     utcMilliseconds,
     utcDate: utcDate,
     utcDifference: utcDifference,
+    formattedDate: formattedDate,
   }
 };
 
