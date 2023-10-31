@@ -42,6 +42,8 @@ export const Home = () => {
   const [openSnack, setOpenSnack] = useState<string | null>(null)
   const [aboutButton, setAboutButton] = useState<AboutButtons>("aboutMe")
 
+  const { main } = langs[currentLang as keyof Langs]
+
   // @ts-ignore
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"))
 
@@ -133,8 +135,6 @@ export const Home = () => {
     const foundImage = images(data.profilePicStored)[0]
     if (foundImage) setImageData(foundImage)
   }
-
-  const { main } = langs[currentLang as keyof Langs]
 
   return (
     <Box sx={{ alignSelf: "flex-start", minHeight: "inherit", minWidth: "inherit" }}>

@@ -415,3 +415,56 @@ export const isMobile = () => {
   const test = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   return test;
 };
+
+/**
+ * Get the Date info formatted.
+*/
+export const getLocalDateInfo = (date?: string | number | Date) => {
+  let useDate
+  // @ts-ignore
+  if (date) {
+    useDate = new Date(date)
+  } else {
+    useDate = new Date()
+  }
+
+  // Prepare the values for Date.UTS
+  const year = +useDate.getFullYear().toString().substring(2)
+  const fullYear = +useDate.getFullYear()
+  const month = useDate.getMonth()
+  const day = useDate.getDate()
+  const hours = useDate.getHours()
+  const minutes = useDate.getMinutes()
+  const seconds = useDate.getSeconds()
+  const milliseconds = useDate.getMilliseconds();
+
+  // Convert the utcMilliseconds in to a readable date
+  const readableDate = new Date().toString()
+
+  // This is to be prevent wrong sorting
+  // 9 hours and 7 minutes is 97, 10 hours and 12 minutes is 1012
+  // That way all timestamps from the small hours will be first, regardless of day which is an issue
+  // These conversions help with that.
+  const converted = {
+    month: month < 10 ? "0" + month : month,
+    day: day < 10 ? "0" + day : day,
+    hours: hours < 10 ? "0" + hours : hours,
+    minutes: minutes < 10 ? "0" + minutes : minutes,
+    seconds: seconds < 10 ? "0" + seconds : seconds,
+  }
+
+  // This is to take accurate and formatted time stamp for the logs
+  const formattedDate = `${fullYear}${converted.month}${converted.day}${converted.hours}${converted.minutes}${converted.seconds}`
+
+  return {
+    year,
+    month,
+    day,
+    hours,
+    minutes,
+    seconds,
+    milliseconds,
+    readableDate,
+    formattedDate,
+  }
+};

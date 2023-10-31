@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, onSnapshot, query, setDoc } from "firebase/firestore"
 import { apiSlice } from "./app/apiSlice"
-import { getDateDataInUTC, getError } from "./app/utils"
+import { getDateDataInUTC, getError, getLocalDateInfo } from "./app/utils"
 import { UserData } from "./components/Auth/userSlice"
 import { fireStore } from "./firebase-config"
 
@@ -20,8 +20,10 @@ export const extendedApi = apiSlice.injectEndpoints({
         try {
           // Gets a reference to the logs
           const { formattedDate: timestamp } = getDateDataInUTC()
+          const { readableDate } = getLocalDateInfo()
+
           const usersRef = doc(fireStore, "logs", timestamp)
-          await setDoc(usersRef, { timestamp, log })
+          await setDoc(usersRef, { timestamp, log, readableDate })
 
           return { data: {} }
         } catch (err: any) {
