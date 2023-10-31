@@ -232,7 +232,7 @@ export const Profile = () => {
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       <BackGround sx={{ top: "10vh" }} />
 
-      <Typography variant="h3">Profile page</Typography>
+      <Typography variant="h3">{main.header}</Typography>
       <Paper
         variant="elevation"
         elevation={10}
@@ -248,24 +248,27 @@ export const Profile = () => {
           padding: "40px",
         }}
       >
-        <TableContainer component={Paper}>
+        <TableContainer
+          component={Paper}
+          sx={{ minWidth: { xs: "auto", md: "500px" }, maxWidth: { xs: "auto", md: "500px" } }}
+        >
           <Table sx={{ minWidth: "100%", maxWidth: "100%" }} size="small" aria-label="a dense table">
             <TableBody>
               <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                 <TableCell sx={{ minWidth: "84px" }} align="left">
-                  User Id:
+                  {main.userId}
                 </TableCell>
                 <TableCell align="left">{userId}</TableCell>
               </TableRow>
               <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                 <TableCell sx={{ minWidth: "84px" }} align="left">
-                  User names:
+                  {main.userNames}
                 </TableCell>
                 <TableCell align="left">{names}</TableCell>
               </TableRow>
               <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                 <TableCell sx={{ minWidth: "84px" }} align="left">
-                  User email:
+                  {main.userEmail}
                 </TableCell>
                 <TableCell align="left">{email ? email : "No email"}</TableCell>
               </TableRow>
@@ -294,7 +297,7 @@ export const Profile = () => {
           >
             <InsertPhotoIcon color="primary" />
           </IconButton>
-          <Typography sx={{ textAlign: "center" }}>Upload Image</Typography>
+          <Typography sx={{ textAlign: "center" }}>{main.uploadImage}</Typography>
         </Box>
       </Paper>
     </Box>
