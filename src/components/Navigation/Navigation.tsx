@@ -97,7 +97,7 @@ export const Navigation = () => {
   /**
    * Prepare component data.
    */
-  const { main, themeModal } = langs[lang as keyof Langs]
+  const { main, leftMenu } = langs[lang as keyof Langs]
 
   /** Access Context */
   const authCtx = useAuthContext()
@@ -133,10 +133,10 @@ export const Navigation = () => {
 
   /** Prepare all links for the left menu. */
   const navLeftItems = [
-    { path: "/", text: "Home", icon: <HomeRoundedIcon color="primary" /> },
-    { path: "auth", text: "Authenticate", icon: <LoginIcon color="primary" /> },
-    { path: "chat", text: "Chat", icon: <ChatIcon color="primary" /> },
-    { path: "projects", text: "Projects", icon: <AccountTreeIcon color="primary" /> },
+    { path: "/", text: leftMenu.home, icon: <HomeRoundedIcon color="primary" /> },
+    { path: "auth", text: leftMenu.authenticate, icon: <LoginIcon color="primary" /> },
+    { path: "chat", text: leftMenu.chat, icon: <ChatIcon color="primary" /> },
+    { path: "projects", text: leftMenu.projects, icon: <AccountTreeIcon color="primary" /> },
     // { path: "meals/meal", text: "Your Single Meal", icon: <HamburgerMenu /> },
   ].map((link) => (
     <ListItemButton
@@ -454,7 +454,7 @@ export const Navigation = () => {
                       <ListItemIcon>
                         <GTranslateIcon color="primary" />
                       </ListItemIcon>
-                      <Typography sx={{ ml: "5px" }}>{lang == "bg" ? "EN" : "BG"}</Typography>
+                      <Typography sx={{ ml: "5px" }}>{main.lang}</Typography>
                     </ListItemButton>
                   </Tooltip>
                 </List>
