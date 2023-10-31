@@ -22,7 +22,7 @@ import Paper from "@mui/material/Paper"
 import TextField from "@mui/material/TextField"
 import InputAdornment from "@mui/material/InputAdornment"
 import IconButton from "@mui/material/IconButton"
-import { VisibilityOff } from "@mui/icons-material"
+import { VisibilityOff, Visibility } from "@mui/icons-material"
 
 /**
  * AuthForm Component
@@ -364,7 +364,7 @@ export const AuthForm = () => {
               <Button variant="contained" type="button" onClick={() => switchAuthMethodHandler("options")}>
                 {main.goBack}
               </Button>
-              <Typography variant="h6">Change password</Typography>
+              <Typography variant="h6">{main.changePassword}</Typography>
             </Stack>
 
             <Box component="form" onSubmit={changePassword}>
@@ -373,7 +373,7 @@ export const AuthForm = () => {
                   margin="normal"
                   required
                   id="password"
-                  label="Your new password"
+                  label={main.yourNewPassword}
                   name="password"
                   autoComplete="password"
                   autoFocus
@@ -390,7 +390,7 @@ export const AuthForm = () => {
                           onMouseDown={handleMouseDownPassword}
                           edge="end"
                         >
-                          {passwordVisible ? <VisibilityOff /> : <VisibilityOff />}
+                          {passwordVisible ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -398,7 +398,7 @@ export const AuthForm = () => {
                 />
 
                 <Button variant="contained" type="submit">
-                  Change
+                  {main.change}
                 </Button>
               </Stack>
             </Box>

@@ -20,9 +20,11 @@ interface Main {
   goToLogin: string
   yourEmail: string
   yourPassword: string
+  yourNewPassword: string
   googleSignIn: string
   anonymousSignIn: string
   changePassword: string
+  change: string
 }
 
 export const langs: Langs = {
@@ -37,9 +39,11 @@ export const langs: Langs = {
       goToLogin: "Go to Login",
       yourEmail: "Your Email",
       yourPassword: "Your Password",
+      yourNewPassword: "Your new password",
       googleSignIn: "Sign In With Google",
       anonymousSignIn: "Anonymous Login",
       changePassword: "Change password",
+      change: "Change",
     },
   },
   bg: {
@@ -53,9 +57,11 @@ export const langs: Langs = {
       goToLogin: "Влез в профил",
       yourEmail: "Вашата поща",
       yourPassword: "Вашата парола",
+      yourNewPassword: "Вашата нова парола",
       googleSignIn: "Влезте с Google",
       anonymousSignIn: "Влезте като анонимен потребител",
       changePassword: "Смени парола",
+      change: "Смени",
     },
   },
 }
