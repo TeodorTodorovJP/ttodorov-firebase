@@ -4,6 +4,8 @@ import ChatRoom from "../ChatRoom/ChatRoom"
 import { ChatRoomsContent, selectUserRooms, setShowRooms } from "../chatSlice"
 import GenerateProfilePic from "../../UI/generateImages/GenerateProfilePic"
 import { Avatar, Badge, Box, Button, List, ListItem, ListItemAvatar, Paper } from "@mui/material"
+import { selectUserPreferences } from "../../Auth/userSlice"
+import { langs, Langs } from "../chatTexts"
 
 /**
  * ChatRooms component provides functionality to manage multiple chat rooms. It maintains
@@ -33,11 +35,15 @@ const ChatRooms = () => {
   /** Access store */
   const dispatch = useAppDispatch()
   const rooms = useAppSelector(selectUserRooms)
+  const { lang: currentLang } = useAppSelector(selectUserPreferences)
 
   /** Local state */
   const [activeRoom, setActiveRoom] = useState<string>(rooms[0].roomId)
   const [roomTabs, setRoomTabs] = useState<ChatRoomsContent[]>([])
   const [showTabs, setShowTabs] = useState(false)
+
+  /** Access all text translations */
+  const { main } = langs[currentLang as keyof Langs]
 
   interface UnreadRoomMessages {
     [key: string]: number
@@ -151,7 +157,7 @@ const ChatRooms = () => {
         }}
       >
         <Button variant="contained" type="button" onClick={() => handleHideRooms()}>
-          Close Chats
+          {main.closeChats}
         </Button>
 
         {rooms &&

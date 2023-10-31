@@ -13,6 +13,7 @@ interface Lang {
 interface Main {
   offline: string
   onlyImages: string
+  closeChats: string
 }
 
 export const langs: Langs = {
@@ -20,12 +21,14 @@ export const langs: Langs = {
     main: {
       offline: "You are currently offline!",
       onlyImages: "You can only share images!",
+      closeChats: "Close Chats",
     },
   },
   bg: {
     main: {
       offline: "Нямате интернет връзка!",
       onlyImages: "Може да качите само снимки!",
+      closeChats: "Затвори Чата",
     },
   },
 }
