@@ -6,6 +6,7 @@ import AuthForm from "./components/Auth/AuthForm"
 import Home from "./components/Home/Home"
 import Chat from "./components/Chat/Chat"
 import Profile from "./components/Profile/Profile"
+import Projects from "./components/Projects/Projects"
 
 /**
  * The only purpose of this component is to address the router + context issue.
@@ -37,6 +38,10 @@ const RouterWrap = () => {
             {
               path: "chat",
               element: authCtx.isLoggedIn ? <Chat /> : <AuthForm />,
+            },
+            {
+              path: "projects",
+              element: <Projects />,
             },
             // {
             //   path: "meals",

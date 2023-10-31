@@ -294,7 +294,7 @@ export const Profile = () => {
           >
             <InsertPhotoIcon color="primary" />
           </IconButton>
-          <Typography>Upload Image</Typography>
+          <Typography sx={{ textAlign: "center" }}>Upload Image</Typography>
         </Box>
       </Paper>
     </Box>

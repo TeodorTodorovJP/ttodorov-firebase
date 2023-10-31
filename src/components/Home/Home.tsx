@@ -12,6 +12,8 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import { BackGround } from "../UI/BackGround"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
+import { useNavigate } from "react-router-dom"
+
 
 type AboutButtons = "aboutMe" | "skills" | "experience"
 
@@ -42,6 +44,9 @@ export const Home = () => {
 
   // @ts-ignore
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"))
+
+  /** Access Router */
+  const navigate = useNavigate()
 
   /** Error hooks */
   const [homeDataError, setHomeDataError] = useError()
@@ -160,7 +165,7 @@ export const Home = () => {
               </Box>
 
               <Stack spacing={2} direction={{ xs: "column", md: "row" }}>
-                <Button variant="contained" endIcon={<ArrowDownwardIcon />}>
+                <Button onClick={() => navigate("/projects")} variant="contained" endIcon={<ArrowDownwardIcon />}>
                   <Typography>VIEW MY WORK PROJECTS HERE OR VIA:</Typography>
                 </Button>
               </Stack>

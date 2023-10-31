@@ -21,6 +21,20 @@ import RouterWrap from "./RouterWrap"
 const container = document.getElementById("root")!
 const root = createRoot(container)
 
+/**
+ * On mobile devices, the address bar is moving the website down and at the same time 
+ * it doesn't affect the vh, so the bottom part of the website get's cut off. 
+ * To fix that you have to get the correct height of it, so that you can adjust the position of the page.
+ * This code is an attempt to avoid these issues.
+ * Doesn't work!!!!!!
+*/
+// window.addEventListener("load",() => {
+//   setTimeout(() => {
+//       // This hides the address bar:
+//       window.scrollTo(0, 1);
+//   }, 0);
+// });
+
 root.render(
   <React.StrictMode>
     <AuthContextProvider>

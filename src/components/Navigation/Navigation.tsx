@@ -44,6 +44,7 @@ import CalculateIcon from "@mui/icons-material/Calculate"
 import ChatIcon from "@mui/icons-material/Chat"
 import Brightness4Icon from "@mui/icons-material/Brightness4"
 import Brightness7Icon from "@mui/icons-material/Brightness7"
+import AccountTreeIcon from "@mui/icons-material/AccountTree"
 
 // import "./Card.css";
 // import mySvg from "./mySvg.svg";
@@ -134,8 +135,8 @@ export const Navigation = () => {
   const navLeftItems = [
     { path: "/", text: "Home", icon: <HomeRoundedIcon color="primary" /> },
     { path: "auth", text: "Authenticate", icon: <LoginIcon color="primary" /> },
-    { path: "counter", text: "Your Counter", icon: <CalculateIcon color="primary" /> },
     { path: "chat", text: "Chat", icon: <ChatIcon color="primary" /> },
+    { path: "projects", text: "Projects", icon: <AccountTreeIcon color="primary" /> },
     // { path: "meals/meal", text: "Your Single Meal", icon: <HamburgerMenu /> },
   ].map((link) => (
     <ListItemButton
@@ -319,7 +320,15 @@ export const Navigation = () => {
             </Collapse>
           </Menu>
 
-          <Box component="img" src={Logo} alt="Logo" sx={{ maxWidth: { xs: 80, md: 100 } }} />
+          <Box
+            component="img"
+            src={Logo}
+            alt="Logo"
+            sx={{ maxWidth: { xs: 80, md: 100 } }}
+            onClick={() => {
+              navigate("/")
+            }}
+          />
 
           <Box sx={{ flexGrow: 1 }} />
 

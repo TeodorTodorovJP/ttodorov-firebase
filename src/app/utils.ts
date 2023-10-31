@@ -374,7 +374,20 @@ export const getDateDataInUTC = (date?: string | number | Date) => {
   // Get's the timezone difference in hours between the input date and the UTC date
   const utcDifference = new Date().getTimezoneOffset() / 60
 
-  const formattedDate = `${fullYear}${month}${day}${hours}${minutes}`
+  // This is to be prevent wrong sorting
+  // 9 hours and 7 minutes is 97, 10 hours and 12 minutes is 1012
+  // That way all timestamps from the small hours will be first, regardless of day which is an issue
+  // These conversions help with that.
+  const converted = {
+    month: month < 10 ? "0" + month : month,
+    day: day < 10 ? "0" + day : day,
+    hours: hours < 10 ? "0" + hours : hours,
+    minutes: minutes < 10 ? "0" + minutes : minutes,
+    seconds: seconds < 10 ? "0" + seconds : seconds,
+  }
+
+  // This is to take accurate and formatted time stamp for the logs
+  const formattedDate = `${fullYear}${converted.month}${converted.day}${converted.hours}${converted.minutes}${converted.seconds}`
 
   return {
     year,
