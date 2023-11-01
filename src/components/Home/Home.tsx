@@ -6,14 +6,14 @@ import useError from "../CustomHooks/useError"
 import { useEffect, useState } from "react"
 import { setModal } from "../Modal/modalSlice"
 import { getBlobUrl } from "../../app/utils"
-import { Box, Button, ButtonGroup, Link, Snackbar, Stack, Typography, useMediaQuery } from "@mui/material"
-import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt"
+import { Box, Button, ButtonGroup, IconButton, Link, Snackbar, Stack, Typography, useMediaQuery } from "@mui/material"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import { BackGround } from "../UI/BackGround"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 import { useNavigate } from "react-router-dom"
-
+import LanguageIcon from "@mui/icons-material/Language"
+import AccountTreeIcon from "@mui/icons-material/AccountTree"
 
 type AboutButtons = "aboutMe" | "skills" | "experience"
 
@@ -37,12 +37,37 @@ export const Home = () => {
       "https://firebasestorage.googleapis.com/v0/b/ttodorovnet.appspot.com/o/k602b3bYLJexkEz7NP8PiGmZHcH2%2FFri%2C%2014%20Apr%202023%2010%3A10%3A26%20GMT%2FprofilePicjpg?alt=media&token=523ee63c-f0b1-4594-8993-225692b4ddae",
   }
 
+  const techSkills = [
+    "JavaScript",
+    "ES6 ",
+    "TypeScript",
+    "React",
+    "Redux",
+    "RTK",
+    "React Router",
+    "HTML/CSS",
+    "Bootstrap for React",
+    "NodeJS",
+    "ExpressJS",
+    "MariaDB",
+    "MySQL",
+    "ESLint",
+    "Git",
+    "React Context",
+    "Firebase",
+    "PL/SQL",
+    "Jira",
+    "Microsoft Office",
+    "AngularJS",
+    "ES5",
+  ]
+
   const [imageData, setImageData] = useState<Image | null>(null)
   const [data, setData] = useState<Data>(FallbackData)
   const [openSnack, setOpenSnack] = useState<string | null>(null)
   const [aboutButton, setAboutButton] = useState<AboutButtons>("aboutMe")
 
-  const { main } = langs[currentLang as keyof Langs]
+  const { main, aboutMe, skills, experience } = langs[currentLang as keyof Langs]
 
   // @ts-ignore
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"))
@@ -152,69 +177,86 @@ export const Home = () => {
             }}
           >
             <BackGround />
-            <Stack direction="column" spacing={2}>
+            <Stack direction="column" spacing={2} sx={{ paddingTop: "3vh" }}>
               <Box>
-                <Typography variant="h3">I am Teodor Todorov</Typography>
-                <Typography variant="h3">A Web Developer</Typography>
+                <Typography variant="h3">{main.headerOne}</Typography>
+                <Typography variant="h3">{main.headerTwo}</Typography>
               </Box>
               <Box sx={{ marginTop: { xs: "40px", md: "initial" } }}>
-                <Typography sx={{ fontSize: "15px" }}>
-                  If we get to know each other, you will see that I'm a hard-working, creative
-                </Typography>
-                <Typography sx={{ fontSize: "15px" }}>individual, constantly setting new goals to achieve.</Typography>
+                <Typography sx={{ fontSize: "1.4rem" }}>{main.subHead}</Typography>
               </Box>
 
-              <Stack spacing={2} direction={{ xs: "column", md: "row" }}>
-                <Button onClick={() => navigate("/projects")} variant="contained" endIcon={<ArrowDownwardIcon />}>
-                  <Typography>VIEW MY WORK PROJECTS HERE OR VIA:</Typography>
+              <Stack
+                spacing={2}
+                direction="row"
+                sx={{
+                  alignItems: "center",
+                  justifyContent: { xs: "center", md: "flex-start" },
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                }}
+              >
+                <Typography sx={{ fontSize: "inherit" }}>{main.projectsButtonLeft}</Typography>
+
+                <Button onClick={() => navigate("/projects")} variant="contained">
+                  <AccountTreeIcon sx={{ color: "primary.contrastText" }} />
                 </Button>
+
+                <Typography sx={{ fontSize: "inherit" }}>{main.projectsButtonRight}</Typography>
               </Stack>
 
-              <Stack direction="column" spacing={2} sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
-                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
-                  <Button
-                    startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
-                    sx={{ color: { xs: "text", md: "white" } }}
-                    endIcon={<ContentCopyIcon sx={{ width: "20px" }} />}
-                    onClick={() => handleSnackClick("linkedIn")}
-                  >
-                    LinkedIn
-                  </Button>
+              <Stack direction="row" spacing={2} sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
+                <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                   <Link
                     href={data.linkedIn}
                     target="_blank"
-                    underline="none"
                     color="inherit"
-                    sx={{ textAlign: "center" }}
+                    sx={{ textAlign: "center", color: { xs: "text", md: "white" }, marginLeft: "16px" }}
                   >
-                    {data.linkedIn}
+                    {main.linkedIn}
                   </Link>
+
+                  <IconButton
+                    size="large"
+                    aria-label="show new notifications"
+                    color="inherit"
+                    onClick={() => handleSnackClick("linkedIn")}
+                    sx={{ color: { xs: "text", md: "white" } }}
+                  >
+                    <ContentCopyIcon sx={{ width: "20px" }} />
+                  </IconButton>
                 </Box>
 
-                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <Button
-                    startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
-                    endIcon={<ContentCopyIcon sx={{ width: "20px" }} />}
-                    sx={{ color: { xs: "text", md: "white" } }}
+                <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                  <Link
+                    href={data.repo}
+                    target="_blank"
+                    color="inherit"
+                    sx={{ textAlign: "center", color: { xs: "text", md: "white" } }}
+                  >
+                    {main.repo}
+                  </Link>
+                  <IconButton
+                    size="large"
+                    aria-label="show new notifications"
+                    color="inherit"
                     onClick={() => handleSnackClick("repo")}
+                    sx={{ color: { xs: "text", md: "white" } }}
                   >
-                    GitHub
-                  </Button>
-                  <Link href={data.repo} target="_blank" underline="none" color="inherit" sx={{ textAlign: "center" }}>
-                    {data.repo}
-                  </Link>
+                    <ContentCopyIcon sx={{ width: "20px" }} />
+                  </IconButton>
                 </Box>
 
-                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <Button
-                    startIcon={<FiberManualRecordIcon sx={{ width: "10px" }} />}
-                    endIcon={<ContentCopyIcon sx={{ width: "20px" }} />}
-                    sx={{ color: { xs: "text", md: "white" } }}
+                <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                  <Typography sx={{ textAlign: "center" }}>{main.email}</Typography>
+                  <IconButton
+                    size="large"
+                    aria-label="show new notifications"
+                    color="inherit"
                     onClick={() => handleSnackClick("email")}
+                    sx={{ color: { xs: "text", md: "white" } }}
                   >
-                    Gmail
-                  </Button>
-                  <Typography sx={{ textAlign: "center" }}>{data.email}</Typography>
+                    <ContentCopyIcon sx={{ width: "20px" }} />
+                  </IconButton>
                 </Box>
 
                 <Snackbar
@@ -228,14 +270,25 @@ export const Home = () => {
                 />
               </Stack>
             </Stack>
-            <Box sx={{ display: "flex", flexDirection: "row", marginTop: "50px" }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: { xs: "baseline", md: "normal" },
+                height: "450px",
+                minHeight: "450px",
+                maxHeight: "450px",
+              }}
+            >
               <Box
                 sx={{
                   backgroundImage: `url(${data.profilePicStored})`,
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
-                  width: "400px",
+                  width: "450px",
+                  minWidth: "450px",
+                  maxWidth: "450px",
                   objectFit: "contain",
 
                   display: { xs: "none", md: "block" },
@@ -247,13 +300,19 @@ export const Home = () => {
                   flexDirection: "column",
                   justifyContent: { xs: "center", md: "flex-start" },
                   alignItems: { xs: "center", md: "flex-start" },
+                  marginLeft: "20px",
                 }}
               >
-                <Stack direction="row" justifyContent="center" alignItems="center">
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ paddingLeft: { xs: "0px", md: "10px" } }}
+                >
                   <ButtonGroup aria-label="About buttons" variant={isSmallScreen ? "outlined" : "contained"}>
-                    <Button onClick={() => handleAboutButtonsChange("aboutMe")}>ABOUT ME</Button>
-                    <Button onClick={() => handleAboutButtonsChange("skills")}>SKILLS</Button>
-                    <Button onClick={() => handleAboutButtonsChange("experience")}>EXPERIENCE</Button>
+                    <Button onClick={() => handleAboutButtonsChange("aboutMe")}>{main.aboutButton}</Button>
+                    <Button onClick={() => handleAboutButtonsChange("skills")}>{main.skillsButton}</Button>
+                    <Button onClick={() => handleAboutButtonsChange("experience")}>{main.expButton}</Button>
                   </ButtonGroup>
                 </Stack>
 
@@ -267,13 +326,31 @@ export const Home = () => {
                       padding: "10px",
                     }}
                   >
-                    <Typography variant="h3">My Story</Typography>
-                    <Typography variant="subtitle1" mt="10px" maxWidth="500px">
-                      Long text text text text text text text text text text text text text text text text text text
-                      text text text text text texttext text text text text text texttext text text text text text
-                      texttext text text text text text text
+                    <Typography variant="h3">{aboutMe.header}</Typography>
+                    <Typography
+                      variant="subtitle1"
+                      mt="10px"
+                      maxWidth="500px"
+                      sx={{ textAlign: { xs: "center", md: "justify" } }}
+                    >
+                      {aboutMe.one}
                     </Typography>
-                    <Typography variant="h4">I work on websites</Typography>
+                    <Typography
+                      variant="subtitle1"
+                      mt="10px"
+                      maxWidth="500px"
+                      sx={{ textAlign: { xs: "center", md: "justify" } }}
+                    >
+                      {aboutMe.two}
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      mt="10px"
+                      maxWidth="500px"
+                      sx={{ textAlign: { xs: "center", md: "justify" } }}
+                    >
+                      {aboutMe.three}
+                    </Typography>
                   </Box>
                 )}
                 {aboutButton === "skills" && (
@@ -286,13 +363,38 @@ export const Home = () => {
                       padding: "10px",
                     }}
                   >
-                    <Typography variant="h3">My Skills</Typography>
-                    <Typography variant="subtitle1" mt="10px" maxWidth="500px">
-                      Long text text text text text text text text text text text text text text text text text text
-                      text text text text text texttext text text text text text texttext text text text text text
-                      texttext text text text text text text
+                    <Typography variant="h3">{skills.header}</Typography>
+                    <Typography
+                      variant="subtitle1"
+                      mt="10px"
+                      maxWidth="500px"
+                      sx={{ textAlign: { xs: "center", md: "justify" } }}
+                    >
+                      {skills.one}
                     </Typography>
-                    <Typography variant="h4">I work on websites</Typography>
+                    <Typography
+                      variant="subtitle1"
+                      mt="10px"
+                      maxWidth="500px"
+                      sx={{ textAlign: { xs: "center", md: "justify" } }}
+                    >
+                      {skills.two}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: "10px",
+                        alignItems: "flex-start",
+                        justifyContent: "flex-start",
+                        maxWidth: "420px",
+                        flexWrap: "wrap",
+                        marginTop: "20px",
+                      }}
+                    >
+                      {techSkills.map((skill) => (
+                        <Typography sx={{ textDecoration: "underline" }}>{skill}</Typography>
+                      ))}
+                    </Box>
                   </Box>
                 )}
                 {aboutButton === "experience" && (
@@ -305,13 +407,15 @@ export const Home = () => {
                       padding: "10px",
                     }}
                   >
-                    <Typography variant="h3">My experience</Typography>
-                    <Typography variant="subtitle1" mt="10px" maxWidth="500px">
-                      Long text text text text text text text text text text text text text text text text text text
-                      text text text text text texttext text text text text text texttext text text text text text
-                      texttext text text text text text text
+                    <Typography variant="h3">{experience.header}</Typography>
+                    <Typography
+                      variant="subtitle1"
+                      mt="10px"
+                      maxWidth="500px"
+                      sx={{ textAlign: { xs: "center", md: "justify" } }}
+                    >
+                      {experience.one}
                     </Typography>
-                    <Typography variant="h4">I work on websites</Typography>
                   </Box>
                 )}
               </Box>
