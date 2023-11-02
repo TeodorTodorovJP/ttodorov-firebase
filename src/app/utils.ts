@@ -468,3 +468,59 @@ export const getLocalDateInfo = (date?: string | number | Date) => {
     formattedDate,
   }
 };
+
+
+
+  /** Reads all possible screen parameters and gives the sizes. */
+  export const getSizes = () => {
+    // Find the size of the screen
+    const body = document.body
+    const html = document.documentElement
+
+    const windowMaxHeight: number = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    )
+
+    // console.log("body.scrollHeight: ", body.scrollHeight);
+    // console.log("body.offsetHeight: ", body.offsetHeight);
+    // console.log("html.clientHeight: ", html.clientHeight);
+    // console.log("html.scrollHeight: ", html.scrollHeight);
+    // console.log("html.offsetHeight: ", html.offsetHeight);
+    // console.log("windowMaxHeight: ", windowMaxHeight);
+
+
+
+    /* This is to help with window resize when address bar is hidden*/
+    const addressBarHeight = window.innerHeight - html.clientHeight
+    const windowHeight = windowMaxHeight + addressBarHeight
+
+    /* This is to help with window resize when address bar is hidden*/
+    // 100vh + addressBarVH
+    const addressBarHeightPercentage = 100 + Math.trunc(addressBarHeight / windowMaxHeight)
+
+    const windowMaxWidth: number = Math.max(
+      body.scrollWidth,
+      body.offsetWidth,
+      html.clientWidth,
+      html.scrollWidth,
+      html.offsetWidth
+    )
+
+    // console.log("windowMaxWidth: ", windowMaxWidth);
+    // console.log("windowMaxHeight: ", windowMaxHeight);
+    // console.log("addressBarHeight: ", addressBarHeight);
+    // console.log("addressBarHeightPercentage: ", addressBarHeightPercentage);
+
+
+    return {
+      windowMaxWidth,
+      windowMaxHeight,
+      addressBarHeight,
+      addressBarHeightPercentage
+
+    }
+  }

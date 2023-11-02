@@ -162,27 +162,48 @@ export const Home = () => {
   }
 
   return (
-    <Box sx={{ alignSelf: "flex-start", minHeight: "inherit", minWidth: "inherit" }}>
+    <Box
+      sx={{ alignSelf: "flex-start", minHeight: "inherit", minWidth: "inherit", marginTop: { xs: "7vh", sm: "0vh" } }}
+    >
       {data ? (
-        <Box sx={{ display: "flex", minHeight: "inherit", minWidth: "inherit", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            minHeight: "inherit",
+            minWidth: "inherit",
+            alignItems: "center",
+            justifyContent: { xs: "center", md: "flex-start" },
+          }}
+        >
           <Box
             sx={{
               minWidth: "70vw",
               minHeight: "65vh",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
+              alignItems: { xs: "center", md: "flex-start" },
               color: "text",
               marginLeft: { xs: "1vw", md: "10vw" },
             }}
           >
             <BackGround />
-            <Stack direction="column" spacing={2} sx={{ paddingTop: "3vh" }}>
-              <Box>
+            <Stack
+              direction="column"
+              spacing={3}
+              sx={{ paddingTop: "3vh", alignItems: { xs: "center", md: "flex-start" } }}
+            >
+              <Box sx={{ maxWidth: "95vw", textAlign: { xs: "center", md: "left" } }}>
                 <Typography variant="h3">{main.headerOne}</Typography>
                 <Typography variant="h3">{main.headerTwo}</Typography>
               </Box>
-              <Box sx={{ marginTop: { xs: "40px", md: "initial" } }}>
+              <Box
+                sx={{
+                  marginTop: { xs: "40px", md: "initial" },
+                  maxWidth: "95vw",
+                  textAlign: "center",
+                  //alignSelf: "center",
+                }}
+              >
                 <Typography sx={{ fontSize: "1.4rem" }}>{main.subHead}</Typography>
               </Box>
 
@@ -278,6 +299,7 @@ export const Home = () => {
                 height: "450px",
                 minHeight: "450px",
                 maxHeight: "450px",
+                marginTop: "5vh",
               }}
             >
               <Box
@@ -300,7 +322,7 @@ export const Home = () => {
                   flexDirection: "column",
                   justifyContent: { xs: "center", md: "flex-start" },
                   alignItems: { xs: "center", md: "flex-start" },
-                  marginLeft: "20px",
+                  marginLeft: { xs: 0, md: "20px" },
                 }}
               >
                 <Stack

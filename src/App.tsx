@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom"
 import { useAddUserDataMutation } from "./components/Auth/userApi"
 import useError from "./components/CustomHooks/useError"
 import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus"
-import { getError } from "./app/utils"
+import { getError, getSizes } from "./app/utils"
 import { clearChatData, selectUserRooms, setInbox } from "./components/Chat/chatSlice"
 import { selectTheme, setTheme, Themes } from "./components/Navigation/themeSlice"
 import { useInboxListenerQuery } from "./components/Chat/chatApi"
@@ -88,6 +88,9 @@ export const App = () => {
   const [inboxError, setInboxError] = useError()
 
   const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus()
+
+  /** Git the current screen sizes. Attempt to fix the address bar issue on mobile devices. */
+  const { addressBarHeight } = getSizes()
 
   const [addUserData, { data: usersData, isLoading: isSendingPost, isError, error }] = useAddUserDataMutation()
 
@@ -345,7 +348,13 @@ export const App = () => {
         direction="row"
         alignItems="center"
         justifyContent="center"
-        sx={{ minHeight: "100vh", minWidth: "100vw", maxHeight: "100vh", maxWidth: "100vw" }}
+        sx={{
+          minHeight: "100vh",
+          minWidth: "100vw",
+          maxHeight: "100vh",
+          maxWidth: "100vw",
+          marginTop: addressBarHeight,
+        }}
       >
         <Modal />
         <Navigation />
