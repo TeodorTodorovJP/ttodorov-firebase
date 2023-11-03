@@ -492,9 +492,8 @@ export const getLocalDateInfo = (date?: string | number | Date) => {
     // console.log("html.offsetHeight: ", html.offsetHeight);
     // console.log("windowMaxHeight: ", windowMaxHeight);
 
-
-
     /* This is to help with window resize when address bar is hidden*/
+    // Does not work, on mobile still returns 0
     const addressBarHeight = window.innerHeight - html.clientHeight
     const windowHeight = windowMaxHeight + addressBarHeight
 
@@ -515,12 +514,10 @@ export const getLocalDateInfo = (date?: string | number | Date) => {
     // console.log("addressBarHeight: ", addressBarHeight);
     // console.log("addressBarHeightPercentage: ", addressBarHeightPercentage);
 
-
     return {
       windowMaxWidth,
       windowMaxHeight,
       addressBarHeight,
-      addressBarHeightPercentage
-
+      addressBarHeightPercentage,
     }
   }

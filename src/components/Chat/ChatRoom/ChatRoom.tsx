@@ -17,7 +17,7 @@ import {
 } from "../chatApi"
 import useError from "../../CustomHooks/useError"
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus"
-import { getDateDataInUTC, getError } from "../../../app/utils"
+import { getDateDataInUTC, getError, getSizes } from "../../../app/utils"
 import { useGetUserDataQuery } from "../../Auth/userApi"
 import { setModal } from "../../Modal/modalSlice"
 import {
@@ -113,6 +113,8 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
    */
   const { creator, roomId, otherUserId, otherUserNames, active } = props.room
   const { main } = langs[currentLang as keyof Langs]
+
+  const { addressBarHeight } = getSizes()
 
   // Query endpoints
   /**
@@ -517,7 +519,15 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
       <Box
         component="form"
         onSubmit={onMessageFormSubmit}
-        sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "30px" }}
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "30px",
+          // Hardcoded 50px, can't detect bottom navigation on mobile devices
+          marginBottom: { xs: "6vh", md: "0px" },
+        }}
       >
         <TextField
           type="text"
