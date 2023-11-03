@@ -7,6 +7,7 @@ import Home from "./components/Home/Home"
 import Chat from "./components/Chat/Chat"
 import Profile from "./components/Profile/Profile"
 import Projects from "./components/Projects/Projects"
+import Notes from "./components/Notes/Notes"
 
 /**
  * The only purpose of this component is to address the router + context issue.
@@ -42,6 +43,10 @@ const RouterWrap = () => {
             {
               path: "projects",
               element: <Projects />,
+            },
+            {
+              path: "notes",
+              element: <Notes />,
             },
             // {
             //   path: "meals",

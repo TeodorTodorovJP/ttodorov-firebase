@@ -1,6 +1,7 @@
 import { configureStore, ThunkAction, Action, createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import counterReducer from "../components/Counter/counterSlice";
 import navigationReducer from "../components/Navigation/navigationSlice";
+import notesReducer from "../components/Notes/notesSlice"
 import modalReducer from "../components/Modal/modalSlice"
 import themeReducer from "../components/Navigation/themeSlice"
 import chatReducer from "../components/Chat/chatSlice";
@@ -13,6 +14,7 @@ export const store = configureStore({
   reducer: {
     counter: counterReducer,
     navigation: navigationReducer,
+    notes: notesReducer,
     modal: modalReducer,
     theme: themeReducer,
     chat: chatReducer,

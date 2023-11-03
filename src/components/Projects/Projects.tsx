@@ -1,6 +1,7 @@
 import { Box, Grid, Typography } from "@mui/material"
 import Project from "./Project"
 import ChatCollage from "../UI/images/ChatCollage.png"
+import UnderConstruction from "../UI/images/under-construction.png"
 import { langs, Langs } from "./projectsTexts"
 import { useAppSelector } from "../../app/hooks"
 import { selectUserPreferences } from "../Auth/userSlice"
@@ -8,7 +9,7 @@ import { selectUserPreferences } from "../Auth/userSlice"
 export const Projects = () => {
   // For the translates
   const { lang } = useAppSelector(selectUserPreferences)
-  const { main, chat } = langs[lang as keyof Langs]
+  const { main, chat, notes } = langs[lang as keyof Langs]
 
   const chatInfo = {
     link: "/chat",
@@ -17,7 +18,14 @@ export const Projects = () => {
     description: chat.description,
   }
 
-  const projects = [chatInfo]
+  const notesInfo = {
+    link: "/notes",
+    image: UnderConstruction,
+    header: notes.header,
+    description: notes.description,
+  }
+
+  const projects = [chatInfo, notesInfo]
   return (
     <Box
       sx={{
@@ -33,7 +41,7 @@ export const Projects = () => {
     >
       <Typography variant="h3">{main.header}</Typography>
       <Typography>{main.description}</Typography>
-      <Box sx={{ maxWidth: "100vw", minWidth: "100vw", marginLeft: { xs: "5vw", md: "6vw" } }}>
+      <Box sx={{ maxWidth: "100vw", minWidth: "100vw", marginLeft: { xs: "5vw", md: "6vw" }, marginBottom: "5vh" }}>
         <Grid container spacing={{ xs: 1, sm: 1, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 8 }}>
           {projects.map((pr, index) => (
             <Grid key={index} item xs={4} sm={4} md={4} lg={2}>

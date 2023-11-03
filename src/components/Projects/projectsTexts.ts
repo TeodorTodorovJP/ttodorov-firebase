@@ -6,6 +6,7 @@ export interface Langs {
 interface Lang {
   main: Main
   chat: Chat
+  notes: Notes
 }
 
 interface Main {
@@ -14,6 +15,11 @@ interface Main {
 }
 
 interface Chat {
+  header: string
+  description: string
+}
+
+interface Notes {
   header: string
   description: string
 }
@@ -29,6 +35,10 @@ export const langs: Langs = {
       header: "Chat",
       description: "A chat app for chatting with your friends.",
     },
+    notes: {
+      header: "Notes",
+      description: "In progress! A notes app for taking notes.",
+    },
   },
 
   bg: {
@@ -40,6 +50,10 @@ export const langs: Langs = {
     chat: {
       header: "Чат",
       description: "Чат приложение за чат с твоите приятели.",
+    },
+    notes: {
+      header: "Записки",
+      description: "В разработка! Приложение за записки.",
     },
   },
 }
