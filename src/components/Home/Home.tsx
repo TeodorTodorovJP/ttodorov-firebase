@@ -32,7 +32,7 @@ export const Home = () => {
     email: "ttodorov.jp@gmail.com",
     linkedIn: "https://www.linkedin.com/in/ttodorovjp/",
     phone: "0882 59 19 90",
-    repo: "https://github.com/TeodorTodorovJP/",
+    repo: "https://github.com/TeodorTodorovJP/ttodorov-firebase",
     profilePicStored:
       "https://firebasestorage.googleapis.com/v0/b/ttodorovnet.appspot.com/o/k602b3bYLJexkEz7NP8PiGmZHcH2%2FFri%2C%2014%20Apr%202023%2010%3A10%3A26%20GMT%2FprofilePicjpg?alt=media&token=523ee63c-f0b1-4594-8993-225692b4ddae",
   }
@@ -225,71 +225,111 @@ export const Home = () => {
                 <Typography sx={{ fontSize: "inherit" }}>{main.projectsButtonRight}</Typography>
               </Stack>
 
-              <Stack direction="row" spacing={2} sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
-                <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                  <Link
-                    href={data.linkedIn}
-                    target="_blank"
-                    color="inherit"
-                    sx={{ textAlign: "center", color: { xs: "text", md: "white" }, marginLeft: "16px" }}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  minWidth: { xs: "100vw", md: "inherit" },
+                  alignSelf: { xs: "center", md: "flex-start" },
+                  justifyContent: "space-evenly",
+                }}
+              >
+                <Stack
+                  spacing={2}
+                  sx={{
+                    flexDirection: { xs: "column", md: "row" },
+                    alignSelf: { xs: "center", md: "flex-start" },
+                    alignItems: { xs: "center", md: "baseline" },
+                  }}
+                >
+                  <Box
+                    sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}
                   >
-                    {main.linkedIn}
-                  </Link>
+                    <Link
+                      href={data.linkedIn}
+                      target="_blank"
+                      color="inherit"
+                      sx={{ textAlign: "center", color: { xs: "text", md: "white" }, marginLeft: "16px" }}
+                    >
+                      {main.linkedIn}
+                    </Link>
 
-                  <IconButton
-                    size="large"
-                    aria-label="show new notifications"
-                    color="inherit"
-                    onClick={() => handleSnackClick("linkedIn")}
-                    sx={{ color: { xs: "text", md: "white" } }}
-                  >
-                    <ContentCopyIcon sx={{ width: "20px" }} />
-                  </IconButton>
-                </Box>
+                    <IconButton
+                      size="large"
+                      aria-label="show new notifications"
+                      color="inherit"
+                      onClick={() => handleSnackClick("linkedIn")}
+                      sx={{ color: { xs: "text", md: "white" } }}
+                    >
+                      <ContentCopyIcon sx={{ width: "20px" }} />
+                    </IconButton>
+                  </Box>
 
-                <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                  <Link
-                    href={data.repo}
-                    target="_blank"
-                    color="inherit"
-                    sx={{ textAlign: "center", color: { xs: "text", md: "white" } }}
-                  >
-                    {main.repo}
-                  </Link>
-                  <IconButton
-                    size="large"
-                    aria-label="show new notifications"
-                    color="inherit"
-                    onClick={() => handleSnackClick("repo")}
-                    sx={{ color: { xs: "text", md: "white" } }}
-                  >
-                    <ContentCopyIcon sx={{ width: "20px" }} />
-                  </IconButton>
-                </Box>
+                  <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                    <Link
+                      href={data.repo}
+                      target="_blank"
+                      color="inherit"
+                      sx={{ textAlign: "center", color: { xs: "text", md: "white" } }}
+                    >
+                      {main.repo}
+                    </Link>
+                    <IconButton
+                      size="large"
+                      aria-label="show new notifications"
+                      color="inherit"
+                      onClick={() => handleSnackClick("repo")}
+                      sx={{ color: { xs: "text", md: "white" } }}
+                    >
+                      <ContentCopyIcon sx={{ width: "20px" }} />
+                    </IconButton>
+                  </Box>
+                </Stack>
+                <Stack
+                  spacing={2}
+                  sx={{
+                    flexDirection: { xs: "column", md: "row" },
+                    alignSelf: { xs: "center", md: "flex-start" },
+                    alignItems: { xs: "center", md: "baseline" },
+                  }}
+                >
+                  <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                    <Typography sx={{ textAlign: "center" }}>{main.email}</Typography>
+                    <IconButton
+                      size="large"
+                      aria-label="show new notifications"
+                      color="inherit"
+                      onClick={() => handleSnackClick("email")}
+                      sx={{ color: { xs: "text", md: "white" } }}
+                    >
+                      <ContentCopyIcon sx={{ width: "20px" }} />
+                    </IconButton>
+                  </Box>
 
-                <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                  <Typography sx={{ textAlign: "center" }}>{main.email}</Typography>
-                  <IconButton
-                    size="large"
-                    aria-label="show new notifications"
-                    color="inherit"
-                    onClick={() => handleSnackClick("email")}
-                    sx={{ color: { xs: "text", md: "white" } }}
-                  >
-                    <ContentCopyIcon sx={{ width: "20px" }} />
-                  </IconButton>
-                </Box>
+                  <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                    <Typography sx={{ textAlign: "center" }}>{main.phone}</Typography>
+                    <IconButton
+                      size="large"
+                      aria-label="show new notifications"
+                      color="inherit"
+                      onClick={() => handleSnackClick("phone")}
+                      sx={{ color: { xs: "text", md: "white" } }}
+                    >
+                      <ContentCopyIcon sx={{ width: "20px" }} />
+                    </IconButton>
+                  </Box>
+                </Stack>
+              </Box>
 
-                <Snackbar
-                  open={!!openSnack}
-                  onClose={() => setOpenSnack(null)}
-                  autoHideDuration={20000}
-                  message={`Copied ${openSnack}`}
-                  key={"top" + "center"}
-                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                  sx={{ display: "block", textAlign: "center" }}
-                />
-              </Stack>
+              <Snackbar
+                open={!!openSnack}
+                onClose={() => setOpenSnack(null)}
+                autoHideDuration={20000}
+                message={`Copied ${openSnack}`}
+                key={"top" + "center"}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                sx={{ display: "block", textAlign: "center" }}
+              />
             </Stack>
             <Box
               sx={{
