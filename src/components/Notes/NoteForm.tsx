@@ -10,7 +10,7 @@ import { Outlet, useNavigate } from "react-router-dom"
 
 type AboutButtons = "aboutMe" | "skills" | "experience"
 
-export const Notes = () => {
+export const NoteForm = () => {
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
   const dispatch = useAppDispatch()
   const images = useAppSelector(selectImageBlobUrl)
@@ -29,11 +29,9 @@ export const Notes = () => {
 
   return (
     <Box>
-      <Typography>Hello</Typography>
-
-      <Outlet />
+      <Typography>Note Form</Typography>
     </Box>
   )
 }
 
-export default Notes
+export default NoteForm
