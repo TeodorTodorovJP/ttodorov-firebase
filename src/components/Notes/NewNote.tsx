@@ -7,10 +7,11 @@ import { getBlobUrl } from "../../app/utils"
 import { Box, Typography, useMediaQuery } from "@mui/material"
 
 import { Outlet, useNavigate } from "react-router-dom"
+import NoteForm from "./NoteForm"
 
 type AboutButtons = "aboutMe" | "skills" | "experience"
 
-export const Notes = () => {
+export const NewNote = () => {
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
   const dispatch = useAppDispatch()
   const images = useAppSelector(selectImageBlobUrl)
@@ -29,11 +30,10 @@ export const Notes = () => {
 
   return (
     <Box>
-      <Typography>Hello</Typography>
-
-      <Outlet />
+      <Typography>New Note</Typography>
+      <NoteForm />
     </Box>
   )
 }
 
-export default Notes
+export default NewNote

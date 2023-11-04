@@ -8,6 +8,7 @@ import Chat from "./components/Chat/Chat"
 import Profile from "./components/Profile/Profile"
 import Projects from "./components/Projects/Projects"
 import Notes from "./components/Notes/Notes"
+import NewNote from "./components/Notes/NewNote"
 
 /**
  * The only purpose of this component is to address the router + context issue.
@@ -47,16 +48,35 @@ const RouterWrap = () => {
             {
               path: "notes",
               element: <Notes />,
+              children: [
+                {
+                  path: "new",
+                  element: <NewNote />,
+                },
+                {
+                  path: ":id",
+                  children: [
+                    {
+                      index: true,
+                      element: <p>Show</p>,
+                    },
+                    {
+                      path: "edit",
+                      element: <p>Edit</p>,
+                    },
+                  ],
+                },
+              ],
             },
             // {
             //   path: "meals",
             //   element: authCtx.isLoggedIn && <MealsList />,
-            //   // children: [
-            //   //   {
-            //   //     path: "meal",
-            //   //     element: <p>Single meal</p>,
-            //   //   },
-            //   // ],
+            //   children: [
+            //     {
+            //       path: "meal",
+            //       element: <p>Single meal</p>,
+            //     },
+            //   ],
             // },
             {
               path: "*",
