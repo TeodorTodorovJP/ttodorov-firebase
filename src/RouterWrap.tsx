@@ -80,6 +80,12 @@ const RouterWrap = () => {
             //       element: <p>Single meal</p>,
             //     },
             //   ],
+            //   children: [
+            //     {
+            //       path: "meal",
+            //       element: <p>Single meal</p>,
+            //     },
+            //   ],
             // },
             {
               path: "*",
