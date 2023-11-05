@@ -29,7 +29,21 @@ export const NewNote = () => {
   const navigate = useNavigate()
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "fixed",
+        // The general sizing of the new notes page
+        maxWidth: "100vw",
+        maxHeight: "100vh",
+        minWidth: "100vw",
+        minHeight: { xs: "90vh", md: "80vh" },
+        top: { xs: "8vh", md: "initial" },
+      }}
+    >
       <Typography>New Note</Typography>
       <NoteForm />
     </Box>

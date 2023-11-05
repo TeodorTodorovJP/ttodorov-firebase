@@ -47,8 +47,11 @@ const RouterWrap = () => {
             },
             {
               path: "notes",
-              element: <Notes />,
               children: [
+                {
+                  index: true,
+                  element: <Notes />,
+                },
                 {
                   path: "new",
                   element: <NewNote />,
