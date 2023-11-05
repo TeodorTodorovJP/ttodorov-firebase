@@ -1,30 +1,30 @@
 import { createAsyncThunk, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 import { RootState, AppThunk, AppDispatch } from "../../app/store"
+import { getDateDataInUTC } from "../../app/utils"
 import { Langs } from "./notesTexts"
 
 /** Set's the default language of the app. */
 export const defaultLang: keyof Langs = "en"
 
-/**
- * For handling all menu states.
- */
-interface IsOpen {
-  navLeftVisible: boolean
-  navRightVisible: boolean
-  showThemes: boolean
+export type NoteData = {
+  id: string
+  title: string
+  markdown: string
+  tags: Tag[]
 }
 
-/** Initially all menu's a closed. */
-const initialIsOpen: IsOpen = { navLeftVisible: false, navRightVisible: false, showThemes: false }
+export type Tag = {
+  id: string
+  label: string
+}
 
 export interface NotesState {
-  status: "idle" | "loading" | "failed"
-  isOpen: IsOpen
+  notes: NoteData[]
 }
+
 const getMainInitialState = () => {
   const newState: NotesState = {
-    status: "idle",
-    isOpen: initialIsOpen,
+    notes: [],
   }
   return newState
 }
@@ -37,16 +37,12 @@ export const notesSlice = createSlice({
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     /** Opens a menu, passed to the item param. */
-    setIsOpenToTrue: (state, action: PayloadAction<{ item: string; isOpen: boolean }>) => {
-      const newIsOpen: IsOpen = { ...state.isOpen }
+    addNote: (state, action: PayloadAction<NoteData>) => {
+      const { formattedDate: timestamp } = getDateDataInUTC()
+      action.payload.id = timestamp
 
-      newIsOpen[action.payload.item as keyof IsOpen] = action.payload.isOpen
-      state.isOpen = newIsOpen
-    },
-
-    /** Closes all menus. */
-    setAllOpenToFalse: (state) => {
-      state.isOpen = initialIsOpen
+      //state.notes = [ ...state.notes,  action.payload.noteData]
+      state.notes.push(action.payload)
     },
 
     /** Reset's the navigation state to the initial values. */
@@ -54,11 +50,12 @@ export const notesSlice = createSlice({
   },
 })
 
-export const { setAllOpenToFalse, setIsOpenToTrue, clearNotesData } = notesSlice.actions
+export const { addNote, clearNotesData } = notesSlice.actions
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
-export const selectIsOpen = (state: RootState) => state.notes.isOpen
+export const selectNote = (state: RootState, id: string) => state.notes.notes.filter((note) => note.id === id)
+export const selectNotes = (state: RootState) => state.notes.notes
 
 export default notesSlice.reducer
