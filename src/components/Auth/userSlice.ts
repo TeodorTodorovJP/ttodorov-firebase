@@ -63,6 +63,24 @@ export interface UserState {
 
 export const defaultLang: keyof Langs = "en"
 
+const defaultUser: UserData = {
+  /** User Id - usually from Firebase.*/
+  id: "XCDJBc32UBZbuJQmy4kaiPMJHSz2",
+
+  /** The names - taken from the registration.*/
+  names: "guestuser@abvg.bg",
+
+  /** The email from the registration. */
+  email: "guestuser@abvg.bg",
+
+  /** The time of registration. */
+  timestamp: "Wed, 08 Nov 2023 16:39:13 GMT",
+
+  /** The url of the image that user chose to use. */
+  profilePicStored:
+    "https://firebasestorage.googleapis.com/v0/b/ttodorovnet.appspot.com/o/XCDJBc32UBZbuJQmy4kaiPMJHSz2%2FWed%2C%2008%20Nov%202023%2016%3A45%3A47%20GMT%2Fwellcomeavif?alt=media&token=1519341b-1f76-4d84-a13c-4eb990f49b77",
+}
+
 const getMainInitialState = () => {
   const newState: UserState = {
     userData: { id: "", names: "", profilePic: "", email: "" },
@@ -93,9 +111,10 @@ export const userSlice = createSlice({
   },
 })
 
-export const { setUserData, clearUserData, addImageBlobUrl, setUserPreferences } = userSlice.actions;
+export const { setUserData, clearUserData, addImageBlobUrl, setUserPreferences } = userSlice.actions
 
-export const selectUserData = (state: RootState) => state.user.userData;
+export const selectUserData = (state: RootState) =>
+  state.user.userData.id.length != 0 ? state.user.userData : defaultUser
 export const selectUserPreferences = (state: RootState) => state.user.preferences;
 export const userHasData = (state: RootState) => state.user.userData.id.length > 1;
 
