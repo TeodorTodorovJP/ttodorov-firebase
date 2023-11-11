@@ -96,7 +96,7 @@ export const AuthForm = () => {
   useEffect(() => {
     if (emailError === 0 || passwordError === 0 || generalError === 0 || newPasswordError === 0) {
       // default error modal
-      dispatch(setModal({ modalType: "error" }))
+      dispatch(setModal({ modalType: "error", header: "Error", message: "Error" }))
       setEmailError(null)
       setPasswordError(null)
       setNewPasswordError(null)
