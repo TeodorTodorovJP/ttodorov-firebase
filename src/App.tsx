@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { defaultLang, clearNavData } from "./components/Navigation/navigationSlice"
 import useAuthContext from "./app/auth-context"
 import { Langs } from "./components/Navigation/navigationTexts"
-import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth"
+import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut } from "firebase/auth"
 import {
   clearUserData,
   setUserData,
@@ -26,7 +26,7 @@ import { selectTheme, setTheme, Themes } from "./components/Navigation/themeSlic
 import { useInboxListenerQuery } from "./components/Chat/chatApi"
 import { setModal } from "./components/Modal/modalSlice"
 import { useAddLogMutation } from "./logsApi"
-import { CssBaseline, Grid, Snackbar, Theme } from "@mui/material"
+import { Box, CssBaseline, Grid, Snackbar, Theme } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
 
@@ -225,17 +225,14 @@ export const App = () => {
     if (document.location.hostname === "localhost") {
       document.title = "TTodorov DEV"
       setLocalHost(true)
-
-      // if (!authCtx.isLoggedIn) {
-      //   anonymousSignIn();
-      // }
     } else {
       /** If we are in PROD and the user is not logged in, signIn the user anonymously */
       document.title = "TTodorov"
       let type = "Logged"
       if (!authCtx.isLoggedIn) {
-        type = "Anonymous"
-        anonymousSignIn()
+        type = "GuestUser"
+        // anonymousSignIn()
+        signInWithEmailAndPassword(getAuth(), "guestuser@abvg.bg", "1234as")
       }
       addLog({ type, env: "Prod" })
     }
@@ -345,7 +342,7 @@ export const App = () => {
         container
         spacing={0}
         direction="row"
-        alignItems="center"
+        alignItems="flex-start"
         justifyContent="center"
         sx={{
           minHeight: "100vh",
@@ -373,5 +370,3 @@ export const App = () => {
 }
 
 export default App
-// You can use autocomplete, look how to do it with user permission like popup or alert
-// <input id="email" autocomplete="email" name="email" aria-required="true" placeholder="Email" required>
