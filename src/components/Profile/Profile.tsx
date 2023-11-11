@@ -229,10 +229,19 @@ export const Profile = () => {
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <BackGround sx={{ top: "10vh" }} />
 
-      <Typography variant="h3">{main.header}</Typography>
+      <Typography variant="h3" sx={{ marginTop: "64px" }}>
+        {main.header}
+      </Typography>
       <Paper
         variant="elevation"
         elevation={10}
