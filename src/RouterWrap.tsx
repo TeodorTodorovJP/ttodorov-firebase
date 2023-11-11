@@ -8,7 +8,11 @@ import Chat from "./components/Chat/Chat"
 import Profile from "./components/Profile/Profile"
 import Projects from "./components/Projects/Projects"
 import Notes from "./components/Notes/Notes"
-import NewNote from "./components/Notes/NewNote"
+import NotesBrowse from "./components/Notes/NotesBrowse"
+import EditNote from "./components/Notes/NoteDetailed"
+import EditTags from "./components/Notes/EditTags"
+import NoteForm from "./components/Notes/NoteForm"
+import NotePreview from "./components/Notes/NotePreview"
 
 /**
  * The only purpose of this component is to address the router + context issue.
@@ -47,27 +51,32 @@ const RouterWrap = () => {
             },
             {
               path: "notes",
+              element: <Notes />,
               children: [
                 {
                   index: true,
-                  element: <Notes />,
+                  element: <NotesBrowse />,
                 },
                 {
                   path: "new",
-                  element: <NewNote />,
+                  element: <NoteForm />,
                 },
                 {
                   path: ":id",
                   children: [
                     {
                       index: true,
-                      element: <p>Show</p>,
+                      element: <NotePreview />,
                     },
                     {
                       path: "edit",
-                      element: <p>Edit</p>,
+                      element: <EditNote />,
                     },
                   ],
+                },
+                {
+                  path: "edittags",
+                  element: <EditTags />,
                 },
               ],
             },
