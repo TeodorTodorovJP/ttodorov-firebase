@@ -25,7 +25,6 @@
     "@types/react-select": "^5.0.1",
     "@types/sort-by": "^1.2.0",
     "@types/string-replace-loader": "^2.3.2",
-    "@types/uuidv4": "^5.0.0",
     "firebase": "^9.0.0",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
