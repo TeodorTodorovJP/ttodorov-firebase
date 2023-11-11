@@ -17,7 +17,7 @@ import {
   useMediaQuery,
 } from "@mui/material"
 
-import { Outlet, useNavigate } from "react-router-dom"
+import { Outlet, useNavigate, Link as RouterLink } from "react-router-dom"
 import { Preview } from "@mui/icons-material"
 import { useGetNotesQuery, useGetTagsQuery } from "./notesApi"
 import { NoteData, selectNotes, selectTags, Tag } from "./notesSlice"
@@ -115,10 +115,10 @@ export const NotesBrowse = () => {
       >
         <Typography variant="h3">{main.notes}</Typography>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={() => navigate("/notes/new")}>
+          <Button variant="contained" component={RouterLink} to="/notes/new">
             {main.newNote}
           </Button>
-          <Button variant="contained" onClick={() => navigate("/notes/edittags")}>
+          <Button variant="contained" component={RouterLink} to="/notes/edittags">
             {main.editTags}
           </Button>
         </Stack>

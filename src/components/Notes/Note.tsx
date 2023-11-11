@@ -1,7 +1,7 @@
 import { Box, Card, CardActionArea, CardContent, CardMedia, Chip, Paper, Typography } from "@mui/material"
 import { memo } from "react"
-import { useNavigate } from "react-router-dom"
 import { NoteData } from "./notesSlice"
+import { Outlet, useNavigate, Link as RouterLink } from "react-router-dom"
 
 export const Note = memo(({ userId, id, title, markdown, tags }: NoteData) => {
   /** Access Router */
@@ -12,6 +12,8 @@ export const Note = memo(({ userId, id, title, markdown, tags }: NoteData) => {
       key={id}
       variant="elevation"
       elevation={10}
+      component={RouterLink}
+      to={`/notes/${id}`}
       sx={{
         maxWidth: { xs: "93vw", sm: "40vw", md: "25vw", lg: "15vw" },
         minWidth: { xs: "93vw", sm: "40vw", md: "25vw", lg: "15vw" },
@@ -24,6 +26,7 @@ export const Note = memo(({ userId, id, title, markdown, tags }: NoteData) => {
         alignItems: "center",
         justifyContent: "center",
         transition: "ease 0.5s",
+        textDecoration: "none",
 
         "&:hover": {
           boxShadow: 20,
@@ -32,7 +35,6 @@ export const Note = memo(({ userId, id, title, markdown, tags }: NoteData) => {
           marginLeft: "-5px",
         },
       }}
-      onClick={() => navigate(`/notes/${id}`)}
     >
       <Typography gutterBottom variant="h5" component="div">
         {title}

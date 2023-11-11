@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, Link as RouterLink } from "react-router-dom"
 import { useAppSelector } from "../../app/hooks"
 import NoteForm from "./NoteForm"
 import { selectNote } from "./notesSlice"
@@ -56,11 +56,11 @@ export const NotePreview = () => {
       <Typography variant="h3">{title}</Typography>
 
       <Stack direction="row" spacing={2}>
-        <Button variant="contained" type="button" onClick={() => navigate(`/notes/${id}/edit`)}>
+        <Button variant="contained" type="button" component={RouterLink} to={`/notes/${id}/edit`}>
           {main.edit}
         </Button>
 
-        <Button variant="contained" type="button" onClick={() => navigate("/notes")}>
+        <Button variant="contained" type="button" component={RouterLink} to={`/notes`}>
           {main.cancel}
         </Button>
 

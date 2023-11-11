@@ -106,7 +106,7 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
 
     addTagsToDB()
 
-    navigate(-1)
+    navigate("/notes")
   }
 
   const deleteModalHandler = (value: string) => {
@@ -120,7 +120,7 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
       noteId: noteData!.id,
     })
 
-    navigate(-1)
+    navigate("/notes")
   }
 
   const getLabels = (option: string | Tag) => {

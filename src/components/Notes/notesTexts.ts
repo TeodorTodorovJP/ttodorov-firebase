@@ -41,6 +41,7 @@ interface Main {
   save: string
   edit: string
   editTags: string
+  editTagsDesc: string
   cancel: string
   delete: string
   success: string
@@ -57,6 +58,7 @@ export const langs: Langs = {
       save: "Save",
       edit: "Edit",
       editTags: "Edit Tags",
+      editTagsDesc: "Delete any tag you don't want to see in your tag suggestions.",
       cancel: "Cancel",
       delete: "Delete",
       success: "Success!",
@@ -92,6 +94,7 @@ export const langs: Langs = {
       save: "Запази",
       edit: "Промени",
       editTags: "Групи",
+      editTagsDesc: "Изтриите групите които не желаете да бъдат предлагани.",
       cancel: "Назад",
       delete: "Изтрий",
       success: "Успешно!",

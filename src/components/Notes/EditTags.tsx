@@ -1,15 +1,12 @@
-import { Box, Button, Chip, CircularProgress, Grid, Stack, Typography } from "@mui/material"
+import { Box, Button, Chip, CircularProgress, Stack, Typography } from "@mui/material"
 import { useState } from "react"
-import Note from "./Note"
-import ChatCollage from "../UI/images/ChatCollage.png"
-import UnderConstruction from "../UI/images/under-construction.png"
 import { langs, Langs } from "./notesTexts"
 import { useAppSelector } from "../../app/hooks"
 import { selectUserData, selectUserPreferences } from "../Auth/userSlice"
-import { useDeleteTagMutation, useGetNotesQuery, useGetTagsQuery } from "./notesApi"
-import { NoteData, selectNotes, selectTags } from "./notesSlice"
+import { useDeleteTagMutation, useGetTagsQuery } from "./notesApi"
+import { selectTags } from "./notesSlice"
 import DeleteIcon from "@mui/icons-material/Delete"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link as RouterLink } from "react-router-dom"
 import DialogConfirm from "../Modal/DialogConfirm"
 
 export const EditTags = () => {
@@ -73,6 +70,8 @@ export const EditTags = () => {
         top: "10vh",
       }}
     >
+      <Typography variant="h3"> {main.editTags} </Typography>
+      <Typography align="center"> {main.editTagsDesc} </Typography>
       <Stack
         spacing={{ xs: 1, sm: 2 }}
         direction="row"
@@ -97,7 +96,7 @@ export const EditTags = () => {
           />
         ))}
       </Stack>
-      <Button variant="contained" type="button" onClick={() => navigate(-1)}>
+      <Button variant="contained" type="button" component={RouterLink} to="..">
         {main.cancel}
       </Button>
 
