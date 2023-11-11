@@ -8,7 +8,7 @@ export const apiSlice = createApi({
   // All of our requests will have URLs starting with '/fakeApi'
   baseQuery: fetchBaseQuery({ baseUrl: "/fakeApi" }),
   //keepUnusedDataFor: 30, // wait for 30 seconds before clearing the cache for all endpoints
-  tagTypes: ["Post", "Users", "Messages"],
+  tagTypes: ["Post", "Users", "Messages", "Notes", "NotesTags"],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({
     // The `getPosts` endpoint is a "query" operation that returns data
