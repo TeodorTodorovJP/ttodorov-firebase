@@ -53,9 +53,9 @@ const Modal = () => {
    * Default Error modal.
    */
   if (modal.modalType === "error") {
-    modal.header = defaultError.message
-    modal.message = defaultError.message
-    modal.agree = defaultError.agree
+    //modal.header = defaultError.message
+    //modal.message = defaultError.message
+    //modal.agree = defaultError.agree
   }
 
   // Clicking the backdrop shouldn't hide the modal
