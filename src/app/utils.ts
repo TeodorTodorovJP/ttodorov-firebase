@@ -521,3 +521,12 @@ export const getLocalDateInfo = (date?: string | number | Date) => {
       addressBarHeightPercentage,
     }
   }
+
+
+  /**
+   * Gets an array of primitive values and compares them with each other by a strict equality comparison.
+   * string, number
+  */
+  export const onlyUnique = (value: any, index: number, array: any[]) => {
+    return array.indexOf(value) === index;
+  }
