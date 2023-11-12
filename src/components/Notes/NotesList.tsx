@@ -1,25 +1,28 @@
-import { Box, CircularProgress, Grid, Stack, Typography } from "@mui/material"
+import { Box, Stack, Typography } from "@mui/material"
 import { memo } from "react"
 import Note from "./Note"
-import ChatCollage from "../UI/images/ChatCollage.png"
-import UnderConstruction from "../UI/images/under-construction.png"
 import { langs, Langs } from "./notesTexts"
 import { useAppSelector } from "../../app/hooks"
-import { selectUserData, selectUserPreferences } from "../Auth/userSlice"
-import { useGetNotesQuery } from "./notesApi"
-import { NoteData, selectNotes } from "./notesSlice"
+import { selectUserPreferences } from "../Auth/userSlice"
+import { NoteData } from "./notesSlice"
 
 type NoteListType = {
   notes: NoteData[]
 }
 
+/**
+ * NotesList Component
+ *
+ * Main goal is to present all notes in a compact way.
+ *
+ */
 export const NotesList = memo(({ notes }: NoteListType) => {
   // For the translates
   const { lang } = useAppSelector(selectUserPreferences)
-  const currentUser = useAppSelector(selectUserData)
 
   const { error } = langs[lang as keyof Langs]
 
+  /** Displays a message when the user has no Notes. */
   if (!!notes && notes.length < 1) {
     return (
       <Box sx={{ display: "flex", width: "100vw", alignItems: "center", justifyContent: "center", marginTop: "5vh" }}>
