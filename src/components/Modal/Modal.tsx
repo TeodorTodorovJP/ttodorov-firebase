@@ -13,6 +13,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material"
+import { useAddLogMutation } from "../../logsApi"
 
 /**
  * Modal is a React component that displays a modal dialog with varying content based on the current state.
@@ -26,7 +27,8 @@ const Modal = () => {
   const dispatch = useAppDispatch()
   const modalStore = useAppSelector(selectModal)
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
-
+  /** Add log to firebase */
+  const [addLog] = useAddLogMutation()
   /**
    * Prepare component data.
    */
@@ -56,6 +58,9 @@ const Modal = () => {
     //modal.header = defaultError.message
     //modal.message = defaultError.message
     //modal.agree = defaultError.agree
+    if (document.location.hostname !== "localhost") {
+      addLog({ type: "Error", env: document.location.hostname, text: modal.message })
+    }
   }
 
   // Clicking the backdrop shouldn't hide the modal
