@@ -42,7 +42,7 @@ export const DialogConfirm = (props: ConfirmationDialogProps) => {
       <DialogTitle>{props.texts.title}</DialogTitle>
 
       <DialogContent dividers>
-        <Typography>{props.texts.text}</Typography>
+        <Typography variant="caption">{props.texts.text}</Typography>
       </DialogContent>
 
       <DialogActions>
