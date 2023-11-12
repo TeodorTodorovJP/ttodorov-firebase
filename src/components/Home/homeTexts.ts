@@ -75,7 +75,7 @@ export const langs: Langs = {
     },
     experience: {
       header: "My experience",
-      one: "During my 2 years, I have worked with a large code base that maintains the financial needs of millions of users. The work included building several projects while reusing a lot of the existing systems and components and created new ones in the same style while maintaining other parts of the code base. Of course, I did not do that alone, often, the business logic is so intricate and complex that communication and feedback with my peers are regular.",
+      one: "My 2 years experience, includes work with a large code base that maintains the financial needs of millions of users. The work included building several projects while reusing a lot of the existing systems and components and created new ones in the same style while maintaining other parts of the code base. Of course, I did not do that alone, often, the business logic is so intricate and complex that communication and feedback with my peers are regular.",
     },
   },
   bg: {
@@ -107,7 +107,7 @@ export const langs: Langs = {
     },
     experience: {
       header: "Опит",
-      one: "През изминалите 2 години работих с голяма кодова база, която поддържа финансовите нужди на милиони потребители. Работата включваше изграждане на няколко проекта при повторно използване на много от съществуващите системи и компоненти и създаване на нови в същия стил, като същевременно поддържах други части от кодовата база. Разбира се, не го правех сам, често бизнес логиката е толкова сложна, че комуникацията и обратната връзка с колегите ми са редовни.",
+      one: "Моите 2 години опит включват работа с голяма кодова база, която поддържа финансовите нужди на милиони потребители. Работата включва изграждане на няколко проекта при повторно използване на много от съществуващите системи и компоненти и създаване на нови в същия стил, като същевременно поддържах други части от кодовата база. Разбира се, не го правя сам, често бизнес логиката е толкова сложна, че комуникацията и обратната връзка с колегите ми са редовни.",
     },
   },
 }
