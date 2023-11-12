@@ -1,15 +1,21 @@
 import { useNavigate, useParams, Link as RouterLink } from "react-router-dom"
 import { useAppSelector } from "../../app/hooks"
-import NoteForm from "./NoteForm"
 import { selectNote } from "./notesSlice"
 import ReactMarkdown from "react-markdown"
 import { Box, Button, Chip, Paper, Stack, Typography } from "@mui/material"
 import { selectUserData, selectUserPreferences } from "../Auth/userSlice"
 import { Langs, langs } from "./notesTexts"
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useState } from "react"
 import DialogConfirm from "../Modal/DialogConfirm"
 import { useDeleteNoteMutation } from "./notesApi"
 
+/**
+ * NotePreview Component
+ *
+ * Main goal is to present a note in a detailed an presentable way.
+ * It includes Markdown syntax.
+ *
+ */
 export const NotePreview = () => {
   const params = useParams<"id">()
   const { id, markdown, tags, title } = useAppSelector((state) => selectNote(state, params.id!)[0])
@@ -17,19 +23,19 @@ export const NotePreview = () => {
   const currentUser = useAppSelector(selectUserData)
 
   const [deleteNote] = useDeleteNoteMutation()
+  const navigate = useNavigate()
 
   const [openConfirmDeleteModal, setOpenConfirmDeleteModal] = useState<boolean>(false)
 
-  /** Access Router */
-  const navigate = useNavigate()
+  const { main, onDeleteNote } = langs[currentLang as keyof Langs]
 
-  const { main, error, onDeleteNote } = langs[currentLang as keyof Langs]
-
+  /** On user responding the deletion of a Note. */
   const deleteModalHandler = (value: string) => {
     if (value === "ok") deleteNoteHandler()
     if (value === "cancel") setOpenConfirmDeleteModal(false)
   }
 
+  /** On user confirming the deletion of a Note. */
   const deleteNoteHandler = () => {
     deleteNote({
       userId: currentUser.id,
@@ -60,7 +66,7 @@ export const NotePreview = () => {
           {main.edit}
         </Button>
 
-        <Button variant="contained" type="button" component={RouterLink} to={`/notes`}>
+        <Button variant="contained" type="button" component={RouterLink} to="..">
           {main.cancel}
         </Button>
 
@@ -71,7 +77,7 @@ export const NotePreview = () => {
 
       <Stack direction="row" spacing={2}>
         {tags.map((tag) => (
-          <Chip label={tag.title} key={tag.id} variant="filled" sx={{ padding: "15px" }} />
+          <Chip label={tag} key={tag} variant="filled" sx={{ padding: "15px" }} />
         ))}
       </Stack>
       <Paper variant="elevation" elevation={10} sx={{ padding: "15px", "& > p": { textAlign: "center" } }}>
