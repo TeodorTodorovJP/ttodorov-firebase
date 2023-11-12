@@ -6,41 +6,47 @@ import { selectUserData, selectUserPreferences } from "../Auth/userSlice"
 import { useDeleteTagMutation, useGetTagsQuery } from "./notesApi"
 import { selectTags } from "./notesSlice"
 import DeleteIcon from "@mui/icons-material/Delete"
-import { useNavigate, Link as RouterLink } from "react-router-dom"
+import { Link as RouterLink } from "react-router-dom"
 import DialogConfirm from "../Modal/DialogConfirm"
 
+/**
+ * EditTags Component
+ *
+ * Main goal is to present all note tags available to the user and allow deletion.
+ *
+ */
 export const EditTags = () => {
-  // For the translates
   const { lang } = useAppSelector(selectUserPreferences)
   const currentUser = useAppSelector(selectUserData)
   const tags = useAppSelector(selectTags)
 
-  const [openConfirmDeleteModal, setOpenConfirmDeleteModal] = useState<boolean>(false)
+  useGetTagsQuery(currentUser.id)
+  const [deleteTag] = useDeleteTagMutation()
 
+  const [openConfirmDeleteModal, setOpenConfirmDeleteModal] = useState<boolean>(false)
   const [tagForDeletion, setTagForDeletion] = useState<string | null>(null)
 
   const { main, error, onDeleteTag } = langs[lang as keyof Langs]
 
-  /** Access Router */
-  const navigate = useNavigate()
+  /** On user clicking the delete icon on a tag. */
+  const handleDelete = (tag: string) => {
+    setOpenConfirmDeleteModal(true)
+    /** Prepares the tag locally */
+    setTagForDeletion(tag)
+  }
 
-  useGetTagsQuery(currentUser.id)
-  const [deleteTag] = useDeleteTagMutation()
-
-  const deleteModalHandler = (value: string) => {
-    if (value === "ok" && tagForDeletion) {
-      deleteTag({ userId: currentUser.id, tagId: tagForDeletion })
+  /** On user responding the deletion of a tag. */
+  const deleteModalHandler = (userResponse: string) => {
+    // If the response is OK and we have a prepared tag
+    if (userResponse === "ok" && tagForDeletion) {
+      deleteTag({ userId: currentUser.id, tag: tagForDeletion })
     }
-
+    /** Clear the tag preparation */
     setTagForDeletion(null)
     setOpenConfirmDeleteModal(false)
   }
 
-  const handleDelete = (id: string) => {
-    setOpenConfirmDeleteModal(true)
-    setTagForDeletion(id)
-  }
-
+  /** If tags take a while to load */
   if (!tags) {
     return (
       <Box sx={{ display: "flex" }}>
@@ -49,6 +55,7 @@ export const EditTags = () => {
     )
   }
 
+  /** If tags loaded but the user has none. */
   if (!!tags && tags.length < 1) {
     return (
       <Box sx={{ display: "flex" }}>
@@ -87,9 +94,9 @@ export const EditTags = () => {
       >
         {tags.map((tag) => (
           <Chip
-            label={tag.title}
-            key={tag.id}
-            onDelete={() => handleDelete(tag.id)}
+            label={tag}
+            key={tag}
+            onDelete={() => handleDelete(tag)}
             deleteIcon={<DeleteIcon />}
             variant="filled"
             sx={{ padding: "15px" }}
