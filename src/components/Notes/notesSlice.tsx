@@ -1,7 +1,7 @@
-import { createAsyncThunk, createSlice, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
-import { RootState, AppThunk, AppDispatch } from "../../app/store"
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { RootState } from "../../app/store"
 import { Langs } from "./notesTexts"
-import { v4 as uuid } from "uuid"
+import { onlyUnique } from "../../app/utils"
 
 /** Set's the default language of the app. */
 export const defaultLang: keyof Langs = "en"
@@ -11,20 +11,15 @@ export type NoteData = {
   id: string
   title: string
   markdown: string
-  tags: Tag[]
-}
-
-export type Tag = {
-  id: string
-  title: string
+  tags: string[]
 }
 
 export interface NotesState {
   notes: NoteData[]
-  tags: Tag[]
+  tags: string[]
 }
 
-const initialTagValue = { id: uuid(), title: "New Tag" }
+const initialTagValue = "New Tag"
 
 const getMainInitialState = () => {
   const newState: NotesState = {
@@ -39,60 +34,63 @@ const initialState = getMainInitialState()
 export const notesSlice = createSlice({
   name: "notes",
   initialState,
-  // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    addTags: (state, action: PayloadAction<Tag[]>) => {
-      //state.notes = [ ...state.notes,  action.payload.noteData]
-      state.tags = [...state.tags, ...action.payload]
+    /**
+     * Adds all new tags.
+     * @param {string[]} action.payload
+     */
+    addTags: (state, action: PayloadAction<string[]>) => {
+      let allTags = [...state.tags, ...action.payload]
+      state.tags = allTags.filter(onlyUnique)
     },
 
-    setTags: (state, action: PayloadAction<Tag[]>) => {
-      //state.notes = [ ...state.notes,  action.payload.noteData]
-      // Provide an initial tag for each user.
-      // if (action.payload.length < 1) {
-      //   state.tags = [{ id: "initial", title: "New" }]
-      // } else {
+    /**
+     * Adds all tags.
+     * @param {string[]} action.payload
+     */
+    setTags: (state, action: PayloadAction<string[]>) => {
       state.tags = action.payload
-      //}
     },
+
+    /**
+     * Deletes a tag.
+     * @param {string} action.payload.tag
+     */
+    deleteTag: (state, action: PayloadAction<{ tag: string }>) => {
+      state.tags.filter((tag) => tag === action.payload.tag)
+    },
+
+    /**
+     * Adds a single note.
+     * @param {NoteData} action.payload
+     */
     addNote: (state, action: PayloadAction<NoteData>) => {
-      //state.notes = [ ...state.notes,  action.payload.noteData]
       state.notes.push(action.payload)
     },
 
+    /**
+     * Adds all notes.
+     * @param {NoteData[]} action.payload
+     */
+    setNotes: (state, action: PayloadAction<NoteData[]>) => {
+      state.notes = action.payload
+    },
+
+    /**
+     * Deletes a note.
+     * @param {string} action.payload.id
+     */
     deleteNote: (state, action: PayloadAction<{ id: string }>) => {
-      //state.notes = [ ...state.notes,  action.payload.noteData]
       state.notes.filter((note) => note.id === action.payload.id)
     },
 
-    setNotes: (state, action: PayloadAction<NoteData[]>) => {
-      //state.notes = [ ...state.notes,  action.payload.noteData]
-      // Provide an initial tag for each user.
-      // if (action.payload.length < 1) {
-      //   state.notes = [
-      //     {
-      //       id: "initial",
-      //       title: "New Note",
-      //       userId: "initial",
-      //       markdown: "Text",
-      //       tags: [initialTagValue],
-      //     },
-      //   ]
-      // } else {
-      state.notes = action.payload
-      //}
-    },
-
-    /** Reset's the navigation state to the initial values. */
+    /** Reset's the notes state to the initial values. */
     clearNotesData: (state) => getMainInitialState(),
   },
 })
 
-export const { addNote, setNotes, addTags, setTags, clearNotesData, deleteNote } = notesSlice.actions
+export const { addNote, setNotes, addTags, setTags, clearNotesData, deleteNote, deleteTag } = notesSlice.actions
 
-// The function below is called a selector and allows us to select a value from
-// the state. Selectors can also be defined inline where they're used instead of
-// in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectNote = (state: RootState, id: string) => state.notes.notes.filter((note) => note.id === id)
 export const selectNotes = (state: RootState) => state.notes.notes
 export const selectTags = (state: RootState) => (state.notes.tags.length === 0 ? [initialTagValue] : state.notes.tags)
