@@ -1,82 +1,66 @@
 import { Langs, langs } from "./notesTexts"
-import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { selectImageBlobUrl, selectUserPreferences, Image, selectUserData } from "../Auth/userSlice"
-import useError from "../CustomHooks/useError"
-import { useEffect, useMemo, useState, useRef } from "react"
+import { useAppSelector } from "../../app/hooks"
+import { selectUserPreferences, selectUserData } from "../Auth/userSlice"
+import { useMemo, useState } from "react"
 import {
   Autocomplete,
   Box,
   Button,
   CircularProgress,
   InputLabel,
-  Link,
   OutlinedInput,
-  Stack,
   TextField,
   Typography,
-  useMediaQuery,
 } from "@mui/material"
 
-import { Outlet, useNavigate, Link as RouterLink } from "react-router-dom"
-import { Preview } from "@mui/icons-material"
+import { Link as RouterLink } from "react-router-dom"
 import { useGetNotesQuery, useGetTagsQuery } from "./notesApi"
-import { NoteData, selectNotes, selectTags, Tag } from "./notesSlice"
+import { selectNotes, selectTags } from "./notesSlice"
 import NotesList from "./NotesList"
 
-type AboutButtons = "aboutMe" | "skills" | "experience"
-
+/**
+ * NotesBrowse Component
+ *
+ * Main goal is to present all notes.
+ * It can filter/search by title and tags.
+ * It can access the NoteForm, NotePreview and EditTags
+ *
+ */
 export const NotesBrowse = () => {
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
-  const dispatch = useAppDispatch()
-  const images = useAppSelector(selectImageBlobUrl)
   const currentUser = useAppSelector(selectUserData)
   const notes = useAppSelector(selectNotes)
   const tags = useAppSelector(selectTags)
 
-  // Use the default user id of guestuser@abvg.bg
   useGetTagsQuery(currentUser.id)
+  useGetNotesQuery(currentUser.id)
 
-  const [imageData, setImageData] = useState<Image | null>(null)
-  const [openSnack, setOpenSnack] = useState<string | null>(null)
-  const [aboutButton, setAboutButton] = useState<AboutButtons>("aboutMe")
-  const [tempTags, setTempTags] = useState<Tag[]>([])
+  /**
+   * The tempTags are needed because the Autocomplete MUI component
+   * doesn't provide an outlet for all currently selected tags.
+   */
+  const [tempTags, setTempTags] = useState<string[]>([])
   const [title, setTitle] = useState<string>("")
 
-  /** Get messages for the current room from firebase */
+  const { main } = langs[currentLang as keyof Langs]
 
-  const { main, error } = langs[currentLang as keyof Langs]
-
-  // @ts-ignore
-  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"))
-
-  const onTagsChange = (event: React.SyntheticEvent<Element, Event>, values: Tag[]) => {
-    setTempTags(values)
-  }
-
-  const getLabels = (option: string | Tag) => {
-    if (typeof option === "string") {
-      return option
-    } else if (!!option && !!option.title) {
-      return option.title
-    } else {
-      return ""
-    }
-  }
-
+  /** Filters the Notes based on their title and tags. */
   const filteredNotes = useMemo(() => {
     return notes.filter((note) => {
       return (
         (title === "" || note.title.toLocaleLowerCase().includes(title?.toLocaleLowerCase())) &&
-        (tempTags.length === 0 || tempTags.every((tag) => note.tags.some((noteTag) => noteTag.title === tag.title)))
+        (tempTags.length === 0 || tempTags.every((tag) => note.tags.some((noteTag) => noteTag === tag)))
       )
     })
   }, [title, tempTags, notes])
 
-  /** Access Router */
-  const navigate = useNavigate()
+  /** Stores the tag names each time the tags are changed. */
+  const onTagsChange = (event: React.SyntheticEvent<Element, Event>, values: string[]) => {
+    /** Updates the tempTags so that the filtering can trigger. */
+    setTempTags(values)
+  }
 
-  useGetNotesQuery(currentUser.id)
-
+  /** If notes take a while to load */
   if (!notes) {
     return (
       <Box sx={{ display: "flex" }}>
@@ -85,6 +69,7 @@ export const NotesBrowse = () => {
     )
   }
 
+  /** If tags take a while to load */
   if (!tags) {
     return (
       <Box sx={{ display: "flex" }}>
@@ -114,14 +99,21 @@ export const NotesBrowse = () => {
         }}
       >
         <Typography variant="h3">{main.notes}</Typography>
-        <Stack direction="row" spacing={2}>
-          <Button variant="contained" component={RouterLink} to="/notes/new">
+        <Box
+          sx={{
+            display: "flex",
+            gap: "1vh",
+            flexDirection: { xs: "column", sm: "row" },
+            marginTop: { xs: "10px", md: "0px" },
+          }}
+        >
+          <Button variant="contained" component={RouterLink} to="/notes/new" sx={{ textAlign: "center" }}>
             {main.newNote}
           </Button>
-          <Button variant="contained" component={RouterLink} to="/notes/edittags">
+          <Button variant="contained" component={RouterLink} to="/notes/edittags" sx={{ textAlign: "center" }}>
             {main.editTags}
           </Button>
-        </Stack>
+        </Box>
       </Box>
       <Box
         sx={{
@@ -143,7 +135,7 @@ export const NotesBrowse = () => {
             required
             id="title"
             name="title"
-            defaultValue="Title"
+            placeholder={main.title}
             autoFocus
             onChange={(event) => setTitle(event.target.value)}
           />
@@ -156,10 +148,10 @@ export const NotesBrowse = () => {
             autoSelect
             id="tags-standard"
             options={tags}
-            getOptionLabel={getLabels}
+            //getOptionLabel={getLabels}
             renderInput={(params) => <TextField {...params} variant="outlined" placeholder={main.tags} />}
             onChange={onTagsChange}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
+            isOptionEqualToValue={(option, value) => option === value}
           />
         </Box>
       </Box>
@@ -170,22 +162,3 @@ export const NotesBrowse = () => {
 }
 
 export default NotesBrowse
-
-/*
-
-One of your dependencies, babel-preset-react-app, is importing the
-"@babel/plugin-proposal-private-property-in-object" package without        
-declaring it in its dependencies. This is currently working because        
-"@babel/plugin-proposal-private-property-in-object" is already in your     
-node_modules folder for unrelated reasons, but it may break at any time.   
-
-babel-preset-react-app is part of the create-react-app project, which      
-is not maintianed anymore. It is thus unlikely that this bug will
-ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to  
-your devDependencies to work around this error. This will make this message
-go away.
-
-
-
-
-*/
