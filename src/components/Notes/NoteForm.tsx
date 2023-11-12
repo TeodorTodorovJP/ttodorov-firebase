@@ -1,13 +1,12 @@
 import { Langs, langs } from "./notesTexts"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { selectImageBlobUrl, selectUserPreferences, selectUserData } from "../Auth/userSlice"
-import { useEffect, useRef, useState, useMemo } from "react"
+import { selectUserPreferences, selectUserData } from "../Auth/userSlice"
+import { useEffect, useRef, useState } from "react"
 import { getDateDataInUTC } from "../../app/utils"
 import {
   Autocomplete,
   Box,
   Button,
-  Chip,
   CircularProgress,
   InputLabel,
   OutlinedInput,
@@ -16,104 +15,134 @@ import {
   Typography,
 } from "@mui/material"
 import { useNavigate, Link as RouterLink } from "react-router-dom"
-import { useAddNoteMutation, useAddTagsMutation, useDeleteNoteMutation, useGetTagsQuery } from "./notesApi"
-import { NoteData, selectTags, Tag } from "./notesSlice"
-import { v4 as uuid } from "uuid"
+import { useAddNoteMutation, useAddTagsMutation, useChangeNoteMutation, useDeleteNoteMutation } from "./notesApi"
+import { NoteData, selectTags } from "./notesSlice"
 import { setModal } from "../Modal/modalSlice"
 import DialogConfirm from "../Modal/DialogConfirm"
-import ReactMarkdown from "react-markdown"
-
-type AboutButtons = "aboutMe" | "skills" | "experience"
 
 type NoteFormProps = {
   noteData?: NoteData
 }
 
+/**
+ * NoteForm Component
+ *
+ * Has two main goals:
+ *  1. Filling data for a new note
+ *  2. Updating data for an existing note
+ *    - Optional noteData is available if loaded from 'EditNote' Component
+ *
+ */
 export const NoteForm = ({ noteData }: NoteFormProps) => {
   const { lang: currentLang } = useAppSelector(selectUserPreferences)
-  const dispatch = useAppDispatch()
-  const images = useAppSelector(selectImageBlobUrl)
   const currentUser = useAppSelector(selectUserData)
   const tags = useAppSelector(selectTags)
-
-  const titleRef = useRef<HTMLInputElement>(null)
-  const [titleErr, setTitleErr] = useState<string | null>(null)
-
-  const [tempTags, setTempTags] = useState<Tag[]>([])
-
-  const [openConfirmDeleteModal, setOpenConfirmDeleteModal] = useState<boolean>(false)
-
-  const markDownRef = useRef<HTMLTextAreaElement>(null)
-  const [markDownErr, setMarkDownErr] = useState<string | null>(null)
-
-  const { main, error, onDeleteNote } = langs[currentLang as keyof Langs]
 
   const [addNote] = useAddNoteMutation()
   const [addTags] = useAddTagsMutation()
   const [deleteNote] = useDeleteNoteMutation()
+  const [updateNote] = useChangeNoteMutation()
+  const navigate = useNavigate()
 
+  const dispatch = useAppDispatch()
+
+  const titleRef = useRef<HTMLInputElement>(null)
+  const markDownRef = useRef<HTMLTextAreaElement>(null)
+
+  /**
+   * The tempTags are needed because the Autocomplete MUI component
+   * doesn't provide an outlet for all currently selected tags.
+   */
+  const [tempTags, setTempTags] = useState<string[]>([])
+  const [openConfirmDeleteModal, setOpenConfirmDeleteModal] = useState<boolean>(false)
+
+  const { main, error, onDeleteNote } = langs[currentLang as keyof Langs]
+
+  /**
+   * If the component is provided with data
+   * and user has tags in it (always true)
+   * and user has not edited the tags field
+   * the tags on save would be empty.
+   *
+   * The tempTags are needed because the Autocomplete MUI component
+   * doesn't provide an outlet for all currently selected tags.
+   */
   useEffect(() => {
     setTempTags(noteData ? [...noteData.tags] : [tags[0]])
   }, [])
 
-  /** Access Router */
-  const navigate = useNavigate()
-
-  const tagsIds = useMemo(() => {
-    if (tags.length > 0) {
-      return tags.map((tag) => tag.id)
-    }
-    return []
-  }, [tags])
-
+  /** Saves all newly created tags by the user. */
   const addTagsToDB = () => {
-    const newTags = tempTags.filter((tag) => !tagsIds.includes(tag.id))
+    /** Get's all new tags. */
+    const newTags = tempTags.filter((tag) => !tags.includes(tag))
 
+    /**
+     * If the user has created new tags, we save them in DB
+     * These tags appear as suggestions when creating or editing a note
+     * Or when searching for a note in 'NotesBrowse'
+     */
     if (newTags.length > 0) {
       addTags({ userId: currentUser.id, tagData: newTags })
     }
   }
 
-  const saveNoteHandler = () => {
+  /** Validates and saves the notes and triggers addTagsToDB */
+  const saveNoteHandler = async () => {
     const { formattedDate: timestampAsId } = getDateDataInUTC()
 
     let message: string = ""
 
+    /** Validates the Text of the note. Between 5 and 5000 symbols. */
     if (markDownRef.current!.value.length < 5 || markDownRef.current!.value.length > 5000) {
       message = error.body
     }
 
+    /** Validates the number of tags of the note. Between 1 and 6. */
     if (tempTags.length < 1 || tempTags.length > 6) {
       message = error.tags
     }
 
+    /** Validates the Title of the note. Between 3 and 70 symbols. */
     if (titleRef.current!.value.length < 3 || titleRef.current!.value.length > 70) {
       message = error.title
     }
 
+    /** If any of the above fail, show a message. */
     if (message.length > 0) {
       dispatch(setModal({ header: "Error", agree: "OK", message }))
       return
     }
 
-    addNote({
+    addTagsToDB()
+
+    /** Check if we have noteData, which means we are in edit mode. */
+    const isEdit = !!noteData && !!noteData.id
+
+    /** If we have noteData, reuse the note Id */
+    const noteId = isEdit ? noteData.id : timestampAsId
+
+    const noteObject = {
       userId: currentUser.id,
-      id: timestampAsId,
+      id: noteId,
       title: titleRef.current!.value,
       markdown: markDownRef.current!.value,
       tags: tempTags,
-    })
+    }
 
-    addTagsToDB()
+    const callMethod = isEdit ? updateNote : addNote
+
+    await callMethod(noteObject)
 
     navigate("/notes")
   }
 
-  const deleteModalHandler = (value: string) => {
-    if (value === "ok") deleteNoteHandler()
-    if (value === "cancel") setOpenConfirmDeleteModal(false)
+  /** On user responding the deletion of a Note. */
+  const deleteModalHandler = (userResponse: string) => {
+    if (userResponse === "ok") deleteNoteHandler()
+    if (userResponse === "cancel") setOpenConfirmDeleteModal(false)
   }
 
+  /** On user confirming the deletion of a Note. */
   const deleteNoteHandler = () => {
     deleteNote({
       userId: currentUser.id,
@@ -123,40 +152,7 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
     navigate("/notes")
   }
 
-  const getLabels = (option: string | Tag) => {
-    if (typeof option === "string") {
-      return option
-    } else if (!!option && !!option.title) {
-      return option.title
-    } else {
-      return ""
-    }
-  }
-
-  type TagEvent = string | Tag
-
-  const onTagsChange = (event: React.SyntheticEvent<Element, Event>, values: TagEvent[]) => {
-    let newTags = values.map((tag) => {
-      const uniqueId = uuid()
-      let newTag: Tag
-
-      // This means the tag is created by the user and it has no id
-      if (typeof tag === "string") {
-        const { utcMilliseconds: timestamp } = getDateDataInUTC()
-        newTag = {
-          id: `${timestamp}/${uniqueId}`,
-          title: tag,
-        }
-      } else {
-        newTag = tag
-      }
-
-      return newTag
-    })
-
-    setTempTags(newTags)
-  }
-
+  /** If tags take a while to load */
   if (!tags) {
     return (
       <Box sx={{ display: "flex" }}>
@@ -192,16 +188,14 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
         }}
       >
         <Box sx={{ width: { xs: "90vw", md: "45vw" }, maxWidth: { xs: "90vw", md: "45vw" } }}>
-          <InputLabel error={!!titleErr} htmlFor="title">
-            {titleErr ? titleErr : main.title}
-          </InputLabel>
+          <InputLabel htmlFor="title">{main.title}</InputLabel>
           <OutlinedInput
             fullWidth
             required
-            error={!!titleErr}
             id="title"
             name="title"
-            defaultValue={noteData?.title || "Title"}
+            defaultValue={noteData?.title || ""}
+            placeholder={main.title}
             autoFocus
             inputRef={titleRef}
             sx={{
@@ -220,26 +214,13 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
             autoSelect
             id="tags-standard"
             options={tags}
-            getOptionLabel={getLabels}
-            defaultValue={noteData ? [...noteData.tags] : [tags[0]]}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
+            defaultValue={!!noteData ? noteData.tags : []}
             renderInput={(params) => (
               <TextField {...params} variant="outlined" placeholder={noteData ? "" : main.tags} />
             )}
-            onChange={onTagsChange}
-            renderTags={(tagArr, tagProps) => {
-              return tagArr.map((tag, index) => {
-                const { onDelete } = tagProps({ index })
-
-                const title = typeof tag === "string" ? tag : tag.title
-                return <Chip key={index} label={title} onDelete={onDelete} sx={{ opacity: "1" }} />
-              })
-            }}
+            onChange={(event, values) => setTempTags(values)}
             sx={{
               minWidth: "300px",
-              // "& > .MuiFormControl-root > .MuiInputBase-root > .MuiButtonBase-root": {
-              //   opacity: "1",
-              // },
             }}
           />
         </Box>
@@ -261,10 +242,10 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
           required
           rows={15}
           fullWidth
-          error={!!markDownErr}
           id="markDown"
           name="markDown"
-          defaultValue={noteData?.markdown || "Markdown text"}
+          defaultValue={noteData?.markdown || ""}
+          placeholder={main.body}
           inputRef={markDownRef}
           sx={{
             "&.Mui-disabled > textarea": {
