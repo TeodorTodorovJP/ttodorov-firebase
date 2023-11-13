@@ -40,8 +40,8 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded"
 import LoginIcon from "@mui/icons-material/Login"
 import LogoutIcon from "@mui/icons-material/Logout"
 import GTranslateIcon from "@mui/icons-material/GTranslate"
-import CalculateIcon from "@mui/icons-material/Calculate"
 import ChatIcon from "@mui/icons-material/Chat"
+import NoteAltIcon from "@mui/icons-material/NoteAlt"
 import Brightness4Icon from "@mui/icons-material/Brightness4"
 import Brightness7Icon from "@mui/icons-material/Brightness7"
 import AccountTreeIcon from "@mui/icons-material/AccountTree"
@@ -136,6 +136,7 @@ export const Navigation = () => {
     { path: "/", text: leftMenu.home, icon: <HomeRoundedIcon color="primary" /> },
     { path: "auth", text: leftMenu.authenticate, icon: <LoginIcon color="primary" /> },
     { path: "chat", text: leftMenu.chat, icon: <ChatIcon color="primary" /> },
+    { path: "notes", text: leftMenu.notes, icon: <NoteAltIcon color="primary" /> },
     { path: "projects", text: leftMenu.projects, icon: <AccountTreeIcon color="primary" /> },
     // { path: "meals/meal", text: "Your Single Meal", icon: <HamburgerMenu /> },
   ].map((link) => (
