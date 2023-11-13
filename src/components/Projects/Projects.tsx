@@ -1,6 +1,7 @@
 import { Box, Grid, Typography } from "@mui/material"
 import Project from "./Project"
 import ChatCollage from "../UI/images/ChatCollage.png"
+import NotesCollage from "../UI/images/NotesCollage.png"
 import UnderConstruction from "../UI/images/under-construction.png"
 import { langs, Langs } from "./projectsTexts"
 import { useAppSelector } from "../../app/hooks"
@@ -20,7 +21,7 @@ export const Projects = () => {
 
   const notesInfo = {
     link: "/notes",
-    image: UnderConstruction,
+    image: NotesCollage,
     header: notes.header,
     description: notes.description,
   }
