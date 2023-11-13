@@ -83,6 +83,16 @@ module.exports = {
               },
             },
             {
+              name: "Notes",
+              description: "The main Notes directory.",
+              sectionDepth: 2,
+              components: function () {
+                return glob.sync(path.resolve(__dirname, "src/components/Notes/**/*.tsx")).filter(function (module) {
+                  return /\/[A-Z]\w*\.tsx$/.test(module)
+                })
+              },
+            },
+            {
               name: "Modal",
               description: "The Modal directory.",
               sectionDepth: 2,

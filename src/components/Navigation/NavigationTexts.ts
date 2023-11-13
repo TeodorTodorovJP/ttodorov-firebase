@@ -31,6 +31,7 @@ interface LeftMenu {
   home: string
   authenticate: string
   chat: string
+  notes: string
   projects: string
 }
 
@@ -57,6 +58,7 @@ export const langs: Langs = {
       home: "Home",
       authenticate: "Authenticate",
       chat: "Chat",
+      notes: "Notes",
       projects: "Projects",
     },
   },
@@ -83,6 +85,7 @@ export const langs: Langs = {
       home: "Начална страница",
       authenticate: "Удостоверяване",
       chat: "Чат",
+      notes: "Записки",
       projects: "Проекти",
     },
   },

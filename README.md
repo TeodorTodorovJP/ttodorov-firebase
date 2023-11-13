@@ -1,15 +1,17 @@
 # Hello, my name is Teodor Todorov and this is my website.
-## I am currently working on the project and it's far from done. It's main goal is educational.
+## This is my personal website and it serves me as training playground.
 
 ## The project is deployed at: https://ttodorov.net/
 
-If you like what you see or have any questions, contact me at: 
+Here are my contracts: 
   - Email: ttodorov.jp@gmail.com
-  - Facebook: https://www.facebook.com/teodor.todorov.jp
+  - LinkedIn: https://www.linkedin.com/in/ttodorovjp/
   - Phone: 0882 59 19 90
 
 ## Main stack:
 - This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) TS template.
+
+The complete stack so far is:
 
 ### TypeScript.
 ### React.
@@ -18,16 +20,18 @@ If you like what you see or have any questions, contact me at:
 ### Redux Toolkit + Query.
 ### React Router Dom.
 ### React Styleguidist.
-### MUI - Material UI
+### MUI - Material UI.
 
 ## For database and backend - Firebase.
 
 ## Main functionalities:
     - You can also try: "npm run styleguide" to view the documentation.
-    
-### 1. Login
-    - Email.
-    - Google.
+
+### 1. Notes
+    - Create, Edit, Preview and Search your notes.
+    - You can search them by tags and title.
+    - You can use Markdown syntax when writing the text.
+    - You can remove any tags you don't want as suggestions.
 
 ### 2. Chat
     - Chat with multiple people in different chat rooms.
@@ -46,6 +50,10 @@ If you like what you see or have any questions, contact me at:
 ## 4.2 Theme
     - Change your theme to Light or Dark.
     - The default theme is either Light (for the website) or Dark if the user has dark theme enabled on the  Browser.
+
+### 5. Login
+    - Email.
+    - Google.
 
 ## Available Scripts
 
