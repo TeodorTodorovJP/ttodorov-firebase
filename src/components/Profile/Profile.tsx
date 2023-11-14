@@ -5,7 +5,6 @@ import { useOnlineStatus } from "../CustomHooks/useOnlineStatus"
 import { getAuth } from "firebase/auth"
 import { langs, Langs } from "./profileTexts"
 import { useSaveImageMutation } from "../Chat/chatApi"
-import useError from "../CustomHooks/useError"
 import { useUpdateUserDataMutation } from "../Auth/userApi"
 import { addImageBlobUrl, Image, selectImageBlobUrl } from "../Auth/userSlice"
 import { getBlobUrl } from "../../app/utils"
@@ -66,8 +65,6 @@ export const Profile = () => {
 
   /** Custom hooks */
   const { isOnline } = useOnlineStatus()
-  const [saveImagesError, setSaveImagesError] = useError()
-  const [updateUserError, setUpdateUserError] = useError()
 
   /** Local state */
   const [imageData, setImageData] = useState<Image | null>(null)
@@ -75,52 +72,10 @@ export const Profile = () => {
   const { id: userId, names, email, profilePic, profilePicStored } = userData
 
   /** Update User Data in firebase. */
-  const [
-    updateUserDataDb,
-    { data: dataUpdatedUser, isLoading: sendingUpdateUser, isError: isErrorUpdateUser, error: errorUpdateUser },
-  ] = useUpdateUserDataMutation()
-
-  /**
-   * For useUpdateUserDataMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorUpdateUser && errorUpdateUser) || (dataUpdatedUser && dataUpdatedUser.error)) && !updateUserError) {
-      setUpdateUserError([isErrorUpdateUser, errorUpdateUser, dataUpdatedUser], "ambiguousSource")
-    }
-  }, [isErrorUpdateUser, errorUpdateUser, dataUpdatedUser])
-
-  /**
-   * For useUpdateUserDataMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (updateUserError) dispatch(setModal({ message: updateUserError }))
-  }, [updateUserError])
+  const [updateUserDataDb] = useUpdateUserDataMutation()
 
   /** Save image to firebase */
-  const [
-    saveImageToDB,
-    { data: dataSaveImg, isLoading: sendingSaveImg, isError: isErrorSaveImg, error: errorSaveImg },
-  ] = useSaveImageMutation()
-
-  /**
-   * For useSaveImageMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorSaveImg && errorSaveImg) || (dataSaveImg && dataSaveImg.error)) && !saveImagesError) {
-      setSaveImagesError([isErrorSaveImg, errorSaveImg, dataSaveImg], "ambiguousSource")
-    }
-  }, [isErrorSaveImg, errorSaveImg, dataSaveImg])
-
-  /**
-   * For useSaveImageMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (saveImagesError) dispatch(setModal({ message: saveImagesError }))
-  }, [saveImagesError])
+  const [saveImageToDB] = useSaveImageMutation()
 
   /**
    * If we have not stored the image, store it.
@@ -150,26 +105,10 @@ export const Profile = () => {
     return () => (revoke ? revoke(profilePicStored) : null)
   }, [profilePicStored, imageData])
 
-  /** Prepare text formatting. */
-  let idRow = `User id: ${userId}`
-  let namesRow = `User names: ${names}`
-  let emailRow = `User email: ${email ? email : "No email"}`
-
   let profileImage: ReactElement = <p>No image</p>
 
   /** Get the texts. */
   const { main } = langs[currentLang as keyof Langs]
-
-  /**
-   * Add size to the google image link.
-   * Not needed because of the blob image storage functionality.
-   * */
-  function addSizeToGoogleProfilePic(url: string) {
-    if (url.indexOf("googleusercontent.com") !== -1 && url.indexOf("?") === -1) {
-      return url + "?sz=200"
-    }
-    return url
-  }
 
   const imageSide = { xs: "100px", md: "300px" }
   const imageSizes = { width: imageSide, height: imageSide }
