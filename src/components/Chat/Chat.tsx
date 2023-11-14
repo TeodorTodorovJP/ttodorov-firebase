@@ -1,11 +1,9 @@
-import { useAppDispatch, useAppSelector } from "../../app/hooks"
+import { useAppSelector } from "../../app/hooks"
 import { selectShowRooms, selectUserRooms } from "./chatSlice"
 import ChatRooms from "./ChatRooms/ChatRooms"
 import ChatUsers from "./ChatUsers/ChatUsers"
 import { useGetUserDataQuery } from "../Auth/userApi"
-import useError from "../CustomHooks/useError"
 import { useEffect, useState } from "react"
-import { setModal } from "../Modal/modalSlice"
 import { Box, Drawer, IconButton, Typography } from "@mui/material"
 import ChatIcon from "@mui/icons-material/Chat"
 
@@ -32,15 +30,11 @@ import ChatIcon from "@mui/icons-material/Chat"
 
 export const Chat = () => {
   /** Access store */
-  const dispatch = useAppDispatch()
   const rooms = useAppSelector(selectUserRooms)
   const showRooms = useAppSelector(selectShowRooms)
 
   /** Hooks */
   const [viewUsers, setViewUsers] = useState<boolean>(false)
-
-  /** Error hooks */
-  const [usersError, setUsersError] = useError()
 
   /** Toggling the chat Users. */
   const toggleUsers = () => {
@@ -70,9 +64,9 @@ export const Chat = () => {
   const {
     data: chatUsers, // The latest returned result regardless of hook arg, if present.
     isSuccess, // When true, indicates that the query has data from a successful request.
-    isError, // When true, indicates that the query is in an error state.
-    error, // The error result if present.
-    isLoading: isLoadingUsers, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
+    //isError, // When true, indicates that the query is in an error state.
+    //error, // The error result if present.
+    //isLoading: isLoadingUsers, // When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
     //currentData, // The latest returned result for the current hook arg, if present.
     //isFetching, // When true, indicates that the query is currently fetching, but might have data from an earlier request. This will be true for both the first request fired off, as well as subsequent requests.
     //isUninitialized, // When true, indicates that the query has not started yet.
@@ -83,26 +77,6 @@ export const Chat = () => {
     //fulfilledTimeStamp,
     //startedTimeStamp,
   } = useGetUserDataQuery(uselessParam, { refetchOnReconnect: true })
-
-  /**
-   * For useGetUserDataQuery
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isError && error) || (chatUsers && chatUsers.error)) && !usersError) {
-      setUsersError([isError, error, chatUsers], "ambiguousSource")
-    }
-  }, [isError, error, chatUsers])
-
-  /**
-   * For useGetUserDataQuery
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (usersError) {
-      dispatch(setModal({ message: usersError }))
-    }
-  }, [usersError])
 
   useEffect(() => {
     setViewUsers(!showRooms)
