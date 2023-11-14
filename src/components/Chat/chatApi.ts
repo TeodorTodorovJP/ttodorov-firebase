@@ -18,6 +18,7 @@ import { apiSlice } from "../../app/apiSlice"
 import { getDateDataInUTC, getError } from "../../app/utils"
 import { fileStorageRef, fireStore } from "../../firebase-config"
 import { UserData } from "../Auth/userSlice"
+import { setModal } from "../Modal/modalSlice"
 import { MessageData, MessageDataArr } from "./chatSlice"
 
 export interface GetMessages {
@@ -78,7 +79,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     getMessages: builder.query<GetMessages, string>({
       queryFn: (roomId: string) => ({ data: { data: [], error: null } }),
       keepUnusedDataFor: 60 * 60 * 24, // one day
-      async onCacheEntryAdded(roomId, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+      async onCacheEntryAdded(roomId, { updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch }) {
         await cacheDataLoaded
         let unsubscribe
         try {
@@ -120,6 +121,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                 return draft
               })
             } catch (err: any) {
+              dispatch(setModal({ message: getError(err) }))
               updateCachedData((draft) => {
                 draft.error = getError(err)
                 return draft
@@ -127,6 +129,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             }
           })
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           updateCachedData((draft) => {
             draft.error = getError(err)
             return draft
@@ -143,7 +146,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     sendNewRoomData: builder.mutation<DefaultQueryFnType, { roomId: string; userData: UserData; otherUser: UserData }>({
       // inferred as the type from the `QueryArg` type
       //                 v
-      queryFn: async (args, { signal, dispatch, getState }, extraOptions, baseQuery) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           console.log("Check for room in db")
           const roomRef = doc(fireStore, "allChatRooms", args.roomId)
@@ -163,6 +166,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             console.log("room added to db")
           }
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
@@ -174,7 +178,7 @@ export const extendedApi = apiSlice.injectEndpoints({
       DefaultQueryFnType,
       { roomId: string; userData: UserData; otherUser: UserData; messageText?: string; imageUrl?: string }
     >({
-      queryFn: async (args) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           const { utcMilliseconds: timestamp } = getDateDataInUTC()
           const serverTime = serverTimestamp()
@@ -189,6 +193,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             serverTime: serverTime,
           })
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
@@ -197,7 +202,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     //
     //
     saveImage: builder.mutation<SendImage, { userId: string; file: File }>({
-      queryFn: async (args) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           /**
            * Upload the image to Cloud Storage.
@@ -224,7 +229,8 @@ export const extendedApi = apiSlice.injectEndpoints({
           }
 
           return { data: { data: data, error: null } }
-        } catch (err) {
+        } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: null, error: getError(err) } }
         }
       },
@@ -240,7 +246,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     inboxListener: builder.query<InboxMessages, string>({
       queryFn: (userId: string) => ({ data: { data: [], error: null } }),
       keepUnusedDataFor: 60 * 60 * 24, // one day
-      async onCacheEntryAdded(userId, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+      async onCacheEntryAdded(userId, { updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch }) {
         await cacheDataLoaded
         let unsubscribe
         try {
@@ -286,6 +292,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                 return draft
               })
             } catch (err: any) {
+              dispatch(setModal({ message: getError(err) }))
               updateCachedData((draft) => {
                 draft.error = getError(err)
                 return draft
@@ -293,6 +300,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             }
           })
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           updateCachedData((draft) => {
             draft.error = getError(err)
             return draft
@@ -311,7 +319,7 @@ export const extendedApi = apiSlice.injectEndpoints({
      * that other user, will receive that message to it's "inbox".
      */
     sendToInbox: builder.mutation<DefaultQueryFnType, { roomId: string; userId: string; otherUserId: string }>({
-      queryFn: async (args) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           const { utcMilliseconds: timestamp } = getDateDataInUTC()
           const serverTime = serverTimestamp()
@@ -326,6 +334,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             serverTime: serverTime,
           })
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
@@ -338,7 +347,7 @@ export const extendedApi = apiSlice.injectEndpoints({
      * delete that room from the inbox.
      */
     deleteInboxMessage: builder.mutation<DefaultQueryFnType, { roomId: string; userId: string; otherUserId: string }>({
-      queryFn: async (args) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           const recentMessagesQuery = query(
             collection(fireStore, "inboxes", args.userId, "messages"),
@@ -351,6 +360,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             deleteDoc(doc.ref)
           })
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
