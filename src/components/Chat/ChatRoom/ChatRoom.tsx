@@ -15,19 +15,15 @@ import {
   useSendNewRoomDataMutation,
   useSendToInboxMutation,
 } from "../chatApi"
-import useError from "../../CustomHooks/useError"
 import { useOnlineStatus } from "../../CustomHooks/useOnlineStatus"
-import { getDateDataInUTC, getError, getSizes } from "../../../app/utils"
+import { getDateDataInUTC, getError } from "../../../app/utils"
 import { useGetUserDataQuery } from "../../Auth/userApi"
 import { setModal } from "../../Modal/modalSlice"
 import {
   Box,
-  Button,
   IconButton,
   InputAdornment,
   Stack,
-  StackProps,
-  styled,
   TextField,
   Typography,
 } from "@mui/material"
@@ -96,15 +92,6 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
   const imageInputRef = useRef<HTMLInputElement>(null)
   const messageInputRef = useRef<HTMLInputElement>(null)
 
-  /** Error hooks */
-  const [usersError, setUsersError] = useError()
-  const [messagesError, setMessagesError] = useError()
-  const [sendRoomDataError, setSendRoomDataError] = useError()
-  const [saveMsgsError, setSaveMsgsError] = useError()
-  const [saveImagesError, setSaveImagesError] = useError()
-  const [sendInboxError, setSendInboxError] = useError()
-  const [delInboxError, setDelInboxError] = useError()
-
   /** Custom hooks */
   const { isOnline } = useOnlineStatus()
 
@@ -114,65 +101,27 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
   const { creator, roomId, otherUserId, otherUserNames, active } = props.room
   const { main } = langs[currentLang as keyof Langs]
 
-  const { addressBarHeight } = getSizes()
-
   // Query endpoints
   /**
    * Get users from firebase.
+   * TODO: the query should accept userId so that the useEffect is not needed to filter the users
+   * or maybe the get them from the store by Id
    */
-  const {
-    data: chatUsers, // The latest returned result regardless of hook arg, if present.
-    isError: isErrorFr, // When true, indicates that the query is in an error state.
-    error: errorFr, // The error result if present.
-    //isSuccess, // When true, indicates that the query has data from a successful request.
-  } = useGetUserDataQuery()
+  const { data: chatUsers } = useGetUserDataQuery()
 
   /**
    * For useGetUserDataQuery
    * Checks for errors generated from the RTKQ and errors generated from Firebase
    * */
   useEffect(() => {
-    if (((isErrorFr && errorFr) || (chatUsers && chatUsers.error)) && !usersError) {
-      setUsersError([isErrorFr, errorFr, chatUsers], "ambiguousSource")
-    } else if (chatUsers && chatUsers.data) {
+    if (chatUsers && chatUsers.data) {
       const other = chatUsers.data.filter((user) => user.id == otherUserId)[0]
       if (other) setOtherUser(other)
     }
-  }, [isErrorFr, errorFr, chatUsers])
-
-  /**
-   * For useGetUserDataQuery
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (usersError) dispatch(setModal({ message: usersError }))
-  }, [usersError])
+  }, [chatUsers])
 
   /** Get messages for the current room from firebase */
-  const {
-    data: roomMessages,
-    isError: isErrorMsgs,
-    error: errorMsgs,
-    refetch: refetchMessages,
-  } = useGetMessagesQuery(roomId, { refetchOnReconnect: true })
-
-  /**
-   * For useGetMessagesQuery
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorMsgs && errorMsgs) || (roomMessages && roomMessages.error)) && !messagesError) {
-      setMessagesError([isErrorMsgs, errorMsgs, roomMessages], "ambiguousSource")
-    }
-  }, [isErrorMsgs, errorMsgs, roomMessages])
-
-  /**
-   * For useGetMessagesQuery
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (messagesError) dispatch(setModal({ message: messagesError }))
-  }, [messagesError])
+  const { data: roomMessages } = useGetMessagesQuery(roomId, { refetchOnReconnect: true })
 
   /**
    * This function sends a notification for new messages in a chat room.
@@ -206,103 +155,17 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
     }
   }, [roomMessages, otherUser])
 
-  /**
-   * Send room data to firebase.
-   */
-  const [updateRoomData, { data: dataSRD, isLoading: isUpdating, isError: isErrorSRD, error: errorSRD }] =
-    useSendNewRoomDataMutation()
+  /** Send room data to firebase. */
+  const [updateRoomData] = useSendNewRoomDataMutation()
 
-  /**
-   * For useSendNewRoomDataMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorSRD && errorSRD) || (dataSRD && dataSRD.error)) && !sendRoomDataError) {
-      setSendRoomDataError([isErrorSRD, errorSRD, dataSRD], "ambiguousSource")
-    }
-  }, [isErrorSRD, errorSRD, dataSRD])
+  /** Save message to firebase. */
+  const [saveMessageToDB] = useSaveMessageMutation()
 
-  /**
-   * For useSendNewRoomDataMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (sendRoomDataError) dispatch(setModal({ message: sendRoomDataError }))
-  }, [sendRoomDataError])
+  /** Save image to firebase. */
+  const [saveImageToDB] = useSaveImageMutation()
 
-  /**
-   * Save message to firebase.
-   */
-  const [saveMessageToDB, { data: dataSMsgs, isLoading: sendingMessage, isError: isErrorSMsgs, error: errorSMsgs }] =
-    useSaveMessageMutation()
-
-  /**
-   * For useSaveMessageMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorSMsgs && errorSMsgs) || (dataSMsgs && dataSMsgs.error)) && !saveMsgsError) {
-      setSaveMsgsError([isErrorSMsgs, errorSMsgs, dataSMsgs], "ambiguousSource")
-    }
-  }, [isErrorSMsgs, errorSMsgs, dataSMsgs])
-
-  /**
-   * For useSaveMessageMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (saveMsgsError) dispatch(setModal({ message: saveMsgsError }))
-  }, [saveMsgsError])
-
-  /**
-   * Save image to firebase.
-   */
-  const [
-    saveImageToDB,
-    { data: dataSaveImg, isLoading: sendingSaveImg, isError: isErrorSaveImg, error: errorSaveImg },
-  ] = useSaveImageMutation()
-
-  /**
-   * For useSaveImageMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorSaveImg && errorSaveImg) || (dataSaveImg && dataSaveImg.error)) && !saveImagesError) {
-      setSaveImagesError([isErrorSaveImg, errorSaveImg, dataSaveImg], "ambiguousSource")
-    }
-  }, [isErrorSaveImg, errorSaveImg, dataSaveImg])
-
-  /**
-   * For useSaveImageMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (saveImagesError) dispatch(setModal({ message: saveImagesError }))
-  }, [saveImagesError])
-
-  /**
-   * Delete inbox message from firebase.
-   */
-  const [delInboxMessage, { data: delInbox, isError: isErrorDelInbox, error: errorDelInbox }] =
-    useDeleteInboxMessageMutation()
-
-  /**
-   * For useDeleteInboxMessageMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorDelInbox && errorDelInbox) || (delInbox && delInbox.error)) && !delInboxError) {
-      setDelInboxError([isErrorDelInbox, errorDelInbox, delInbox], "ambiguousSource")
-    }
-  }, [isErrorDelInbox, errorDelInbox, delInbox])
-
-  /**
-   * For useDeleteInboxMessageMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (delInboxError) dispatch(setModal({ message: delInboxError }))
-  }, [delInboxError])
+  /** Delete inbox message from firebase. */
+  const [delInboxMessage] = useDeleteInboxMessageMutation()
 
   /**
    * If the current room has unread messages and the current room is active, delete the messages from the store and firebase and cache.
@@ -319,25 +182,7 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
   /**
    * Send a message to the inbox of the other user to firebase.
    */
-  const [sendToInboxDB, { data: inboxData, isError: isErrorInbox, error: errorInbox }] = useSendToInboxMutation()
-
-  /**
-   * For useSendToInboxMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorInbox && errorInbox) || (inboxData && inboxData.error)) && !sendInboxError) {
-      setSendInboxError([isErrorInbox, errorInbox, inboxData], "ambiguousSource")
-    }
-  }, [isErrorInbox, errorInbox, inboxData])
-
-  /**
-   * For useSendToInboxMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (sendInboxError) dispatch(setModal({ message: sendInboxError }))
-  }, [sendInboxError])
+  const [sendToInboxDB] = useSendToInboxMutation()
 
   /**
    * This function saves an image message to a database with the given image URL, room ID, user data, and
@@ -459,14 +304,10 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
         if (res.data) {
           saveImgMessage(res.data?.imageUrl, roomId)
         } else if (res.error) {
-          // todo - after I re-do the error handling
+          dispatch(setModal({ message: res.error }))
         }
       })
   }
-
-  // if (props.imageUrl) {
-  //     content = <img src={props.imageUrl + "&" + new Date().getTime()} alt="Girl in a jacket" width="500" height="600"/>
-  // }
 
   return (
     <Box
