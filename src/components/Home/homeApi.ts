@@ -3,6 +3,7 @@ import { apiSlice } from "../../app/apiSlice"
 import { getError } from "../../app/utils"
 import { fireStore } from "../../firebase-config"
 import { UserData } from "../Auth/userSlice"
+import { setModal } from "../Modal/modalSlice"
 
 export interface Data {
   email: string
@@ -20,7 +21,7 @@ interface HomeData {
 export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getHomeData: builder.query<HomeData, any>({
-      queryFn: async (args, { signal, dispatch, getState }, extraOptions, baseQuery) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           // ttodorov.jp@gmail.com
           const homeDataRef = doc(fireStore, "pages", "home")
@@ -33,6 +34,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             return { data: { data: null, error: null } }
           }
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: null, error: getError(err) } }
         }
       },
@@ -42,7 +44,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     updateHomeData: builder.mutation<HomeData, { homeData: HomeData }>({
       // inferred as the type from the `QueryArg` type
       //                 v
-      queryFn: async (args) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           // Gets a reference to the users
           const homeRef = doc(fireStore, "pages", "home")
@@ -50,6 +52,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // Currently if someone tempers with it, can mess with the data
           await setDoc(homeRef, args.homeData.data)
         } catch (err: any) {
+          dispatch(setModal({ message: getError(err) }))
           return { data: { data: null, error: getError(err) } }
         }
         // data is always returned because of queryFn requirements
