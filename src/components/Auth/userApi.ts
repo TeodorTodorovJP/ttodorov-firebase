@@ -3,20 +3,21 @@ import { apiSlice } from "../../app/apiSlice";
 import { getDateDataInUTC, getError } from "../../app/utils";
 import { fireStore } from "../../firebase-config";
 import { UserData } from "../Auth/userSlice";
+import { setModal } from "../Modal/modalSlice"
 
 interface UpdateUserData {
-  data: UserData | null;
-  error: any | null;
+  data: UserData | null
+  error: any | null
 }
 
 interface AddUser {
-  userData: UserData | null;
-  error: any | null;
+  userData: UserData | null
+  error: any | null
 }
 
 interface GetUsers {
-  data: UserData[];
-  error: any;
+  data: UserData[]
+  error: any
 }
 
 export const extendedApi = apiSlice.injectEndpoints({
@@ -32,7 +33,7 @@ export const extendedApi = apiSlice.injectEndpoints({
     updateUserData: builder.mutation<UpdateUserData, { userData: UserData }>({
       // inferred as the type from the `QueryArg` type
       //                 v
-      queryFn: async (args, { signal, dispatch, getState }, extraOptions, baseQuery) => {
+      queryFn: async (args, { dispatch }) => {
         try {
           // Gets a reference to the users
           const userRef = doc(fireStore, "users", args.userData.id)
@@ -40,6 +41,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // Currently if someone tempers with it, can mess with the data
           await setDoc(userRef, args.userData)
         } catch (err: any) {
+          dispatch(setModal({ message: err.message }))
           return { data: { data: null, error: getError(err) } }
         }
         // data is always returned because of queryFn requirements
@@ -52,7 +54,7 @@ export const extendedApi = apiSlice.injectEndpoints({
       // The query is not relevant here as the data will be provided via streaming updates.
       // A queryFn returning an empty array is used, with contents being populated via
       // streaming updates below as they are received.
-      queryFn: async (userData: UserData) => {
+      queryFn: async (userData: UserData, { dispatch }) => {
         try {
           // Gets a reference to the users
           const usersRef = doc(fireStore, "users", userData.id)
@@ -72,6 +74,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           }
           return { data: { userData: user, error: null } }
         } catch (err: any) {
+          dispatch(setModal({ message: err.message }))
           return { data: { userData: null, error: getError(err) } }
         }
       },
@@ -91,7 +94,7 @@ export const extendedApi = apiSlice.injectEndpoints({
       keepUnusedDataFor: 60 * 60 * 24, // one day
       // Attaches a listener for any changes from the query, but we use it as a way to sustain a listener from the API
       // Otherwise the old Thunk may be used, but will cost the caching benefits
-      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch }) {
         // create a websocket connection when the cache subscription starts
 
         // no-op in case `cacheEntryRemoved` resolves before `cacheDataLoaded`,
@@ -119,6 +122,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                 return draft
               })
             } catch (err: any) {
+              dispatch(setModal({ message: err.message }))
               updateCachedData((draft) => {
                 draft.error = getError(err)
                 return draft
@@ -126,6 +130,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             }
           })
         } catch (err: any) {
+          dispatch(setModal({ message: err.message }))
           updateCachedData((draft) => {
             draft.error = getError(err)
             return draft
