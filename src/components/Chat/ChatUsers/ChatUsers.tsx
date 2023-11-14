@@ -1,12 +1,9 @@
-import { memo, ReactElement, useEffect, useState } from "react";
-import classes from "./ChatUsers.module.css";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import ChatUser from "./ChatUser";
-import useError from "../../CustomHooks/useError"
+import { memo, useEffect, useState } from "react"
+import { useAppSelector } from "../../../app/hooks"
+import ChatUser from "./ChatUser"
 import { useGetUserDataQuery } from "../../Auth/userApi"
 import { selectUserData } from "../../Auth/userSlice"
-import { setModal } from "../../Modal/modalSlice"
-import { Box, List, ListItem, ListItemText, ListSubheader, Paper } from "@mui/material"
+import { List } from "@mui/material"
 
 /**
  * ChatUsers Component
@@ -33,35 +30,13 @@ import { Box, List, ListItem, ListItemText, ListSubheader, Paper } from "@mui/ma
  */
 export const ChatUsers = () => {
   const [chatUsersElements, setChatUsersElements] = useState<JSX.Element[]>()
-  const [usersError, setUsersError] = useError()
-  const dispatch = useAppDispatch()
   const currentUser = useAppSelector(selectUserData)
 
   /**
    * Get users from firebase.
    */
   const uselessParam: void = undefined
-  const { data: chatUsers, isSuccess, isError, error } = useGetUserDataQuery(uselessParam, { refetchOnReconnect: true })
-
-  /**
-   * For useGetUserDataQuery
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isError && error) || (chatUsers && chatUsers.error)) && !usersError) {
-      setUsersError([isError, error, chatUsers], "ambiguousSource")
-    }
-  }, [isError, error, chatUsers])
-
-  /**
-   * For useGetUserDataQuery
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (usersError) {
-      dispatch(setModal({ message: usersError }))
-    }
-  }, [usersError])
+  const { data: chatUsers } = useGetUserDataQuery(uselessParam, { refetchOnReconnect: true })
 
   /**
    * Updates the `chatUsersElements` state whenever the `chatUsers` state changes.
@@ -101,4 +76,4 @@ export const ChatUsers = () => {
   )
 }
 
-export default memo(ChatUsers);
+export default memo(ChatUsers)
