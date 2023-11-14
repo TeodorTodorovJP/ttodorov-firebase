@@ -17,18 +17,17 @@ import {
   selectUserData,
 } from "./components/Auth/userSlice"
 import { useNavigate } from "react-router-dom"
-import { useAddUserDataMutation } from "./components/Auth/userApi"
-import useError from "./components/CustomHooks/useError"
 import { useOnlineStatus } from "./components/CustomHooks/useOnlineStatus"
-import { getError, getSizes, checkBrowser } from "./app/utils"
+import { getError } from "./app/utils"
 import { clearChatData, selectUserRooms, setInbox } from "./components/Chat/chatSlice"
-import { selectTheme, setTheme, Themes } from "./components/Navigation/themeSlice"
-import { useInboxListenerQuery } from "./components/Chat/chatApi"
+import { selectTheme, setTheme } from "./components/Navigation/themeSlice"
 import { setModal } from "./components/Modal/modalSlice"
-import { useAddLogMutation } from "./logsApi"
-import { Box, CssBaseline, Grid, Snackbar, Theme } from "@mui/material"
+import { CssBaseline, Grid, Snackbar, Theme } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
+import { useAddUserDataMutation } from "./components/Auth/userApi"
+import { useInboxListenerQuery } from "./components/Chat/chatApi"
+import { useAddLogMutation } from "./logsApi"
 
 /**
  * App Component
@@ -79,40 +78,13 @@ export const App = () => {
       },
     })
   )
-  const [previousTheme, setPreviousTheme] = useState<Themes>(storeTheme)
-  const [initLoad, setInitLoad] = useState<boolean>(true)
-
-  /** Error hooks */
-  const [usersError, setUsersError] = useError()
-  const [loginError, setLoginError] = useError()
-  const [inboxError, setInboxError] = useError()
 
   const { isOnline, wasOffline, resetOnlineStatus } = useOnlineStatus()
 
-  const [addUserData, { data: usersData, isLoading: isSendingPost, isError, error }] = useAddUserDataMutation()
+  const [addUserData] = useAddUserDataMutation()
 
   /** Add log to firebase */
   const [addLog] = useAddLogMutation()
-
-  /**
-   * For useAddUserDataMutation
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isError && error) || (usersData && usersData.error)) && !usersError) {
-      setUsersError([isError, error, usersData], "ambiguousSource")
-    }
-  }, [isError, error, usersData])
-
-  /**
-   * For useAddUserDataMutation
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (usersError) {
-      dispatch(setModal({ message: usersError }))
-    }
-  }, [usersError])
 
   /**
    * For finding if the user has chosen dark mode through browser or OS settings
@@ -157,30 +129,10 @@ export const App = () => {
    * Get inbox messages based on userId
    * @param currentUser.id
    * */
-  const {
-    data: inboxMessages,
-    isError: isErrorInbox,
-    error: errorInbox,
-    refetch: refetchInbox,
-  } = useInboxListenerQuery(currentUser.id, { refetchOnReconnect: true, skip: !currentUser.id })
-
-  /**
-   * For useInboxListenerQuery
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isErrorInbox && errorInbox) || (inboxMessages && inboxMessages.error)) && !inboxError) {
-      setInboxError([isErrorInbox, errorInbox, inboxMessages], "ambiguousSource")
-    }
-  }, [isErrorInbox, errorInbox, inboxMessages])
-
-  /**
-   * For useInboxListenerQuery
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (inboxError) dispatch(setModal({ message: inboxError }))
-  }, [inboxError])
+  const { data: inboxMessages } = useInboxListenerQuery(currentUser.id, {
+    refetchOnReconnect: true,
+    skip: !currentUser.id,
+  })
 
   /**
    * Updates the document title based on the number of inbox messages.
@@ -209,16 +161,6 @@ export const App = () => {
       }
     }
   }, [inboxMessages, userRooms])
-
-  /**
-   * For onAuthStateChanged
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (loginError) {
-      dispatch(setModal({ message: loginError }))
-    }
-  }, [loginError])
 
   useEffect(() => {
     /** If in DEV */
@@ -306,8 +248,8 @@ export const App = () => {
             }
             dispatch(setModal({ useModal: false }))
           }
-        } catch (err) {
-          setLoginError([err], "ambiguousSource")
+        } catch (err: any) {
+          dispatch(setModal({ message: err.message }))
         }
       } else if (authCtx.isLoggedIn) {
         /** If the user has logged out by request or automatically, clear the login data */
