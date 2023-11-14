@@ -2,17 +2,12 @@ import { Langs, langs } from "./homeTexts"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { selectImageBlobUrl, selectUserPreferences, addImageBlobUrl, Image } from "../Auth/userSlice"
 import { Data, useGetHomeDataQuery } from "./homeApi"
-import useError from "../CustomHooks/useError"
 import { useEffect, useState } from "react"
-import { setModal } from "../Modal/modalSlice"
 import { getBlobUrl } from "../../app/utils"
 import { Box, Button, ButtonGroup, IconButton, Link, Snackbar, Stack, Typography, useMediaQuery } from "@mui/material"
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import { BackGround } from "../UI/BackGround"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
-import { useNavigate } from "react-router-dom"
-import LanguageIcon from "@mui/icons-material/Language"
+import { Link as RouterLink } from "react-router-dom"
 import AccountTreeIcon from "@mui/icons-material/AccountTree"
 
 type AboutButtons = "aboutMe" | "skills" | "experience"
@@ -72,12 +67,6 @@ export const Home = () => {
   // @ts-ignore
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"))
 
-  /** Access Router */
-  const navigate = useNavigate()
-
-  /** Error hooks */
-  const [homeDataError, setHomeDataError] = useError()
-
   /**
    * Copy the email to the user's clipboard and
    * show a popup to notify the user.
@@ -99,33 +88,7 @@ export const Home = () => {
    * Get the current user data.
    * */
   const uselessParam: void = undefined
-  const {
-    data: homeData, // The latest returned result regardless of hook arg, if present.
-    isSuccess, // When true, indicates that the query has data from a successful request.
-    isError, // When true, indicates that the query is in an error state.
-    error, // The error result if present.
-    isLoading: isLoadingUsers,
-  } = useGetHomeDataQuery(uselessParam)
-
-  /**
-   * For useGetUserDataQuery
-   * Checks for errors generated from the RTKQ and errors generated from Firebase
-   * */
-  useEffect(() => {
-    if (((isError && error) || (homeData && homeData.error)) && !homeDataError) {
-      setHomeDataError([isError, error, homeData], "ambiguousSource")
-    }
-  }, [isError, error, homeData])
-
-  /**
-   * For useGetUserDataQuery
-   * When error is caught show the modal
-   * */
-  useEffect(() => {
-    if (homeDataError) {
-      dispatch(setModal({ message: homeDataError }))
-    }
-  }, [homeDataError])
+  const { data: homeData } = useGetHomeDataQuery(uselessParam)
 
   /**
    * If the current user has an image but is not yet loaded or
@@ -218,7 +181,7 @@ export const Home = () => {
               >
                 <Typography sx={{ fontSize: "inherit" }}>{main.projectsButtonLeft}</Typography>
 
-                <Button onClick={() => navigate("/projects")} variant="contained">
+                <Button variant="contained" component={RouterLink} to="/projects">
                   <AccountTreeIcon sx={{ color: "primary.contrastText" }} />
                 </Button>
 
