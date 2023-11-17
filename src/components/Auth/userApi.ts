@@ -41,7 +41,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // Currently if someone tempers with it, can mess with the data
           await setDoc(userRef, args.userData)
         } catch (err: any) {
-          dispatch(setModal({ message: err.message }))
+          dispatch(setModal({ text: err.message }))
           return { data: { data: null, error: getError(err) } }
         }
         // data is always returned because of queryFn requirements
@@ -74,7 +74,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           }
           return { data: { userData: user, error: null } }
         } catch (err: any) {
-          dispatch(setModal({ message: err.message }))
+          dispatch(setModal({ text: err.message }))
           return { data: { userData: null, error: getError(err) } }
         }
       },
@@ -122,7 +122,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                 return draft
               })
             } catch (err: any) {
-              dispatch(setModal({ message: err.message }))
+              dispatch(setModal({ text: err.message }))
               updateCachedData((draft) => {
                 draft.error = getError(err)
                 return draft
@@ -130,7 +130,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             }
           })
         } catch (err: any) {
-          dispatch(setModal({ message: err.message }))
+          dispatch(setModal({ text: err.message }))
           updateCachedData((draft) => {
             draft.error = getError(err)
             return draft
