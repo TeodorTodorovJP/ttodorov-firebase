@@ -96,13 +96,13 @@ export const AuthForm = () => {
   useEffect(() => {
     if (emailError === 0 || passwordError === 0 || generalError === 0 || newPasswordError === 0) {
       // default error modal
-      dispatch(setModal({ modalType: "error", header: "Error", message: "Error" }))
+      dispatch(setModal({ type: "error", title: "Error", text: "Error" }))
       setEmailError(null)
       setPasswordError(null)
       setNewPasswordError(null)
     } else if (generalError) {
       setGeneralError(null)
-      dispatch(setModal({ message: generalError }))
+      dispatch(setModal({ text: generalError }))
     }
   }, [emailError, passwordError, generalError, newPasswordError])
 
@@ -146,7 +146,7 @@ export const AuthForm = () => {
    * Generated too many anonymous logins.
    */
   const anonymousSignIn = () => {
-    dispatch(setModal({ modalType: "loader" }))
+    dispatch(setModal({ type: "loader" }))
     try {
       signInAnonymously(getAuth())
     } catch (error: any) {}
@@ -157,14 +157,14 @@ export const AuthForm = () => {
    * modal while waiting for the sign-in to complete.
    */
   const googleSignIn = () => {
-    dispatch(setModal({ modalType: "loader" }))
+    dispatch(setModal({ type: "loader" }))
     if (provider.current) {
       // Sign in Firebase using popup auth and Google as the identity provider.
       signInWithPopup(getAuth(), provider.current)
         .catch((error) => {
           if (error.message.includes("auth/popup-closed-by-user")) {
             // The modal is closed by the user without any action
-            dispatch(setModal({ useModal: false }))
+            dispatch(setModal({ open: false }))
           } else {
             addLog({ type: "error while google login", error })
             setGeneralError(error)
@@ -175,7 +175,7 @@ export const AuthForm = () => {
           // But because of this Firebase issue: https://github.com/vercel/next.js/discussions/51135
           // the signInWithPopup will not return the error and because there is an error the onAuthStateChanged will not be triggered
           // thus, nothing will close the modal, braking the website's flow
-          dispatch(setModal({ useModal: false }))
+          dispatch(setModal({ open: false }))
         })
     }
   }
@@ -233,11 +233,11 @@ export const AuthForm = () => {
     const enteredPassword = passwordInputRef.current?.value
 
     if (enteredEmail && enteredPassword) {
-      dispatch(setModal({ modalType: "loader" }))
+      dispatch(setModal({ type: "loader" }))
       const authRequest = isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword
 
       authRequest(getAuth(), enteredEmail, enteredPassword).catch((error) => {
-        dispatch(setModal({ useModal: false }))
+        dispatch(setModal({ open: false }))
         const errorCode = error.code
         if (errorCode.includes("email")) {
           setEmailError(error)
