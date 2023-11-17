@@ -5,7 +5,6 @@ export interface Langs {
 
 interface Lang {
   main: Main
-  themeModal: ТhemeModal
   leftMenu: LeftMenu
 }
 
@@ -16,15 +15,6 @@ interface Main {
   button: string
   profile: string
   lang: string
-}
-
-interface ТhemeModal {
-  header: string
-  agree: string
-  deny: string
-  message: string
-  messageDone: string
-  agreeDone: string
 }
 
 interface LeftMenu {
@@ -45,15 +35,6 @@ export const langs: Langs = {
       profile: "Profile",
       lang: "БГ",
     },
-
-    themeModal: {
-      header: "Theme Option",
-      agree: "Yes",
-      deny: "No",
-      message: "Change the default theme to '${}'? Will be saved in Local Storage!",
-      messageDone: "Your theme is already saved!",
-      agreeDone: "OK",
-    },
     leftMenu: {
       home: "Home",
       authenticate: "Authenticate",
@@ -71,15 +52,6 @@ export const langs: Langs = {
       button: "Български",
       profile: "Профил",
       lang: "EN",
-    },
-
-    themeModal: {
-      header: "Теми",
-      agree: "Да",
-      deny: "Не",
-      message: "Запазете тази тема '${}'? Ще бъде запазена във вашият браузър!",
-      messageDone: "Вашата тема е вече запазена!",
-      agreeDone: "Добре",
     },
     leftMenu: {
       home: "Начална страница",
