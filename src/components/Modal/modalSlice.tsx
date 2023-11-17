@@ -3,40 +3,28 @@ import { RootState, AppThunk, AppDispatch } from "../../app/store"
 
 export interface Modal {
   /** For open/close the modal. */
-  useModal?: boolean
+  open?: boolean
 
   /** For predefined modals. */
-  modalType?: "loader" | "error"
-
-  /**
-   * The predefined action that will happen if the user clicks agree.
-   * Can be null if the modal will not perform any actions after user interaction.
-   * */
-  action?: null | string
+  type?: "normal" | "error" | "loader"
 
   /**
    * The title of the modal.
    * Can be null if the modal is of type 'loader'
    * */
-  header?: null | string
+  title?: null | string
 
   /** The message that will be displayed. */
-  message?: string
+  text?: string
 
   /** The text of the agree button. */
-  agree?: string
+  ok?: string
 
   /**
-   * The text of the deny button.
+   * The text of the cancel button.
    * Can be null for the modals that are intended to only notify the user.
    * */
-  deny?: null | string
-
-  /**
-   * For attaching a custom response that will be handled.
-   * Can be used in combination with agree and deny.
-   */
-  response?: null | string
+  cancel?: null | string
 }
 
 export interface ModalState {
@@ -45,13 +33,11 @@ export interface ModalState {
 const getMainInitialState = () => {
   const newState: ModalState = {
     modal: {
-      useModal: false, // False for closing the modal
-      action: null,
-      header: null,
-      message: "Message",
-      agree: "OK",
-      deny: null,
-      response: null,
+      open: false, // False for closing the modal
+      title: null,
+      text: "Message",
+      ok: "OK",
+      cancel: null,
     },
   }
   return newState
