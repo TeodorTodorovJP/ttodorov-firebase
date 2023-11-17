@@ -221,7 +221,7 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
       // After creation, fill the message inside
       await saveMessageToDB({ roomId, userData, otherUser, messageText })
     } catch (error) {
-      dispatch(setModal({ message: getError(error) }))
+      dispatch(setModal({ text: getError(error) }))
     }
   }
 
@@ -294,7 +294,7 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
 
     // Check if the file is an image.
     if (!file.type.match("image.*")) {
-      dispatch(setModal({ message: main.onlyImages }))
+      dispatch(setModal({ text: main.onlyImages }))
       return
     }
     //imageName: string; roomId: string; file: File
@@ -304,7 +304,7 @@ export const ChatRoom = (props: { room: ChatRoomsContent; notifyForMessages: Fun
         if (res.data) {
           saveImgMessage(res.data?.imageUrl, roomId)
         } else if (res.error) {
-          dispatch(setModal({ message: res.error }))
+          dispatch(setModal({ text: res.error }))
         }
       })
   }
