@@ -18,7 +18,7 @@ import { useNavigate, Link as RouterLink } from "react-router-dom"
 import { useAddNoteMutation, useAddTagsMutation, useChangeNoteMutation, useDeleteNoteMutation } from "./notesApi"
 import { NoteData, selectTags } from "./notesSlice"
 import { setModal } from "../Modal/modalSlice"
-import DialogConfirm from "../Modal/DialogConfirm"
+import Modal from "../Modal/Modal"
 
 type NoteFormProps = {
   noteData?: NoteData
@@ -90,26 +90,26 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
   const saveNoteHandler = async () => {
     const { formattedDate: timestampAsId } = getDateDataInUTC()
 
-    let message: string = ""
+    let text: string = ""
 
     /** Validates the Text of the note. Between 5 and 5000 symbols. */
     if (markDownRef.current!.value.length < 5 || markDownRef.current!.value.length > 5000) {
-      message = error.body
+      text = error.body
     }
 
     /** Validates the number of tags of the note. Between 1 and 6. */
     if (tempTags.length < 1 || tempTags.length > 6) {
-      message = error.tags
+      text = error.tags
     }
 
     /** Validates the Title of the note. Between 3 and 70 symbols. */
     if (titleRef.current!.value.length < 3 || titleRef.current!.value.length > 70) {
-      message = error.title
+      text = error.title
     }
 
     /** If any of the above fail, show a message. */
-    if (message.length > 0) {
-      dispatch(setModal({ header: "Error", agree: "OK", message }))
+    if (text.length > 0) {
+      dispatch(setModal({ title: "Error", ok: "OK", text }))
       return
     }
 
@@ -281,11 +281,9 @@ export const NoteForm = ({ noteData }: NoteFormProps) => {
         )}
       </Stack>
 
-      <DialogConfirm
-        id="delete-confirm"
-        keepMounted
+      <Modal
         open={openConfirmDeleteModal}
-        userResponse={deleteModalHandler}
+        onUserResponse={deleteModalHandler}
         texts={{ ok: onDeleteNote.ok, cancel: onDeleteNote.cancel, text: onDeleteNote.text, title: onDeleteNote.title }}
       />
     </Box>
