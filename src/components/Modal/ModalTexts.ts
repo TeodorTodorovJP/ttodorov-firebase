@@ -1,50 +1,45 @@
 export interface Langs {
-  bg: Lang;
-  en: Lang;
+  bg: Lang
+  en: Lang
 }
 
 interface Lang {
-  defaultModal: DefaultModal;
-  loader: Loader;
-  defaultError: DefaultError;
+  defaultModal: DefaultModal
+  loader: Loader
 }
 
 interface DefaultModal {
-  agree: string;
+  title: string
+  text: string
+  ok: string
+  cancel: string
 }
 
 interface Loader {
-  message: string;
-}
-
-interface DefaultError {
-  message: string;
-  agree: string;
+  message: string
 }
 
 export const langs: Langs = {
   en: {
     defaultModal: {
-      agree: "OK",
+      title: "Message",
+      text: "Something is not right",
+      ok: "OK",
+      cancel: "Cancel",
     },
     loader: {
       message: "Loading...",
     },
-    defaultError: {
-      message: "Error",
-      agree: "OK",
-    },
   },
   bg: {
     defaultModal: {
-      agree: "OK",
+      title: "Съобщение",
+      text: "Нещо не е наред",
+      ok: "OK",
+      cancel: "Затвори",
     },
     loader: {
       message: "Зареждане...",
     },
-    defaultError: {
-      message: "Грешка",
-      agree: "OK",
-    },
   },
-};
+}
