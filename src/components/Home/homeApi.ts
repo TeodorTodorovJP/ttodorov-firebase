@@ -34,7 +34,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             return { data: { data: null, error: null } }
           }
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: null, error: getError(err) } }
         }
       },
@@ -52,7 +52,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // Currently if someone tempers with it, can mess with the data
           await setDoc(homeRef, args.homeData.data)
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: null, error: getError(err) } }
         }
         // data is always returned because of queryFn requirements
