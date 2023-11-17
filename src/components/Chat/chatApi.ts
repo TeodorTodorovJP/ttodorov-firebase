@@ -121,7 +121,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                 return draft
               })
             } catch (err: any) {
-              dispatch(setModal({ message: getError(err) }))
+              dispatch(setModal({ text: getError(err) }))
               updateCachedData((draft) => {
                 draft.error = getError(err)
                 return draft
@@ -129,7 +129,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             }
           })
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           updateCachedData((draft) => {
             draft.error = getError(err)
             return draft
@@ -166,7 +166,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             console.log("room added to db")
           }
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
@@ -193,7 +193,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             serverTime: serverTime,
           })
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
@@ -230,7 +230,7 @@ export const extendedApi = apiSlice.injectEndpoints({
 
           return { data: { data: data, error: null } }
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: null, error: getError(err) } }
         }
       },
@@ -292,7 +292,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                 return draft
               })
             } catch (err: any) {
-              dispatch(setModal({ message: getError(err) }))
+              dispatch(setModal({ text: getError(err) }))
               updateCachedData((draft) => {
                 draft.error = getError(err)
                 return draft
@@ -300,7 +300,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             }
           })
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           updateCachedData((draft) => {
             draft.error = getError(err)
             return draft
@@ -334,7 +334,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             serverTime: serverTime,
           })
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
@@ -360,7 +360,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             deleteDoc(doc.ref)
           })
         } catch (err: any) {
-          dispatch(setModal({ message: getError(err) }))
+          dispatch(setModal({ text: getError(err) }))
           return { data: { data: [], error: getError(err) } }
         }
         return { data: { data: [], error: null } }
