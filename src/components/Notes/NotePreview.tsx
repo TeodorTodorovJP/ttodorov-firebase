@@ -6,8 +6,8 @@ import { Box, Button, Chip, Paper, Stack, Typography } from "@mui/material"
 import { selectUserData, selectUserPreferences } from "../Auth/userSlice"
 import { Langs, langs } from "./notesTexts"
 import { useState } from "react"
-import DialogConfirm from "../Modal/DialogConfirm"
 import { useDeleteNoteMutation } from "./notesApi"
+import Modal from "../Modal/Modal"
 
 /**
  * NotePreview Component
@@ -84,11 +84,9 @@ export const NotePreview = () => {
         <ReactMarkdown>{markdown}</ReactMarkdown>
       </Paper>
 
-      <DialogConfirm
-        id="delete-confirm"
-        keepMounted
+      <Modal
         open={openConfirmDeleteModal}
-        userResponse={deleteModalHandler}
+        onUserResponse={deleteModalHandler}
         texts={{ ok: onDeleteNote.ok, cancel: onDeleteNote.cancel, text: onDeleteNote.text, title: onDeleteNote.title }}
       />
     </Box>
