@@ -147,7 +147,7 @@ export const Profile = () => {
 
     // Check if the file is an image.
     if (!file.type.match("image.*")) {
-      dispatch(setModal({ message: main.onlyImages }))
+      dispatch(setModal({ text: main.onlyImages }))
       return
     }
     //imageName: string; roomId: string; file: File
@@ -162,7 +162,7 @@ export const Profile = () => {
           // The user data is not made to use the cached store data
           dispatch(setUserData(sendData))
         } else if (res.error) {
-          dispatch(setModal({ message: res.error }))
+          dispatch(setModal({ text: res.error }))
         }
       })
   }
