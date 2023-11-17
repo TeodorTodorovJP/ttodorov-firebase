@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 // import "./App.css";
 import Navigation from "./components/Navigation/Navigation"
 import { Outlet } from "react-router-dom"
-import Modal from "./components/Modal/Modal"
+import GlobalModal from "./components/Modal/GlobalModal"
 import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { defaultLang, clearNavData } from "./components/Navigation/navigationSlice"
 import useAuthContext from "./app/auth-context"
@@ -221,7 +221,7 @@ export const App = () => {
               if (checkUser.userData) {
                 userObj = { ...userObj, ...checkUser.userData }
               } else if (checkUser.error) {
-                dispatch(setModal({ message: getError(checkUser.error) }))
+                dispatch(setModal({ text: getError(checkUser.error) }))
               }
 
               // Add user to context
@@ -246,10 +246,10 @@ export const App = () => {
               dispatch(clearNavData())
               dispatch(clearChatData())
             }
-            dispatch(setModal({ useModal: false }))
+            dispatch(setModal({ open: false }))
           }
         } catch (err: any) {
-          dispatch(setModal({ message: err.message }))
+          dispatch(setModal({ text: err.message }))
         }
       } else if (authCtx.isLoggedIn) {
         /** If the user has logged out by request or automatically, clear the login data */
@@ -293,7 +293,7 @@ export const App = () => {
           maxWidth: "100vw",
         }}
       >
-        <Modal />
+        <GlobalModal />
         <Navigation />
         <Outlet />
 
