@@ -7,7 +7,7 @@ import { useDeleteTagMutation, useGetTagsQuery } from "./notesApi"
 import { selectTags } from "./notesSlice"
 import DeleteIcon from "@mui/icons-material/Delete"
 import { Link as RouterLink } from "react-router-dom"
-import DialogConfirm from "../Modal/DialogConfirm"
+import Modal from "../Modal/Modal"
 
 /**
  * EditTags Component
@@ -107,11 +107,9 @@ export const EditTags = () => {
         {main.cancel}
       </Button>
 
-      <DialogConfirm
-        id="delete-confirm"
-        keepMounted
+      <Modal
         open={openConfirmDeleteModal}
-        userResponse={deleteModalHandler}
+        onUserResponse={deleteModalHandler}
         texts={{ ok: onDeleteTag.ok, cancel: onDeleteTag.cancel, text: onDeleteTag.text, title: onDeleteTag.title }}
       />
     </Box>
