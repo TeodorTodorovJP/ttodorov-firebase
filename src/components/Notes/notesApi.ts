@@ -68,7 +68,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // Update the store with all new tags.
           dispatch(addTags(args.tagData))
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: args.tagData, error: err.message } }
         }
         // data is always returned because of queryFn requirements
@@ -104,7 +104,7 @@ export const extendedApi = apiSlice.injectEndpoints({
 
           /** Here an update to the store is not required, because of 'invalidatesTags' which will trigger getTags. */
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: args.tag, error: err.message } }
         }
         return { data: { data: args.tag, error: null } }
@@ -135,7 +135,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // update store with data
           dispatch(setTags(tagData))
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: tagData, error: err.message } }
         }
 
@@ -175,7 +175,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // update store with data
           dispatch(addNote(noteData))
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: noteData, error: err.message } }
         }
 
@@ -211,7 +211,7 @@ export const extendedApi = apiSlice.injectEndpoints({
 
           /** Here an update to the store is not required, because of 'invalidatesTags' which will trigger getNotes. */
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: noteData, error: err.message } }
         }
 
@@ -251,7 +251,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           // update store with data
           dispatch(setNotes(noteData))
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: noteData, error: err.message } }
         }
 
@@ -287,7 +287,7 @@ export const extendedApi = apiSlice.injectEndpoints({
             deleteDoc(doc.ref)
           })
         } catch (err: any) {
-          dispatch(setModal({ modalType: "error", message: err.message }))
+          dispatch(setModal({ type: "error", text: err.message }))
           return { data: { data: args.noteId, error: err.message } }
         }
         return { data: { data: args.noteId, error: null } }
