@@ -111,7 +111,7 @@ export const Profile = () => {
   const { main } = langs[currentLang as keyof Langs]
 
   const imageSide = { xs: "100px", md: "300px" }
-  const imageSizes = { width: imageSide, height: imageSide }
+  const imageSizes = { width: imageSide, height: imageSide, border: "solid" }
 
   if (imageData) {
     profileImage = <Avatar alt="Your Image" src={imageData.blobUrl} sx={imageSizes} />
